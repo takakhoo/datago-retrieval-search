@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/takakhoo/mikiri-beats-katago/actions/workflows/tests.yml/badge.svg)](https://github.com/takakhoo/mikiri-beats-katago/actions/workflows/tests.yml)
 
-**Mikiri makes KataGo 206 Elo stronger at the same search budget. Same network, same search algorithm, no retraining.**
+**Mikiri makes KataGo 263 Elo stronger at the same search budget, as much as KataGo gains from doubling its search. Same network, same search algorithm, no retraining.**
 
 KataGo is the strongest open engine in the AlphaGo family: a policy and value network guiding a tree search. Like every engine in that family, it gives each move the same number of search visits. Mikiri wraps it and decides, move by move, when the search has seen enough. It plays settled moves at a quarter of the budget, keeps searching when the game is on the line, and never searches the same position twice.
 
@@ -14,27 +14,29 @@ Mikiri (見切り) is Japanese for the judgment that you have seen enough.
 
 ## The result
 
-5,000 recorded games against KataGo on 19x19, both sides running the same network:
+5,600 recorded games against KataGo on 19x19, both sides running the same network:
 
 | Against KataGo at 200 visits per move | Games | Record (W-L-D) | Elo gain (95% interval) |
 |---|---|---|---|
-| **Mikiri at the same 200 visits** | 1,000 | 728-196-76 | **+206** (+181 to +232) |
-| **Mikiri at 160 visits, 20% fewer** | 1,000 | 586-325-89 | **+93** (+72 to +114) |
-| **Mikiri with move sampling switched off** (paired openings) | 800 | 561-183-56 | **+178** (+153 to +205) |
+| **Mikiri at the same 200 visits, six-rung ladder** | 600 | 471-87-42 | **+263** (+230 to +301) |
+| **Mikiri at the same 200 visits, four-rung ladder** | 1,000 | 728-196-76 | **+206** (+181 to +232) |
+| **Mikiri at 160 visits, 20% fewer** (four-rung ladder) | 1,000 | 586-325-89 | **+93** (+72 to +114) |
+| **Mikiri with move sampling switched off** (paired openings, four-rung ladder) | 800 | 561-183-56 | **+178** (+153 to +205) |
 | KataGo given twice the visits, for scale | 400 | 310-73-17 | +237 (+198 to +280) |
 | KataGo against itself, as a check on the harness | 400 | 185-183-32 | +2 (-30 to +35) |
 
-- **At equal visits, Mikiri wins 76.6% of the points.** Its stopping rule is worth most of a doubling of KataGo's search.
+- **At equal visits, Mikiri wins 82.0% of the points** with its six-rung ladder (50, 200, 400, 800, 1,600, 3,200) and 76.6% with the four-rung ladder (50, 200, 800, 3,200). The stopping rule is worth a full doubling of KataGo's search.
 - **With 20% fewer visits it still wins 63.0%.**
-- **It holds up under the strictest accounting.** Counting actual network evaluations, Mikiri at 99 per move gains +206 Elo, while KataGo at 98 per move (283 visits) gains +108.
+- **It holds up under the strictest accounting.** Counting actual network evaluations, Mikiri at 100 per move gains +263 Elo. KataGo at 98 per move (283 visits) gains +108, and at 132 per move (400 visits) gains +237.
 - **It is not an artifact of move sampling.** With both sides always playing their top move from 400 balanced openings, the gain is +178.
 
-Paper: [`paper/mikiri.pdf`](paper/mikiri.pdf). Every game behind every number is in [`results/matches/`](results/matches/).
+**Status.** This work is being prepared for submission to **IJCAI 2027** (paper deadline 11 January 2027). It has not been submitted or peer reviewed. The short version in IJCAI format is in [`paper/ijcai/`](paper/ijcai/), and the full technical report is [`paper/mikiri.pdf`](paper/mikiri.pdf). Every game behind every number is in [`results/matches/`](results/matches/).
 
 ## Contents
 
 - [How it works](#how-it-works)
 - [The science, step by step](#the-science-step-by-step)
+- [Against prior stopping rules](#against-prior-stopping-rules)
 - [Match results](#match-results)
 - [Try it](#try-it)
 - [What happened to v1](#what-happened-to-v1)
@@ -117,6 +119,29 @@ When the shallow and deep search disagree, the most similar stored position has 
 
 In play, memory alone (no stopper) served 21% of Mikiri's moves over 600 games with no change in strength (-9 Elo, -37 to +19). It saves search visits. It does not save network evaluations (69 per move against 69), because KataGo already caches evaluations of positions it has seen. The strength comes from the stopping rule.
 
+## Against prior stopping rules
+
+We re-implemented ten published rules for deciding how long to search, from their papers and source code, and ran them on the same dataset with the same scoring. Each threshold was swept so every rule is shown at its best. Numbers are how many times more visits uniform search needs to match the rule at a 200-visit mean budget (above 1.0 is a gain), with 95% intervals.
+
+| Rule | Source | Multiplier at 200 visits |
+|---|---|---|
+| Value-of-information stop | Hay et al. 2012 | 0.34x (0.30 to 0.40) |
+| Best-arm-identification stop | Kaufmann and Koolen 2017 | 0.77x (0.63 to 1.01) |
+| Think longer when behind | Huang et al. 2010 | 0.89x at 174 visits |
+| Stop when the runner-up cannot catch up | Baier and Winands 2016 | 1.25x at 134 visits |
+| Smart pruning | Leela Chess Zero | 1.17x at 159 visits |
+| Extend when the top two are close | Baier and Winands 2016 | 1.15x at 229 visits |
+| Extend when most-visited is not best-valued | Huang et al. 2010 | 1.21x at 239 visits |
+| KL-gain stop | Leela Chess Zero | 1.32x (1.18 to 1.49) |
+| Budget chosen before search | in the spirit of Muppidi et al. 2026 | 1.18x (0.97 to 1.40) |
+| Learned move-stability classifier | DS-MCTS, Lan et al. 2021 | 1.48x (1.28 to 1.73) |
+| Virtual expansion, published settings | V-MCTS, Ye et al. 2022 | 1.60x (1.44 to 1.76) |
+| **Mikiri** | this work | **2.13x (1.88 to 2.41)** |
+
+Two things stand out. Mikiri is ahead of the strongest prior rule, V-MCTS at its published settings, by 0.54 (0.28 to 0.84) in a paired test over the same games. And Mikiri's rate rule improves other people's signals too: it lifts the DS-MCTS-style classifier from 1.48x to 1.75x.
+
+These are re-implementations from root search statistics on KataGo, with the adaptations listed in the paper. The two strongest are also being played against KataGo directly, and those match results are added to the table below as they finish.
+
 ## Match results
 
 The offline analysis predicted a gain. These are the played games that confirm it: from the empty board, alternating colors, each player on its own KataGo process.
@@ -129,6 +154,7 @@ Compute is reported three ways because the answer depends on how you count. **Vi
 | KataGo 200 visits | KataGo 200 | 400 | 185-183-32 | 0.502 | +2 (-30 to +35) | 200 | 200 | 76 : 76 |
 | KataGo 283 visits | KataGo 200 | 400 | 247-126-27 | 0.651 | +108 (+76 to +143) | 283 | 283 | 98 : 73 |
 | KataGo 400 visits | KataGo 200 | 400 | 310-73-17 | 0.796 | +237 (+198 to +280) | 400 | 400 | 132 : 73 |
+| Mikiri (stopper), 200-visit grant, six-rung ladder | KataGo 200 | 600 | 471-87-42 | 0.820 | +263 (+230 to +301) | 201 | 305 | 100 : 76 |
 | Mikiri (stopper), 200-visit grant | KataGo 200 | 1000 | 728-196-76 | 0.766 | +206 (+181 to +232) | 200 | 251 | 99 : 74 |
 | Mikiri (stopper), 160-visit grant | KataGo 200 | 1000 | 586-325-89 | 0.630 | +93 (+72 to +114) | 160 | 197 | 80 : 74 |
 | Mikiri (memory), 200-visit grant | KataGo 200 | 600 | 276-292-32 | 0.487 | -9 (-37 to +19) | 158 | 158 | 69 : 69 |

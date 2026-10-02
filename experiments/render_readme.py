@@ -56,5 +56,37 @@ note = ("*More runs are still in progress and will be added to this table: the f
 text = text.replace("{{progress_note}}", note)
 total = sum(r["games"] for name, r in rows.items() if not name.startswith("pilot"))
 text = text.replace("{{total_games}}", f"{total:,}")
+base = Path("results/baselines.json")
+if base.exists():
+    b = json.loads(base.read_text())
+    d = b["ladders"]["doubling"]
+    pr = {x["cost"]: x for x in sum(b["point_rules"].values(), [])}
+
+    def cell(key, budget="200"):
+        v = d.get(key, {}).get(budget)
+        return f"{v['multiplier']:.2f}x ({v['lo']:.2f} to {v['hi']:.2f})" if v else "n/a"
+
+    def point(rule, lo=150, hi=260):
+        pts = [x for x in b["point_rules"][rule] if lo <= x["cost"] <= hi]
+        return f"{pts[0]['multiplier']:.2f}x at {pts[0]['cost']:.0f} visits" if pts else "n/a"
+
+    lines = ["| Rule | Source | Multiplier at 200 visits |", "|---|---|---|",
+             f"| Value-of-information stop | Hay et al. 2012 | {cell('VOI stop | flat')} |",
+             f"| Best-arm-identification stop | Kaufmann and Koolen 2017 | {cell('BAI stop | flat')} |",
+             f"| Think longer when behind | Huang et al. 2010 | {point('BEHIND (v=0.6)')} |",
+             f"| Stop when the runner-up cannot catch up | Baier and Winands 2016 | {point('STOP (p=0.45)', 120, 270)} |",
+             f"| Smart pruning | Leela Chess Zero | {point('smart pruning (factor 1.33)')} |",
+             f"| Extend when the top two are close | Baier and Winands 2016 | {point('CLOSE (d=0.4)')} |",
+             f"| Extend when most-visited is not best-valued | Huang et al. 2010 | {point('UNST')} |",
+             f"| KL-gain stop | Leela Chess Zero | {cell('KLD gain | flat')} |",
+             f"| Budget chosen before search | in the spirit of Muppidi et al. 2026 | {cell('state only | flat')} |",
+             f"| Learned move-stability classifier | DS-MCTS, Lan et al. 2021 | {cell('DS-MCTS | flat')} |",
+             f"| Virtual expansion, published settings | V-MCTS, Ye et al. 2022 | {cell('V-MCTS (r=0.2, eps=0.1) | as published')} |",
+             f"| **Mikiri** | this work | **{cell('Mikiri | rate')}** |"]
+    text = text.replace("{{baselines_table}}", "\n".join(lines))
+    pv = b["paired"]["Mikiri minus V-MCTS published at 200"]
+    text = text.replace("{{paired_vmcts}}", f"{pv['difference']:.2f} ({pv['lo']:.2f} to {pv['hi']:.2f})")
+    text = text.replace("{{ds_flat}}", f"{d['DS-MCTS | flat']['200']['multiplier']:.2f}")
+    text = text.replace("{{ds_rate}}", f"{d['DS-MCTS | rate']['200']['multiplier']:.2f}")
 Path("README.md").write_text(text)
 print("wrote README.md;", text.count("pending"), "values pending")

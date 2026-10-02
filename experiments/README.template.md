@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/takakhoo/mikiri-beats-katago/actions/workflows/tests.yml/badge.svg)](https://github.com/takakhoo/mikiri-beats-katago/actions/workflows/tests.yml)
 
-**Mikiri makes KataGo {{main.elo_abs}} Elo stronger at the same search budget. Same network, same search algorithm, no retraining.**
+**Mikiri makes KataGo {{long.elo_abs}} Elo stronger at the same search budget, as much as KataGo gains from doubling its search. Same network, same search algorithm, no retraining.**
 
 KataGo is the strongest open engine in the AlphaGo family: a policy and value network guiding a tree search. Like every engine in that family, it gives each move the same number of search visits. Mikiri wraps it and decides, move by move, when the search has seen enough. It plays settled moves at a quarter of the budget, keeps searching when the game is on the line, and never searches the same position twice.
 
@@ -18,23 +18,25 @@ Mikiri (見切り) is Japanese for the judgment that you have seen enough.
 
 | Against KataGo at 200 visits per move | Games | Record (W-L-D) | Elo gain (95% interval) |
 |---|---|---|---|
-| **Mikiri at the same 200 visits** | {{main.games}} | {{main.wld}} | **{{main.elo}}** ({{main.elo_lo}} to {{main.elo_hi}}) |
-| **Mikiri at {{strict.visits}} visits, 20% fewer** | {{strict.games}} | {{strict.wld}} | **{{strict.elo}}** ({{strict.elo_lo}} to {{strict.elo_hi}}) |
-| **Mikiri with move sampling switched off** (paired openings) | {{paired.games}} | {{paired.wld}} | **{{paired.elo}}** ({{paired.elo_lo}} to {{paired.elo_hi}}) |
+| **Mikiri at the same 200 visits, six-rung ladder** | {{long.games}} | {{long.wld}} | **{{long.elo}}** ({{long.elo_lo}} to {{long.elo_hi}}) |
+| **Mikiri at the same 200 visits, four-rung ladder** | {{main.games}} | {{main.wld}} | **{{main.elo}}** ({{main.elo_lo}} to {{main.elo_hi}}) |
+| **Mikiri at {{strict.visits}} visits, 20% fewer** (four-rung ladder) | {{strict.games}} | {{strict.wld}} | **{{strict.elo}}** ({{strict.elo_lo}} to {{strict.elo_hi}}) |
+| **Mikiri with move sampling switched off** (paired openings, four-rung ladder) | {{paired.games}} | {{paired.wld}} | **{{paired.elo}}** ({{paired.elo_lo}} to {{paired.elo_hi}}) |
 | KataGo given twice the visits, for scale | {{unidouble.games}} | {{unidouble.wld}} | {{unidouble.elo}} ({{unidouble.elo_lo}} to {{unidouble.elo_hi}}) |
 | KataGo against itself, as a check on the harness | {{unisame.games}} | {{unisame.wld}} | {{unisame.elo}} ({{unisame.elo_lo}} to {{unisame.elo_hi}}) |
 
-- **At equal visits, Mikiri wins {{main.score}}% of the points.** Its stopping rule is worth most of a doubling of KataGo's search.
+- **At equal visits, Mikiri wins {{long.score}}% of the points** with its six-rung ladder (50, 200, 400, 800, 1,600, 3,200) and {{main.score}}% with the four-rung ladder (50, 200, 800, 3,200). The stopping rule is worth a full doubling of KataGo's search.
 - **With 20% fewer visits it still wins {{strict.score}}%.**
-- **It holds up under the strictest accounting.** Counting actual network evaluations, Mikiri at {{main.evals}} per move gains {{main.elo}} Elo, while KataGo at {{uniroot.evals}} per move (283 visits) gains {{uniroot.elo}}.
+- **It holds up under the strictest accounting.** Counting actual network evaluations, Mikiri at {{long.evals}} per move gains {{long.elo}} Elo. KataGo at {{uniroot.evals}} per move (283 visits) gains {{uniroot.elo}}, and at {{unidouble.evals}} per move (400 visits) gains {{unidouble.elo}}.
 - **It is not an artifact of move sampling.** With both sides always playing their top move from 400 balanced openings, the gain is {{paired.elo}}.
 
-Paper: [`paper/mikiri.pdf`](paper/mikiri.pdf). Every game behind every number is in [`results/matches/`](results/matches/).
+**Status.** This work is being prepared for submission to **IJCAI 2027** (paper deadline 11 January 2027). It has not been submitted or peer reviewed. The short version in IJCAI format is in [`paper/ijcai/`](paper/ijcai/), and the full technical report is [`paper/mikiri.pdf`](paper/mikiri.pdf). Every game behind every number is in [`results/matches/`](results/matches/).
 
 ## Contents
 
 - [How it works](#how-it-works)
 - [The science, step by step](#the-science-step-by-step)
+- [Against prior stopping rules](#against-prior-stopping-rules)
 - [Match results](#match-results)
 - [Try it](#try-it)
 - [What happened to v1](#what-happened-to-v1)
@@ -116,6 +118,16 @@ The original idea behind this project was *approximate* retrieval: find similar 
 When the shallow and deep search disagree, the most similar stored position has the right move 5.5% of the time. The policy network's own second choice has it 43% of the time. Transfer is reliable only when the stored position is the same position, which the exact key already finds.
 
 In play, memory alone (no stopper) served {{memonly.hit}}% of Mikiri's moves over {{memonly.games}} games with no change in strength ({{memonly.elo}} Elo, {{memonly.elo_lo}} to {{memonly.elo_hi}}). It saves search visits. It does not save network evaluations ({{memonly.evals}} per move against {{memonly.base_evals}}), because KataGo already caches evaluations of positions it has seen. The strength comes from the stopping rule.
+
+## Against prior stopping rules
+
+We re-implemented ten published rules for deciding how long to search, from their papers and source code, and ran them on the same dataset with the same scoring. Each threshold was swept so every rule is shown at its best. Numbers are how many times more visits uniform search needs to match the rule at a 200-visit mean budget (above 1.0 is a gain), with 95% intervals.
+
+{{baselines_table}}
+
+Two things stand out. Mikiri is ahead of the strongest prior rule, V-MCTS at its published settings, by {{paired_vmcts}} in a paired test over the same games. And Mikiri's rate rule improves other people's signals too: it lifts the DS-MCTS-style classifier from {{ds_flat}}x to {{ds_rate}}x.
+
+These are re-implementations from root search statistics on KataGo, with the adaptations listed in the paper. The two strongest are also being played against KataGo directly, and those match results are added to the table below as they finish.
 
 ## Match results
 
