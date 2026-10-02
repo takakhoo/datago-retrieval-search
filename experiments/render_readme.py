@@ -36,5 +36,14 @@ if demo.exists():
     k = next((i for i, l in enumerate(moves) if "800" in l), len(moves) // 2)
     excerpt = "\n".join([out[0]] + moves[:6] + ["   ..."] + moves[max(k - 3, 6): k + 5] + ["   ..."] + out[-3:])
 text = text.replace("{{demo_excerpt}}", excerpt)
+train = Path("results/stopper/training.json")
+sentence = "(training curve pending)"
+if train.exists():
+    dc = json.loads(train.read_text())["data_curve"]
+    first, last = dc[0], dc[-1]
+    sentence = (f"with only {first['positions']:,} labeled positions the stopper already reaches "
+                f"{first['multiplier']:.2f}x, and with {last['positions']:,} it reaches {last['multiplier']:.2f}x. "
+                "The band shows the spread over three random draws of training games.")
+text = text.replace("{{training_sentence}}", sentence)
 Path("README.md").write_text(text)
 print("wrote README.md;", text.count("pending"), "values pending")
