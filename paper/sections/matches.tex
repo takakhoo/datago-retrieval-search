@@ -6,14 +6,14 @@ All matches in this section are played against KataGo at a fixed budget, from th
 \begin{table}[t]
 \centering\footnotesize
 \setlength{\tabcolsep}{4pt}
-\input{tables/matches}
+\resizebox{\linewidth}{!}{\input{tables/matches}}
 \caption{All matches. \emph{Visits} is the mean size of the deepest search per move, \emph{Restart} counts every search requested, and \emph{Evals} is network evaluations per move for the player and for its opponent, read from each engine's log.}
 \label{tab:matches}
 \end{table}
 
 \subsection{What a visit is worth}
 
-To read the other results we first need the exchange rate between compute and strength in this setting. KataGo against itself at 200 visits scores \unisameScore\% over \unisameGames{} games ($\unisameElo$ Elo, $\unisameEloLo$ to $\unisameEloHi$), which checks that the harness has no side bias. At 100 visits it loses $\unihalfElo$ Elo to the 200-visit engine, at 283 visits it gains $\unirootElo$, and at 400 visits $\unidoubleElo$. A doubling is worth about 230 Elo here. In network evaluations the uniform engine runs \unihalfEvals, \unisameEvals, \unirootEvals, and \unidoubleEvals{} per move at the four budgets: fewer than its visits, because consecutive searches share cached evaluations.
+To read the other results we first need the exchange rate between compute and strength in this setting. KataGo against itself at 200 visits scores \unisameScore\% over \unisameGames{} games ($\unisameElo$ Elo, $\unisameEloLo$ to $\unisameEloHi$), which checks that the harness has no side bias. Against the 200-visit engine, KataGo at 100 visits rates $\unihalfElo$ Elo, at 283 visits $\unirootElo$, and at 400 visits $\unidoubleElo$. A doubling is worth about 230 Elo here. In network evaluations the uniform engine runs \unihalfEvals, \unisameEvals, \unirootEvals, and \unidoubleEvals{} per move at the four budgets: fewer than its visits, because consecutive searches share cached evaluations.
 
 \subsection{The stopping rule at equal visits and below}
 

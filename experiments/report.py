@@ -75,7 +75,9 @@ def fig_elo_compute(rows: list[dict], out: Path, budget: int = 200) -> None:
     rows = [r for r in rows if r["baseline"] == f"KataGo {budget}" and r["rows"]
             and "paired" not in r["player"] and "board" not in r["player"]]
     uni = sorted((r for r in rows if r["run"].startswith("uni_")), key=lambda r: r["visits"])
-    dg = [r for r in rows if not r["run"].startswith("uni_") and not r["run"].startswith("pilot")]
+    # The figure shows the stopping rule alone on the standard ladder; memory and
+    # ladder variants are in the table.
+    dg = [r for r in rows if r["run"] in ("main_200", "main_stopper_160", "main_140")]
     measures = [("visits", "base_visits", "Visits per move"),
                 ("restart", "base_visits", "Visits per move, every restart counted"),
                 ("rows", "base_rows", "Network evaluations per move")]
