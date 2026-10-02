@@ -99,15 +99,13 @@ def main() -> None:
 
         records_so_far: list = []
         accountant = hook or Deepener("datago", Memory(), eng_d, ledger, 1, args.komi, enabled=False)
-        controller = None
         if stopper is not None and args.control:
-            controller = BudgetController(stopper, ledger, share=args.play_share)
+            controller = BudgetController(stopper, args.budget, share=args.play_share)
+            datago.on_decision = controller.record
 
         def after(rec):
             records_so_far.append(rec)
             accountant(rec)
-            if controller:
-                controller(rec)
 
         if args.paired:
             openings = sample_openings(eng_k, args.paired, cfg, args.opening_plies,

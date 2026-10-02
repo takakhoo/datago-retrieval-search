@@ -7,7 +7,7 @@ visits.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import Callable, Protocol
 
 import numpy as np
 
@@ -91,9 +91,11 @@ class DataGoPlayer:
 
     def __init__(self, engine: AnalysisEngine, path: list[int], stopper: Stopper | None = None,
                  memory: Memory | None = None, store_max_move: int = 80,
-                 temp: Temperature | None = Temperature(), name: str = "datago"):
+                 temp: Temperature | None = Temperature(), name: str = "datago",
+                 on_decision: Callable[[int], None] | None = None):
         self.engine, self.path, self.stopper = engine, list(path), stopper
         self.memory, self.store_max_move, self.temp, self.name = memory, store_max_move, temp, name
+        self.on_decision = on_decision
 
     def search(self, board: Board, komi: float) -> tuple[SearchResult, int, int]:
         """Run the ladder. Returns (final search, restart cost, index of final rung)."""
@@ -116,10 +118,14 @@ class DataGoPlayer:
             cached = self.memory.get(board, komi)
             if cached is not None:
                 point = pick_move(cached, move_number, board.size, rng, self.temp)
+                if self.on_decision:
+                    self.on_decision(0)
                 return Decision(point, 0, cached.winrate, {"hit": 1, "restart_visits": 0})
         res, restart, j = self.search(board, komi)
         if self.memory is not None and move_number <= self.store_max_move:
             self.memory.put(board, komi, res)
         point = pick_move(res, move_number, board.size, rng, self.temp)
+        if self.on_decision:
+            self.on_decision(res.visits)
         return Decision(point, res.visits, res.winrate,
                         {"restart_visits": restart, "rung": j, "searched": 1})

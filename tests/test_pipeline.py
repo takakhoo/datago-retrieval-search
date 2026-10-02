@@ -213,22 +213,18 @@ def test_many_large_concurrent_responses_do_not_deadlock(engine):
     assert all(len(r.policy) == 362 for r in results)
 
 
-def test_budget_controller_tracks_the_grant():
-    from datago.series import BudgetController, Ledger
+def test_budget_controller_holds_spending_at_the_budget():
+    from datago.series import BudgetController
     from datago.stopper import Stopper, TreeEnsemble
     leaf = {"left": [-1], "right": [-1], "feature": [0], "threshold": [0.0], "value": [0.0]}
-    calib = [{"threshold": t, "cost_continue": c} for t, c in ((0.9, 50), (0.5, 100), (0.2, 200), (0.1, 400))]
+    calib = [{"threshold": 1.0 / c, "cost_continue": c} for c in (50, 100, 200, 400, 800, 1600)]
     st = Stopper(TreeEnsemble(0.0, 1.0, [leaf]), 0.5, [50, 200, 800], meta={"calibration": calib})
-    ledger = Ledger(budget_per_move=200)
-    ctl = BudgetController(st, ledger, gain=0.5)
-    assert st.threshold == pytest.approx(0.2)
-    for _ in range(40):
-        ledger.granted += 200 * 100
-        ledger.played += 100 * 100
-        ctl()
-    assert ctl.target > 300 and st.threshold < 0.2
-    for _ in range(200):
-        ledger.granted += 200 * 100
-        ledger.played += 600 * 100
-        ctl()
-    assert ctl.target < 150 and st.threshold > 0.2
+    ctl = BudgetController(st, 200, horizon=500, memory_span=300)
+    assert ctl.command == 200 and st.threshold == pytest.approx(1 / 200)
+    rng = np.random.default_rng(0)
+    # The world costs 1.4x what the calibration promises, and 10% of moves are free hits.
+    for _ in range(30000):
+        hit = rng.random() < 0.1
+        ctl.record(0 if hit else 1.4 * ctl.command * rng.uniform(0.5, 1.5))
+    assert ctl.spent / ctl.granted == pytest.approx(1.0, abs=0.02)
+    assert 140 < ctl.command < 180

@@ -72,35 +72,45 @@ class Deepener:
 
 
 class BudgetController:
-    """Steers the stopper threshold so cumulative spending tracks the grant.
+    """Keeps DataGo's spending on the baseline's budget, move by move.
 
-    The stopper's offline calibration maps thresholds to an expected cost per
-    searched move. After every game the controller nudges that target cost
-    toward whatever makes played visits equal `share` of the granted visits,
-    then sets the threshold from the calibration table. Memory hits therefore
-    turn into deeper searches elsewhere without ever exceeding the grant.
+    Every DataGo move (memory hits included) is granted `budget` visits. The
+    controller asks the stopper for a mean cost that pays back any deficit, or
+    spends any surplus, over the next `horizon` moves. The stopper's offline
+    calibration maps a commanded cost to a threshold, and because real games
+    are not distributed like the calibration set, the controller also tracks
+    the ratio of realized to commanded cost and corrects for it.
     """
 
-    def __init__(self, stopper, ledger: Ledger, share: float = 1.0, gain: float = 0.08):
+    def __init__(self, stopper, budget: float, share: float = 1.0, horizon: int = 3000,
+                 memory_span: int = 1500):
         calib = sorted(stopper.meta["calibration"], key=lambda r: r["cost_continue"])
         self.costs = np.array([r["cost_continue"] for r in calib])
         self.thresholds = np.array([r["threshold"] for r in calib])
-        self.stopper, self.ledger, self.share, self.gain = stopper, ledger, share, gain
-        self.target = float(np.clip(ledger.budget_per_move, self.costs[0], self.costs[-1]))
+        self.stopper, self.budget, self.share = stopper, float(budget), share
+        self.horizon, self.alpha = horizon, 1.0 / memory_span
+        self.granted = self.spent = 0.0
+        self.moves = 0
+        self.command = float(np.clip(self.budget * share, self.costs[0], self.costs[-1]))
+        self.ema_real = self.ema_cmd = self.command
         self._lock = threading.Lock()
         self._apply()
 
     def _apply(self) -> None:
-        self.stopper.threshold = float(np.interp(self.target, self.costs, self.thresholds))
+        self.stopper.threshold = float(np.interp(self.command, self.costs, self.thresholds))
 
-    def __call__(self, rec: GameRecord | None = None) -> None:
+    def record(self, visits: float) -> None:
         with self._lock:
-            spent = self.ledger.played + self.ledger.deepening
-            if spent <= 0:
-                return
-            ratio = self.share * self.ledger.granted / spent
-            self.target = float(np.clip(self.target * ratio ** self.gain,
-                                        self.costs[0], self.costs[-1]))
+            self.moves += 1
+            self.granted += self.share * self.budget
+            self.spent += visits
+            self.ema_real += self.alpha * (visits - self.ema_real)
+            self.ema_cmd += self.alpha * (self.command - self.ema_cmd)
+            deficit = self.spent - self.granted
+            desired = self.share * self.budget - deficit / self.horizon
+            desired = float(np.clip(desired, 0.25 * self.budget, 4.0 * self.budget))
+            bias = self.ema_real / max(self.ema_cmd, 1e-9) if self.moves > 200 else 1.0
+            self.command = float(np.clip(desired / max(bias, 0.05), self.costs[0], self.costs[-1]))
             self._apply()
 
 
