@@ -130,6 +130,22 @@ def matches_table() -> None:
     write("matches", "\n".join(lines) + "\n")
 
 
+def prediction_table() -> None:
+    p = RES / "match_analysis.json"
+    if not p.exists():
+        return
+    rows = json.loads(p.read_text())["prediction"]
+    lines = [r"\begin{tabular}{rrrrr}", r"\toprule",
+             r"Mean visits & Offline regret & Equivalent & Predicted & Measured Elo \\",
+             r"per move & (\% winrate) & uniform visits & Elo & (95\% interval) \\", r"\midrule"]
+    for r in rows:
+        lines.append(f"{r['visits']:.0f} & {100 * r['offline_regret']:.2f} & {r['equivalent_uniform_visits']:.0f} & "
+                     f"${r['predicted_elo']:+.0f}$ & ${r['measured_elo']:+.0f}$ "
+                     f"(${r['measured_lo']:+.0f}$ to ${r['measured_hi']:+.0f}$) \\\\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("prediction", "\n".join(lines) + "\n")
+
+
 RUNS = {
     "main": "main_200", "strict": "main_stopper_160", "lean": "main_140", "paired": "paired_greedy_200",
     "memonly": "mem_only_200", "full": "full_200", "long": "long_200",
@@ -188,3 +204,4 @@ if __name__ == "__main__":
     ablation_table()
     auc_table()
     matches_table()
+    prediction_table()

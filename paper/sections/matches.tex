@@ -30,6 +30,23 @@ Figure~\ref{fig:elo} places these results against the uniform curve under all th
 \label{fig:elo}
 \end{figure}
 
+\subsection{The offline analysis predicted the result}
+
+The ladder dataset gives a forecast that can be checked. For each run we take the mean visits Mikiri actually used, read the cross-fitted regret at that cost from Table~\ref{tab:frontier}, convert it to equivalent uniform visits, and read the Elo of that uniform budget from the measured curve. Table~\ref{tab:prediction} compares the forecast with the match.
+
+\begin{table}[t]
+\centering\small
+\input{tables/prediction}
+\caption{Elo forecast from the offline regret analysis, against the Elo measured in play, for the stopper against KataGo at 200 visits.}
+\label{tab:prediction}
+\end{table}
+
+For the main match the forecast is within nine Elo of the result. At 160 visits it is about 30 Elo too high, outside the measured interval. Regret measured on self-play positions is a good guide to match strength and a slightly optimistic one.
+
+\subsection{In-game ablations}
+
+Two hand-written rules were played on the same ladder at the same budget. The LCB margin with the rate rule, which reaches 1.45 offline with no learning, gains $\rulelcbElo$ Elo ($\rulelcbEloLo$ to $\rulelcbEloHi$) over \rulelcbGames{} games. The entropy gate of the first version with a flat threshold, 0.63 offline, gains $\vonegateElo$ Elo ($\vonegateEloLo$ to $\vonegateEloHi$) over \vonegateGames{} games.
+
 \subsection{Without move sampling}
 
 KataGo's default play samples among well-visited moves early in the game. A search that stops when one move dominates has sharper visit counts than a fixed-budget search, so sampling could favour Mikiri for reasons unrelated to search quality. To rule this out we sampled 400 balanced openings of 12 moves, played each twice with colours swapped, and had both players always play their engine's top move. Mikiri scores \pairedScore\% over \pairedGames{} games (\pairedRecord), $\pairedElo$ Elo ($\pairedEloLo$ to $\pairedEloHi$), at \pairedVisits{} visits per move.
@@ -43,6 +60,15 @@ Figure~\ref{fig:profile} shows Mikiri's spending in the main match. It uses abou
 \includegraphics[width=\linewidth]{profile_main}
 \caption{Mean visits per Mikiri move in the main match, by move number and, for moves 60 and later, by Mikiri's own winrate estimate.}
 \label{fig:profile}
+\end{figure}
+
+The gain does not depend on colour. In the main match Mikiri scored 76.2\% as Black and 77.0\% as White. Figure~\ref{fig:advantage} shows when it arrives: Mikiri's mean winrate estimate stays at 50\% for the first 70 moves, where it is spending a third of the budget, and climbs steadily through the middle game.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{advantage}
+\caption{Mikiri's mean winrate estimate by move number in the main match. Finished games are carried forward at their result.}
+\label{fig:advantage}
 \end{figure}
 
 \subsection{Memory}

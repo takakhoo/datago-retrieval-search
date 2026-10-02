@@ -5,6 +5,22 @@
 
 Table~\ref{tab:uniform} gives the price of a uniform budget. At 200 visits the engine gives up 0.99\% of winrate per move on average, and doubling the budget removes roughly a third of what remains. The average hides the shape. At 200 visits 71\% of positions carry no regret at all: the 200-visit move is the best move we scored. The worst tenth of positions hold 84\% of the total. Regret also depends on when in the game the position occurs. At 200 visits it averages 0.19\% per move over the first 40 moves, 0.74\% from move 40 to 100, and 1.4 to 1.6\% after move 100. The opening is nearly free of search error at these budgets, which will matter for how we interpret memory.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{regret_anatomy}
+\caption{Left: cumulative share of regret held by the worst positions at three budgets. Right: mean regret by move number.}
+\label{fig:anatomy}
+\end{figure}
+
+Figure~\ref{fig:anatomy} shows both facts. Figure~\ref{fig:case} shows what one of the costly positions looks like: at 50 and at 200 visits the engine chooses a move that an independent search rates at 11\%, and at 800 visits it finds one rated at 62\%. The stopper's score is ten and then six times its threshold at the first two rungs, and a fifth of it at the third.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{case_study}
+\caption{A position from the ladder dataset where the stopper keeps searching and the move changes. The threshold $\lambda$ shown is the one that gives a mean cost of 200 visits. The model here was trained on all games, including this one.}
+\label{fig:case}
+\end{figure}
+
 A rule that knew each position's regret and stopped at the first rung with none would match uniform search at twelve times the visits at a 200-visit budget (last column of Table~\ref{tab:frontier}). That is the room available to any stopping rule on this ladder.
 
 \begin{table}[t]
@@ -27,7 +43,14 @@ Table~\ref{tab:auc} asks how well individual search statistics rank positions by
 
 \subsection{A learned stop on a ladder beats uniform search by 1.7 to 1.9 times}
 
-Table~\ref{tab:frontier} is the main offline result. With the 50, 200, 800, 3{,}200 ladder and a mean cost of 200 visits, the learned stopper gives up 0.75\% of winrate per move. Uniform search needs 358 visits to do as well, a multiplier of 1.80. The multiplier stays between 1.69 and 1.88 for mean budgets from 100 to 800 visits. If every restarted search is charged in full, so that reaching the 800-visit rung costs $50+200+800$, the multiplier is 1.29 to 1.51.
+Table~\ref{tab:frontier} and Figure~\ref{fig:frontier} give the main offline result. With the 50, 200, 800, 3{,}200 ladder and a mean cost of 200 visits, the learned stopper gives up 0.75\% of winrate per move. Uniform search needs 358 visits to do as well, a multiplier of 1.80. The multiplier stays between 1.69 and 1.88 for mean budgets from 100 to 800 visits. If every restarted search is charged in full, so that reaching the 800-visit rung costs $50+200+800$, the multiplier is 1.29 to 1.51.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{frontier}
+\caption{Mean regret against mean visits for uniform search, the learned stopper, and an oracle that knows the true regret.}
+\label{fig:frontier}
+\end{figure}
 
 \begin{table}[t]
 \centering\small
@@ -46,3 +69,7 @@ Table~\ref{tab:rules} runs hand-written stopping signals through the same ladder
 \caption{Compute multipliers (continuation cost) for stopping signals on the 50/200/800/3{,}200 ladder. Values below 1 are worse than uniform search.}
 \label{tab:rules}
 \end{table}
+
+\subsection{The model needs little}
+
+Appendix~\ref{app:training} reports ablations and training diagnostics. Removing the trajectory features, removing KataGo's raw error predictions, or keeping only seven features changes the multiplier at 200 visits by at most 0.09. A model of 80 depth-2 trees does nearly as well as one of 400 depth-3 trees. Trained on 300 labeled positions the stopper already reaches 1.50, against 1.82 with 4{,}800. Two choices matter. Fitting the square root of regret instead of regret raises the multiplier from 1.74 to 1.82, because a few very large blunders otherwise dominate the fit. Replacing the rate rule with a flat threshold lowers it to 1.41.

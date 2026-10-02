@@ -22,7 +22,14 @@ The mean regret of always stopping at rung $k$ traces a curve $R(v)$ against vis
 \section{Mikiri}
 \label{sec:method}
 
-Mikiri wraps a fixed engine and changes only how many visits each move receives. It has three parts.
+Mikiri wraps a fixed engine and changes only how many visits each move receives. It has three parts, shown in Figure~\ref{fig:pipeline}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{pipeline}
+\caption{How Mikiri decides one move.}
+\label{fig:pipeline}
+\end{figure}
 
 \subsection{A visit ladder with a learned stop}
 

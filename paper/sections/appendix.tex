@@ -1,0 +1,35 @@
+\appendix
+
+\section{Training the stopper}
+\label{app:training}
+
+The stopper is a gradient-boosted regression tree ensemble (150 trees of depth 3, learning rate 0.05, row subsampling 0.8, at least 30 samples per leaf) fitted to the square root of regret, with all non-final rungs of the ladder pooled. Its prediction is squared before use. Figure~\ref{fig:training} shows the fit and its dependence on data. Held-out error stops improving at about 100 trees.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{training}
+\caption{Left: squared error on training and held-out games as trees are added. Right: compute multiplier at a 200-visit budget against the number of labeled positions used for training. The band is the range over three draws of training games.}
+\label{fig:training}
+\end{figure}
+
+Figure~\ref{fig:diagnostics} shows that the score orders held-out positions correctly: realized regret rises from 0.02\% of winrate in the lowest decile of predicted stake to 4.2\% in the highest. The squared prediction underestimates the level of regret, since it estimates a typical value on the square-root scale. This does not affect play, because only the ordering and a controller-tuned threshold are used. The model relies mostly on one feature, the product of how undecided the game is and how far the best rival's winrate exceeds the chosen move's lower confidence bound.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{stopper_diagnostics}
+\caption{Left: realized regret by decile of the stopper's score, on held-out games. Right: increase in held-out error when one feature is shuffled.}
+\label{fig:diagnostics}
+\end{figure}
+
+Table~\ref{tab:ablation} lists the ablations. Each entry is the compute multiplier by continuation cost, with the multiplier under restart accounting in parentheses, averaged over three assignments of games to folds.
+
+\begin{table}[h]
+\centering\footnotesize
+\input{tables/ablation}
+\caption{Stopper ablations at mean budgets of 100, 200, 400, and 800 visits.}
+\label{tab:ablation}
+\end{table}
+
+\section{Reproducing the results}
+
+The repository contains the ladder dataset, the trained models, every game record, and the scripts that produce each table and figure from them. The dataset took 1.5 GPU-hours to label on one RTX 6000 Ada, and a 1{,}000-game match at 200 visits takes about the same. Training the stopper takes minutes on a laptop CPU. The test suite runs the full pipeline against a small stand-in engine and needs no GPU.

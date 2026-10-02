@@ -131,9 +131,15 @@ Compute is reported three ways because the answer depends on how you count. **Vi
 
 The orange line is KataGo at uniform budgets. Both Mikiri runs sit above it under all three ways of counting. At about the same network evaluations per move (99 against 98), Mikiri gains +206 Elo where KataGo at 283 visits gains +108.
 
+**The offline analysis called it.** From the dataset alone, before a single match game, the regret numbers forecast +197 Elo for the main match. The match gave +206.
+
 ![Where Mikiri spends its visits](results/figures/profile_main.png)
 
 Nobody told Mikiri to save visits in the opening or to ease off once a game is decided. Both fall out of predicting regret in winrate units: it averages about 65 visits over the first 20 moves, peaks near 270 around move 140, and drops to about 130 when it rates its own winrate above 90%.
+
+![Mikiri's winrate estimate by move number](results/figures/advantage.png)
+
+The edge is the same with either color (76.2% as Black, 77.0% as White) and it builds where the visits go: level through the opening, then climbing steadily from about move 70.
 
 ## Try it
 
