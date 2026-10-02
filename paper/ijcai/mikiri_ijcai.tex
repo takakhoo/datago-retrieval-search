@@ -55,7 +55,7 @@ Our contributions are these.
 \begin{itemize}
 \item \textbf{A testbed with exact accounting.} Both players use the same engine, network and move-selection rule. Compute is reported as visits, as visits with every restarted search charged, and as network evaluations measured per player.
 \item \textbf{A ladder dataset with independent labels.} 6{,}000 positions, seven budgets each, every chosen move scored by a separate forced search. It shows that search error is rare and concentrated, and it forecasts match Elo.
-\item \textbf{A stopping rule that is worth a doubling of search.} $\longElo$ Elo over KataGo at equal visits, and $\strictElo$ Elo with 20\% fewer.
+\item \textbf{A stopping rule that is worth nearly a doubling of search.} $\longElo$ Elo over KataGo at equal visits, and $\strictElo$ Elo with 20\% fewer.
 \item \textbf{A comparison with ten published rules} on one engine, offline and, for the strongest two, in play.
 \item \textbf{The rate rule.} Pricing the next rung matters more than the model, and improves prior signals.
 \item \textbf{Two negative results} on retrieval for a frozen engine.
@@ -191,7 +191,7 @@ Three findings. First, the rules with a statistical stopping guarantee are far w
 
 \textbf{Equal visits.} With the six-rung ladder (50, 200, 400, 800, 1{,}600, 3{,}200) Mikiri scores \longScore\% (\longRecord), a gain of $\longElo$ Elo ($\longEloLo$ to $\longEloHi$). With the four-rung ladder it gains $\mainElo$ ($\mainEloLo$ to $\mainEloHi$) over \mainGames{} games. KataGo at 400 visits gains $\unidoubleElo$ (Table~\ref{tab:matches}).
 
-\textbf{Fewer visits and equal evaluations.} A fixed-budget engine finds much of its next tree already cached, and Mikiri's varying searches reuse less, so it runs more evaluations per visit. Granted 160 visits, it requests fewer visits than KataGo even with restarts charged (\strictRestart{} against 200) and gains $\strictElo$ Elo ($\strictEloLo$ to $\strictEloHi$). At equal evaluations the comparison is direct: Mikiri runs \longEvals{} per move and gains $\longElo$, KataGo at 283 visits runs \unirootEvals{} and gains $\unirootElo$ (Figure~\ref{fig:elo}).
+\textbf{Fewer visits and equal evaluations.} A fixed-budget engine finds much of its next tree already cached, and Mikiri's varying searches reuse less, so it runs more evaluations per visit. Granted 160 visits, it requests fewer visits than KataGo even with restarts charged (\strictRestart{} against 200) and gains $\strictElo$ Elo ($\strictEloLo$ to $\strictEloHi$). At close to equal evaluations the comparison is direct: Mikiri runs \longEvals{} per move and gains $\longElo$, KataGo at 283 visits runs \unirootEvals{} and gains $\unirootElo$ (Figure~\ref{fig:elo}).
 
 \begin{figure*}[t]
 \centering
@@ -202,7 +202,7 @@ Three findings. First, the rules with a statistical stopping guarantee are far w
 
 \textbf{No move sampling.} A search that stops when one move dominates has sharper visit counts, which could interact with sampling. With 400 balanced openings each played twice with colours swapped, and both players always playing the top move, Mikiri gains $\pairedElo$ Elo ($\pairedEloLo$ to $\pairedEloHi$).
 
-\textbf{The forecast.} Reading the cross-fitted regret at the cost Mikiri actually used, converting to equivalent uniform visits, and reading that budget's Elo off the measured uniform curve predicts $+197$ for the four-rung match against the measured $\mainElo$, $+126$ at 160 visits against $\strictElo$, and $+225$ for the six-rung ladder against $\longElo$. The forecast orders the three configurations correctly and is within 40 Elo of each, so the ladder dataset can stand in for matches when choosing among rules (Table~\ref{tab:forecast}).
+\textbf{The forecast.} Reading the cross-fitted regret at the cost Mikiri actually used, converting to equivalent uniform visits, and reading that budget's Elo off the measured uniform curve predicts $+197$ for the four-rung match against the measured $\mainElo$, $+126$ at 160 visits against $\strictElo$, and $+225$ for the six-rung ladder against $\longElo$. The forecast orders the three configurations correctly and is within 35 Elo of each, so the ladder dataset can stand in for matches when choosing among rules (Table~\ref{tab:forecast}).
 
 \begin{table}[t]
 \centering\footnotesize
@@ -245,7 +245,7 @@ Results are for KataGo networks at 100 to 800 visits, against KataGo, where a do
 
 \section{Conclusion}
 
-A frozen Go engine leaves a doubling of search on the table by spending visits uniformly. A small learned stopping rule recovers it, and the part of the rule that matters most is the price it puts on continuing.
+A frozen Go engine leaves most of a doubling of search on the table by spending visits uniformly. A small learned stopping rule recovers it, and the part of the rule that matters most is the price it puts on continuing.
 
 \section*{Ethical Statement}
 

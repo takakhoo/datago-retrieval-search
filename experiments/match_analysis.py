@@ -28,7 +28,9 @@ RES = Path("results")
 
 def uniform_elo_curve() -> tuple[np.ndarray, np.ndarray]:
     pts = [(200.0, 0.0)]
-    for name in ("uni_100_vs_200", "uni_283_vs_200", "uni_400_vs_200"):
+    for name in ("uni_100_vs_200", "uni_283_vs_200", "uni_400_vs_200", "uni_566_vs_200"):
+        if not (RES / "matches" / name / "summary.json").exists():
+            continue
         s = json.loads((RES / "matches" / name / "summary.json").read_text())
         pts.append((float(s["visits_per_move"]), float(s["elo"])))
     pts.sort()
@@ -70,6 +72,24 @@ def main() -> None:
             "run": run, "ladder": "six-rung" if policy == six else "four-rung",
             "visits": s["visits_per_move"], "offline_regret": regret,
             "equivalent_uniform_visits": equiv, "predicted_elo": predicted,
+            "measured_elo": s["elo"], "measured_lo": s["elo_lo"], "measured_hi": s["elo_hi"]})
+
+    # Other rules carry their own cross-fitted calibration in the model file.
+    for run, label, model in (("double_200", "seven-rung", "stopper_b18_double"),
+                              ("vmcts_200", "V-MCTS rule", "baseline_vmcts"),
+                              ("dsmcts_200", "DS-MCTS-style rule", "baseline_dsmcts")):
+        p = RES / "matches" / run / "summary.json"
+        if not p.exists():
+            continue
+        s = json.loads(p.read_text())
+        calib = sorted(json.loads(Path(f"models/{model}.json").read_text())["meta"]["calibration"],
+                       key=lambda r: r["cost_continue"])
+        costs = [r["cost_continue"] for r in calib]
+        regret = float(np.interp(s["visits_per_move"], costs, [r["regret"] for r in calib]))
+        equiv = float(np.interp(s["visits_per_move"], costs, [r["equivalent_visits"] for r in calib]))
+        report["prediction"].append({
+            "run": run, "ladder": label, "visits": s["visits_per_move"], "offline_regret": regret,
+            "equivalent_uniform_visits": equiv, "predicted_elo": float(np.interp(np.log2(equiv), logv, elo)),
             "measured_elo": s["elo"], "measured_lo": s["elo_lo"], "measured_hi": s["elo_hi"]})
 
     for run in ("main_200", "main_stopper_160", "paired_greedy_200"):

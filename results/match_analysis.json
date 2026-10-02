@@ -25,13 +25,13 @@
   {
    "run": "long_200",
    "ladder": "six-rung",
-   "visits": 200.95963508047163,
-   "offline_regret": 0.007135956781999327,
-   "equivalent_uniform_visits": 387.64369522215003,
-   "predicted_elo": 225.14724362754464,
-   "measured_elo": 263.4165389121643,
-   "measured_lo": 230.16311862260898,
-   "measured_hi": 301.3310666634446
+   "visits": 200.76309620872402,
+   "offline_regret": 0.007140789085538788,
+   "equivalent_uniform_visits": 387.1566557237724,
+   "predicted_elo": 224.6811320189762,
+   "measured_elo": 227.55665123012315,
+   "measured_lo": 202.63049362317514,
+   "measured_hi": 253.59086784817566
   }
  ],
  "colour": {

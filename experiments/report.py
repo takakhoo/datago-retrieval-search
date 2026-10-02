@@ -38,9 +38,10 @@ def describe(name: str, s: dict) -> str:
         label = f"V-MCTS rule (Ye et al. 2022) in the same player, {grant:g}-visit grant"
     elif "baseline_dsmcts" in str(c.get("stopper")):
         label = f"DS-MCTS-style rule (Lan et al. 2021) in the same player, {grant:g}-visit grant"
-    if "long" in name:
+    rungs = len(str(c.get("path", "")).split(","))
+    if rungs == 6:
         label += ", six-rung ladder"
-    if "double" in name:
+    elif rungs == 7 and "baseline_" not in str(c.get("stopper")):
         label += ", seven-rung ladder"
     if c.get("net", "b18") != "b18":
         label += f", {c['net']} network"

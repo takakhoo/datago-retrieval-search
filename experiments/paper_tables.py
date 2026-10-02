@@ -198,6 +198,7 @@ COMPACT = [
 ]
 OTHER = [
     ("budget_100", "100"), ("budget_400", "400"), ("budget_800", "800"),
+    ("half_400", "400 (Mikiri at 200)"),
     ("b28_200", "200, b28 network"),
     ("size13_200", "200, 13$\\times$13"), ("size9_200", "200, 9$\\times$9"),
 ]
@@ -289,7 +290,7 @@ RUNS = {
     "unihalf": "uni_100_vs_200", "unisame": "uni_200_vs_200", "uniroot": "uni_283_vs_200",
     "unidouble": "uni_400_vs_200", "pilot": "pilot2_stopper_200",
     "rulelcb": "rule_lcb_200", "vonegate": "v1gate_200", "vmcts": "vmcts_200", "dsmcts": "dsmcts_200",
-    "seven": "double_200",
+    "seven": "double_200", "half": "half_400", "unifive": "uni_566_vs_200",
 }
 
 
