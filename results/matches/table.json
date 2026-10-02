@@ -209,6 +209,25 @@
   "hit_rate": 0.0
  },
  {
+  "run": "vmcts_200",
+  "player": "V-MCTS rule (Ye et al. 2022) in the same player, 200-visit grant",
+  "baseline": "KataGo 200",
+  "games": 600,
+  "wld": "395-173-32",
+  "score": 0.685,
+  "score_lo": 0.65,
+  "score_hi": 0.72,
+  "elo": 134.95200708113003,
+  "elo_lo": 107.53812491703204,
+  "elo_hi": 164.06978603561973,
+  "visits": 200.2250637919665,
+  "restart": 350.450127583933,
+  "base_visits": 200.0,
+  "rows": 87.4348461825167,
+  "base_rows": 72.40306239267315,
+  "hit_rate": 0.0
+ },
+ {
   "run": "pilot2_stopper_200",
   "player": "Mikiri (stopper), 200-visit grant (pilot, early model)",
   "baseline": "KataGo 200",

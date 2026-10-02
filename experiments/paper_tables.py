@@ -137,7 +137,7 @@ def prediction_table() -> None:
     rows = json.loads(p.read_text())["prediction"]
     lines = [r"\begin{tabular}{lrrrrr}", r"\toprule",
              r" & Mean visits & Offline regret & Equivalent & Predicted & Measured Elo \\",
-             r"Ladder & per move & (\% winrate) & uniform visits & Elo & (95\% interval) \\", r"\midrule"]
+             r"Rule & per move & (\% winrate) & uniform visits & Elo & (95\% interval) \\", r"\midrule"]
     for r in rows:
         lines.append(f"{r.get('ladder', 'four-rung')} & {r['visits']:.0f} & {100 * r['offline_regret']:.2f} & "
                      f"{r['equivalent_uniform_visits']:.0f} & "
@@ -146,7 +146,7 @@ def prediction_table() -> None:
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("prediction", "\n".join(lines) + "\n")
     lines = [r"\begin{tabular}{lrrrr}", r"\toprule",
-             r"Ladder & Visits & Equiv. & Forecast & Measured (95\% interval) \\", r"\midrule"]
+             r"Rule & Visits & Equiv. & Forecast & Measured (95\% interval) \\", r"\midrule"]
     for r in rows:
         lines.append(f"{r.get('ladder', 'four-rung')} & {r['visits']:.0f} & {r['equivalent_uniform_visits']:.0f} & "
                      f"${r['predicted_elo']:+.0f}$ & ${r['measured_elo']:+.0f}$ "
@@ -190,9 +190,11 @@ COMPACT = [
     ("uni_400_vs_200", "KataGo, 400 visits"), None,
     ("double_200", "Mikiri, seven-rung ladder"),
     ("long_200", "Mikiri, six-rung ladder"), ("main_200", "Mikiri, four-rung ladder"),
+    ("main_175", "Mikiri, four-rung, 175-visit grant"),
     ("main_stopper_160", "Mikiri, four-rung, 160-visit grant"), ("main_140", "Mikiri, four-rung, 140-visit grant"),
     ("paired_greedy_200", "Mikiri, four-rung, no move sampling"), None,
-    ("vmcts_200", "V-MCTS rule (Ye et al.)"), ("dsmcts_200", "DS-MCTS-style rule (Lan et al.)"),
+    ("vmcts_200", "V-MCTS rule (Ye et al.)"), ("short_200", "Mikiri's rule on the V-MCTS ladder"),
+    ("dsmcts_200", "DS-MCTS-style rule (Lan et al.)"),
     ("rule_lcb_200", "LCB margin with rate rule, no learning"), ("v1gate_200", "Entropy gate, flat threshold"), None,
     ("mem_only_200", "Memory only"), ("full_200", "Mikiri four-rung + memory"),
 ]
@@ -291,6 +293,7 @@ RUNS = {
     "unidouble": "uni_400_vs_200", "pilot": "pilot2_stopper_200",
     "rulelcb": "rule_lcb_200", "vonegate": "v1gate_200", "vmcts": "vmcts_200", "dsmcts": "dsmcts_200",
     "seven": "double_200", "half": "half_400", "unifive": "uni_566_vs_200",
+    "short": "short_200", "mid": "main_175",
 }
 
 

@@ -137,7 +137,20 @@ Two follow-up experiments explain where the gap comes from.
 - **The prior rules do not see anything Mikiri misses.** Feeding their statistics (KLD gain, VOI bound, BAI gap, V-MCTS distance) to Mikiri's model as extra inputs, one at a time or all together, moves the multiplier from 2.14x to between 2.07x and 2.17x, with no gain distinguishable from zero ([`results/stopper/hybrid.json`](results/stopper/hybrid.json)). The rules differ in what they do with the search statistics.
 - **Predicting the regret that remains, and dividing by the cost of the next rung, beats every alternative we tried.** In theory the right score is the best recovery per visit over any continuation, and an oracle that reads it matches the hindsight optimum (14.1x against 14.2x). Learned from search statistics it reaches 1.63x to 1.87x. Remaining regret under the rate rule reaches 1.83x to 2.14x, and with no price only 1.41x to 1.56x ([`results/stopper/targets.json`](results/stopper/targets.json)).
 
-These are re-implementations from root search statistics on KataGo, with the adaptations listed in the paper. The two strongest are also being played against KataGo directly, and those match results are added to the table below as they finish.
+These are re-implementations from root search statistics on KataGo, with the adaptations listed in the paper.
+
+### Head to head, in real games
+
+The strongest prior rule, V-MCTS, was packaged into the same player and held to the same 200 visits per move by the same controller.
+
+| Against KataGo at 200 visits | Games | Elo gain (95% interval) | Network evaluations per move (it : KataGo) |
+|---|---|---|---|
+| V-MCTS rule, published settings | {{vmcts.games}} | {{vmcts.elo}} ({{vmcts.elo_lo}} to {{vmcts.elo_hi}}) | {{vmcts.evals}} : {{vmcts.base_evals}} |
+| Mikiri, four-rung ladder | {{main.games}} | {{main.elo}} ({{main.elo_lo}} to {{main.elo_hi}}) | {{main.evals}} : {{main.base_evals}} |
+| Mikiri, six-rung ladder | {{long.games}} | {{long.elo}} ({{long.elo_lo}} to {{long.elo_hi}}) | {{long.evals}} : {{long.base_evals}} |
+| Mikiri's rule on V-MCTS's own ladder (50, 100, 200, 400) | {{short.games}} | {{short.elo}} ({{short.elo_lo}} to {{short.elo_hi}}) | {{short.evals}} : {{short.base_evals}} |
+
+At equal visits Mikiri is clearly ahead: the intervals do not overlap. Counted in network evaluations it is closer. V-MCTS never searches past 400 visits, so more of its work is already in KataGo's cache, and it ran {{vmcts.evals}} evaluations per move to Mikiri's {{main.evals}}. Interpolating between Mikiri's 160-visit and 200-visit matches puts it at about +135 Elo at {{vmcts.evals}} evaluations, level with V-MCTS. The last row is the controlled test, with both rules on the same ladder so that they differ in nothing else (offline, 1.80x for Mikiri's rule against 1.60x). Rows that say pending are still being played.
 
 ## Match results
 

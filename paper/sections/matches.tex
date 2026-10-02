@@ -23,7 +23,7 @@ A longer ladder does at least as well. With six rungs (50, 200, 400, 800, 1{,}60
 
 Visits understate Mikiri's cost in one respect. A fixed-budget engine re-meets much of its previous tree on the next move and finds those evaluations cached. Mikiri's searches vary in size, so less carries over, and it runs more network evaluations per visit. We therefore reran the match with Mikiri granted fewer visits. At a grant of 160 it averaged \strictVisits{} visits per move, \strictRestart{} with every restarted search counted, and \strictEvals{} network evaluations to KataGo's \strictBaseEvals. It scored \strictScore\% over \strictGames{} games (\strictRecord), a gain of $\strictElo$ Elo ($\strictEloLo$ to $\strictEloHi$). At a grant of 140 it averaged \leanVisits{} visits, \leanRestart{} restart visits, and \leanEvals{} evaluations to KataGo's \leanBaseEvals, and gained $\leanElo$ Elo ($\leanEloLo$ to $\leanEloHi$) over \leanGames{} games.
 
-Figure~\ref{fig:elo} places these results against the uniform curve under all three measures of compute. Both Mikiri runs lie above the curve under each. The comparison at equal evaluations is direct: Mikiri in the main match and KataGo at 283 visits run \mainEvals{} and \unirootEvals{} evaluations per move and gain $\mainElo$ and $\unirootElo$ Elo.
+Figure~\ref{fig:elo} places these results against the uniform curve under all three measures of compute. Every Mikiri run lies above the curve under each. The figure also shows the prior rules of Section~\ref{sec:priorplay}. The comparison at equal evaluations is direct: Mikiri in the main match and KataGo at 283 visits run \mainEvals{} and \unirootEvals{} evaluations per move and gain $\mainElo$ and $\unirootElo$ Elo.
 
 \begin{figure}[t]
 \centering
@@ -39,15 +39,18 @@ The ladder dataset gives a forecast that can be checked. For each run we take th
 \begin{table}[t]
 \centering\small
 \input{tables/prediction}
-\caption{Elo forecast from the offline regret analysis, against the Elo measured in play, for the stopper against KataGo at 200 visits.}
+\caption{Elo forecast from the offline regret analysis, against the Elo measured in play, for stopping rules against KataGo at 200 visits.}
 \label{tab:prediction}
 \end{table}
 
-For the four-rung match at 200 visits the forecast is within nine Elo of the result, and for the six-rung ladder within three. At 160 visits it is about 30 Elo too high, outside the measured interval. The forecast orders the three configurations correctly. Regret measured on self-play positions is a usable guide to match strength, good to a few tens of Elo, which makes the ladder dataset a cheap way to choose among stopping rules before playing any games.
+For the four-rung match at 200 visits the forecast is within nine Elo of the result, and for the six-rung ladder within three. At 160 visits it is about 30 Elo too high, outside the measured interval. For the V-MCTS rule of Section~\ref{sec:priorplay}, forecast from its own calibration on the ladder dataset, it is ten Elo too high and inside the interval. The forecast orders all four configurations correctly. Regret measured on self-play positions is a usable guide to match strength, good to a few tens of Elo, which makes the ladder dataset a cheap way to choose among stopping rules before playing any games.
 
 \subsection{Prior rules in play}
+\label{sec:priorplay}
 
-Section~\ref{sec:baselines} compares ten published stopping rules offline. We packaged the two strongest so that they run in the same player, under the same controller, at the same 200-visit budget. The V-MCTS rule \citep{ye2022spending}, with the authors' constants, gains $\vmctsElo$ Elo ($\vmctsEloLo$ to $\vmctsEloHi$) over \vmctsGames{} games. The DS-MCTS-style classifier \citep{lan2021learning} gains $\dsmctsElo$ Elo ($\dsmctsEloLo$ to $\dsmctsEloHi$) over \dsmctsGames{} games.
+Section~\ref{sec:baselines} compares ten published stopping rules offline. We packaged the two strongest so that they run in the same player, under the same controller, at the same 200-visit budget. The V-MCTS rule \citep{ye2022spending}, with the authors' constants and their ladder of checkpoints up to 400 visits, gains $\vmctsElo$ Elo ($\vmctsEloLo$ to $\vmctsEloHi$) over \vmctsGames{} games at \vmctsVisits{} visits per move. The DS-MCTS-style classifier \citep{lan2021learning} gains $\dsmctsElo$ Elo ($\dsmctsEloLo$ to $\dsmctsEloHi$) over \dsmctsGames{} games.
+
+At equal visits Mikiri is ahead of V-MCTS: $\mainElo$ and $\longElo$ against $\vmctsElo$, with intervals that do not overlap. Network evaluations tell a closer story. V-MCTS ran \vmctsEvals{} evaluations per move to KataGo's \vmctsBaseEvals, and Mikiri's four-rung ladder ran \mainEvals. Mikiri's ladder reaches 3{,}200 visits, and its deepest searches meet fewer cached positions than searches capped at 400. Interpolating between Mikiri's matches at 160 and 200 visits (\strictEvals{} and \mainEvals{} evaluations, $\strictElo$ and $\mainElo$ Elo) puts it at about $+135$ at \vmctsEvals{} evaluations, level with V-MCTS. On this evidence Mikiri is the better rule per visit and the two are indistinguishable per network evaluation. Two further matches test this directly. In the first, Mikiri's stopper runs on V-MCTS's own ladder (50, 100, 200, 400), where it reaches 1.80 offline to V-MCTS's 1.60, so that the two rules differ in nothing else: it gains $\shortElo$ Elo ($\shortEloLo$ to $\shortEloHi$) at \shortEvals{} evaluations per move. In the second, the four-rung ladder is granted 175 visits to bring its evaluations close to those of V-MCTS: it gains $\midElo$ Elo ($\midEloLo$ to $\midEloHi$) at \midEvals{} evaluations per move.
 
 \subsection{In-game ablations}
 

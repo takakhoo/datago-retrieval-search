@@ -11,7 +11,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from figures import BLUE, GRID, INK, MUTED, ORANGE, SURFACE, save  # noqa: F401  (sets rcParams)
+from figures import AQUA, BLUE, GRID, INK, MUTED, ORANGE, SURFACE, save  # noqa: F401  (sets rcParams)
 
 
 def load(results: Path) -> dict[str, dict]:
@@ -38,6 +38,8 @@ def describe(name: str, s: dict) -> str:
         label = f"V-MCTS rule (Ye et al. 2022) in the same player, {grant:g}-visit grant"
     elif "baseline_dsmcts" in str(c.get("stopper")):
         label = f"DS-MCTS-style rule (Lan et al. 2021) in the same player, {grant:g}-visit grant"
+    if str(c.get("path")) == "50,100,200,400" and "baseline_" not in str(c.get("stopper")):
+        label += ", same ladder as V-MCTS"
     rungs = len(str(c.get("path", "")).split(","))
     if rungs == 6:
         label += ", six-rung ladder"
@@ -86,33 +88,46 @@ def fig_elo_compute(rows: list[dict], out: Path, budget: int = 200) -> None:
     rows = [r for r in rows if r["baseline"] == f"KataGo {budget}" and r["rows"]
             and "paired" not in r["player"] and "board" not in r["player"]]
     uni = sorted((r for r in rows if r["run"].startswith("uni_")), key=lambda r: r["visits"])
-    # The figure shows the stopping rule alone on the standard ladder; memory and
-    # ladder variants are in the table.
-    dg = [r for r in rows if r["run"] in ("main_200", "main_stopper_160", "main_140")]
+    # Each group is drawn with its own marker so identity never rests on colour alone.
+    groups = [
+        ("Mikiri, four-rung ladder", ("main_140", "main_stopper_160", "main_175", "main_200"), BLUE, "D", True),
+        ("Mikiri, six-rung ladder", ("long_200",), BLUE, "D", False),
+        ("Mikiri on the V-MCTS ladder", ("short_200",), BLUE, "s", False),
+        ("V-MCTS rule (Ye et al.)", ("vmcts_200",), AQUA, "s", True),
+        ("DS-MCTS-style rule (Lan et al.)", ("dsmcts_200",), AQUA, "^", True),
+    ]
+    by_run = {r["run"]: r for r in rows}
     measures = [("visits", "base_visits", "Visits per move"),
                 ("restart", "base_visits", "Visits per move, every restart counted"),
                 ("rows", "base_rows", "Network evaluations per move")]
-    fig, axes = plt.subplots(1, 3, figsize=(12.6, 3.9), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(12.6, 4.2), sharey=True)
     for ax, (key, base, label) in zip(axes, measures):
         ux = [r[key] / r[base] for r in uni]
         ax.plot(ux, [r["elo"] for r in uni], color=ORANGE, marker="o", markersize=5,
                 label="KataGo, uniform budget")
         for r in uni:
             ax.plot([r[key] / r[base]] * 2, [r["elo_lo"], r["elo_hi"]], color=ORANGE, linewidth=1)
-        for i, r in enumerate(dg):
-            x = r[key] / r[base]
-            ax.plot([x, x], [r["elo_lo"], r["elo_hi"]], color=BLUE, linewidth=1.2)
-            ax.plot([x], [r["elo"]], color=BLUE, marker="D", markersize=6, linestyle="none",
-                    label="Mikiri" if i == 0 else None)
+        for name, runs, colour, marker, filled in groups:
+            first = True
+            for run in runs:
+                r = by_run.get(run)
+                if r is None:
+                    continue
+                x = r[key] / r[base]
+                ax.plot([x, x], [r["elo_lo"], r["elo_hi"]], color=colour, linewidth=1.2)
+                ax.plot([x], [r["elo"]], color=colour, marker=marker, markersize=6.5, linestyle="none",
+                        markerfacecolor=colour if filled else SURFACE, markeredgewidth=1.6,
+                        label=name if first else None)
+                first = False
         ax.axhline(0, color=MUTED, linewidth=0.8)
         ax.set_xscale("log")
-        ticks = [0.5, 0.7, 1.0, 1.4, 2.0]
+        ticks = [0.5, 0.7, 1.0, 1.4, 2.0, 2.8]
         ax.set_xticks(ticks)
         ax.set_xticklabels([f"{t:g}x" for t in ticks])
         ax.minorticks_off()
         ax.set_xlabel(f"{label}\n(relative to KataGo at {budget} visits)")
     axes[0].set_ylabel(f"Elo vs KataGo at {budget} visits")
-    axes[0].legend(loc="upper left")
+    axes[0].legend(loc="lower right", fontsize=8)
     axes[0].set_title("Strength against compute, three ways of counting")
     save(fig, out, "elo_vs_compute")
 

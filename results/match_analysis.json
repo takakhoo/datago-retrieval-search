@@ -2,7 +2,7 @@
  "prediction": [
   {
    "run": "main_stopper_160",
-   "ladder": "four-rung",
+   "ladder": "Mikiri, four-rung",
    "visits": 160.0641235092305,
    "offline_regret": 0.008239521813843385,
    "equivalent_uniform_visits": 296.7066478838745,
@@ -13,7 +13,7 @@
   },
   {
    "run": "main_200",
-   "ladder": "four-rung",
+   "ladder": "Mikiri, four-rung",
    "visits": 200.39262090131376,
    "offline_regret": 0.007439088837377348,
    "equivalent_uniform_visits": 359.75931788387663,
@@ -24,7 +24,7 @@
   },
   {
    "run": "long_200",
-   "ladder": "six-rung",
+   "ladder": "Mikiri, six-rung",
    "visits": 200.76309620872402,
    "offline_regret": 0.007140789085538788,
    "equivalent_uniform_visits": 387.1566557237724,
@@ -32,6 +32,17 @@
    "measured_elo": 227.55665123012315,
    "measured_lo": 202.63049362317514,
    "measured_hi": 253.59086784817566
+  },
+  {
+   "run": "vmcts_200",
+   "ladder": "V-MCTS rule",
+   "visits": 200.2250637919665,
+   "offline_regret": 0.00802224996978354,
+   "equivalent_uniform_visits": 312.4826218402849,
+   "predicted_elo": 145.23582612766404,
+   "measured_elo": 134.95200708113003,
+   "measured_lo": 107.53812491703204,
+   "measured_hi": 164.06978603561973
   }
  ],
  "colour": {

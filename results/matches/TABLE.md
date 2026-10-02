@@ -11,4 +11,5 @@
 | Mikiri (stopper), 160-visit grant | KataGo 200 | 1000 | 586-325-89 | 0.630 | +93 (+72 to +114) | 160 | 197 | 80 : 74 |
 | Mikiri (memory), 200-visit grant | KataGo 200 | 600 | 276-292-32 | 0.487 | -9 (-37 to +19) | 158 | 158 | 69 : 69 |
 | Mikiri (stopper), 200-visit grant, paired openings, no sampling | KataGo 200 | 800 | 561-183-56 | 0.736 | +178 (+153 to +205) | 200 | 250 | 115 : 96 |
+| V-MCTS rule (Ye et al. 2022) in the same player, 200-visit grant | KataGo 200 | 600 | 395-173-32 | 0.685 | +135 (+108 to +164) | 200 | 350 | 87 : 72 |
 | Mikiri (stopper), 200-visit grant (pilot, early model) | KataGo 200 | 240 | 169-60-11 | 0.727 | +170 (+125 to +219) | 201 | 252 | 96 : 77 |
