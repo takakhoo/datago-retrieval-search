@@ -18,7 +18,9 @@ import time
 from pathlib import Path
 
 from datago.engine import open_katago
-from datago.match import GameConfig, summarize
+import numpy as np
+
+from datago.match import GameConfig, run_match, sample_openings, summarize
 from datago.memory import Memory
 from datago.players import DataGoPlayer, KataGoPlayer, Temperature
 from datago.series import BudgetController, Deepener, Ledger, run_series
@@ -53,6 +55,11 @@ def main() -> None:
     ap.add_argument("--play-share", type=float, default=1.0,
                     help="share of the grant the controller aims to spend during play")
     ap.add_argument("--trace", action="store_true", help="record every move's cost and winrate")
+    ap.add_argument("--paired", type=int, default=0,
+                    help="instead of a series, play this many sampled openings twice with colours swapped")
+    ap.add_argument("--opening-plies", type=int, default=12)
+    ap.add_argument("--greedy", action="store_true",
+                    help="both players always play the engine's top move (no sampling)")
     ap.add_argument("--workers", type=int, default=48)
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
@@ -61,7 +68,7 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     cfg = GameConfig(size=args.size, komi=args.komi, keep_trace=args.trace)
     path = [int(x) for x in args.path.split(",")]
-    temp = Temperature()
+    temp = None if args.greedy else Temperature()
 
     log_d, log_k = out / "datago.katago.log", out / "baseline.katago.log"
     with open(log_d, "w") as ed, open(log_k, "w") as ek:
@@ -102,8 +109,17 @@ def main() -> None:
             if controller:
                 controller(rec)
 
-        records = run_series(datago, katago, cfg, args.games, args.seed, args.workers,
-                             out / "games.jsonl", after, progress)
+        if args.paired:
+            openings = sample_openings(eng_k, args.paired, cfg, args.opening_plies,
+                                       np.random.default_rng(args.seed), workers=args.workers)
+            (out / "openings.json").write_text(json.dumps(openings))
+            print(f"sampled {len(openings)} balanced openings", flush=True)
+            t0 = time.time()
+            records = run_match(datago, katago, cfg, openings, args.seed, args.workers,
+                                out / "games.jsonl", progress, after)
+        else:
+            records = run_series(datago, katago, cfg, args.games, args.seed, args.workers,
+                                 out / "games.jsonl", after, progress)
         elapsed = time.time() - t0
         eng_d.close()
         eng_k.close()

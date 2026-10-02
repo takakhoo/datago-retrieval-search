@@ -162,7 +162,8 @@ def sample_openings(engine: AnalysisEngine, n: int, cfg: GameConfig, plies: int,
 
 def run_match(a: Player, b: Player, cfg: GameConfig, openings: Sequence[Sequence[int]],
               seed: int = 0, workers: int = 32, out_path: str | Path | None = None,
-              progress: Callable[[int, int, GameRecord], None] | None = None) -> list[GameRecord]:
+              progress: Callable[[int, int, GameRecord], None] | None = None,
+              after_game: Callable[[GameRecord], None] | None = None) -> list[GameRecord]:
     """Play every opening twice with colors swapped. Records are appended to out_path as JSONL."""
     jobs = []
     for i, op in enumerate(openings):
@@ -175,7 +176,10 @@ def run_match(a: Player, b: Player, cfg: GameConfig, openings: Sequence[Sequence
 
     def run(j: int) -> GameRecord:
         i, black, white, op = jobs[j]
-        return play_game(black, white, cfg, np.random.default_rng(seeds[j]), op, i)
+        rec = play_game(black, white, cfg, np.random.default_rng(seeds[j]), op, i)
+        if after_game:
+            after_game(rec)
+        return rec
 
     try:
         with ThreadPoolExecutor(workers) as pool:
