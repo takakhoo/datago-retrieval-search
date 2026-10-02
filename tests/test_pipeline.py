@@ -231,3 +231,22 @@ def test_budget_controller_holds_spending_at_the_budget():
         ctl.record(0 if hit else 1.4 * ctl.command * rng.uniform(0.5, 1.5))
     assert ctl.spent / ctl.granted == pytest.approx(1.0, abs=0.02)
     assert 140 < ctl.command < 180
+
+
+def test_virtual_expansion_and_classifier_stoppers_run_in_the_player(engine, tmp_path):
+    from mikiri.stopper import Stopper, TreeEnsemble, VirtualExpansionModel
+    board = Board(7)
+    rng = np.random.default_rng(0)
+    eager = Stopper(VirtualExpansionModel(128, 0.2), 10.0, [16, 32, 64, 128], [1.0, 1.0, 1.0])
+    d = MikiriPlayer(engine, [16, 32, 64, 128], eager, None, temp=None).decide(board, 7.5, rng)
+    # The first rung has no earlier search to compare with, so the earliest stop is the second rung.
+    assert d.visits == 32 and d.counts["rung"] == 1
+    never = Stopper(VirtualExpansionModel(128, 0.2), -1.0, [16, 32, 64, 128], [1.0, 1.0, 1.0])
+    assert MikiriPlayer(engine, [16, 32, 64, 128], never, None, temp=None).decide(board, 7.5, rng).visits == 128
+    eager.save(tmp_path / "v.json")
+    again = Stopper.load(tmp_path / "v.json")
+    assert again.needs_policy and again.model.total == 128
+
+    leaf = {"left": [-1], "right": [-1], "feature": [0], "threshold": [0.0], "value": [0.0]}
+    prob = Stopper(TreeEnsemble(0.0, 1.0, [leaf]), 0.4, [16, 64], sigmoid=True)
+    assert prob.score(np.zeros(1)) == pytest.approx(0.5) and not prob.should_stop(np.zeros(1))

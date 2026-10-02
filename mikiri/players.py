@@ -100,16 +100,19 @@ class MikiriPlayer:
     def search(self, board: Board, komi: float) -> tuple[SearchResult, int, int]:
         """Run the ladder. Returns (final search, restart cost, index of final rung)."""
         prev_x, prev_move, n_changes, restart = None, None, 0, 0
+        prev_res = None
+        want_policy = bool(getattr(self.stopper, "needs_policy", False))
         for j, v in enumerate(self.path):
-            res = self.engine.search(board, v, komi)
+            res = self.engine.search(board, v, komi, include_policy=want_policy)
             restart += res.visits
             if j == len(self.path) - 1 or self.stopper is None:
                 break
             x = extract(res, board)
             t, n_changes = trajectory(prev_x, x, prev_move, res.best.point, n_changes)
-            if self.stopper.should_stop(np.concatenate([x, t]), j):
+            ctx = {"prev": prev_res, "cur": res, "size": board.size}
+            if self.stopper.should_stop(np.concatenate([x, t]), j, ctx):
                 break
-            prev_x, prev_move = x, res.best.point
+            prev_x, prev_move, prev_res = x, res.best.point, res
         return res, restart, j
 
     def decide(self, board: Board, komi: float, rng: np.random.Generator) -> Decision:

@@ -106,6 +106,58 @@ class RuleModel:
         return {"rule": self.rule}
 
 
+class VirtualExpansionModel:
+    """The stopping signal of Ye et al. (2022), for comparison.
+
+    At a checkpoint with k visits it fills the rest of a budget of `total`
+    visits by root UCB with Q frozen, does the same from the previous rung, and
+    returns the L1 distance between the two visit distributions. Search stops
+    when that distance is below the threshold. Checkpoints below r * total are
+    skipped, as in the paper.
+    """
+    needs_policy = True
+
+    def __init__(self, total: int, r: float = 0.2, c1: float = 1.25, c2: float = 19652.0):
+        self.total, self.r, self.c1, self.c2 = total, r, c1, c2
+
+    def _expand(self, P: np.ndarray, N: np.ndarray, Q: np.ndarray) -> np.ndarray:
+        Nh = N.astype(float).copy()
+        for _ in range(max(self.total - int(N.sum()), 0)):
+            s = Nh.sum()
+            ucb = Q + P * np.sqrt(s) / (1 + Nh) * (self.c1 + np.log((s + self.c2 + 1) / self.c2))
+            Nh[int(ucb.argmax())] += 1
+        return Nh / Nh.sum()
+
+    def raw_ctx(self, x: np.ndarray, ctx: dict) -> float:
+        prev, cur = ctx.get("prev"), ctx["cur"]
+        if prev is None or cur.visits < self.r * self.total:
+            return float("inf")
+        size = ctx["size"]
+        points = sorted({m.point for m in cur.moves} | {m.point for m in prev.moves})
+        if cur.policy is not None:
+            pol = np.asarray(cur.policy)
+            extra = [int(i) for i in np.argsort(-pol[: size * size])[:48] if int(i) not in points]
+            points += extra
+            prior = {p: max(float(pol[size * size if p < 0 else p]), 0.0) for p in points}
+        else:
+            prior = {m.point: m.prior for m in cur.moves}
+        P = np.array([prior.get(p, 0.0) for p in points])
+        out = []
+        for res in (cur, prev):
+            stats = {m.point: m for m in res.moves}
+            qmin = min(m.winrate for m in res.moves)
+            N = np.array([stats[p].visits if p in stats else 0 for p in points], dtype=float)
+            Q = np.array([stats[p].winrate if p in stats else qmin for p in points])
+            out.append(self._expand(P, N, Q))
+        return float(np.abs(out[0] - out[1]).sum())
+
+    def raw(self, x: np.ndarray) -> float:
+        raise RuntimeError("virtual expansion needs the search context")
+
+    def to_json(self) -> dict:
+        return {"virtual": {"total": self.total, "r": self.r}}
+
+
 class Stopper:
     """Stop at rung j when scale[j] * predicted_regret < threshold.
 
@@ -116,11 +168,14 @@ class Stopper:
 
     def __init__(self, model: TreeEnsemble, threshold: float, path: list[int],
                  scales: list[float] | None = None, features: list[str] | None = None,
-                 meta: dict | None = None, squared: bool = False):
+                 meta: dict | None = None, squared: bool = False, sigmoid: bool = False):
         self.model, self.threshold, self.path = model, threshold, list(path)
         # A model fitted to the square root of regret is less swayed by a few huge
         # blunders. Its output is squared back before use.
         self.squared = squared
+        # A classifier's logit is mapped to a probability before any scaling.
+        self.sigmoid = sigmoid
+        self.needs_policy = bool(getattr(model, "needs_policy", False))
         self.scales = list(scales) if scales is not None else [1.0] * (len(path) - 1)
         self.features = features or STOPPER_FEATURES
         self.meta = meta or {}
@@ -134,27 +189,34 @@ class Stopper:
         steps = np.diff(np.asarray(path, dtype=float))
         return (steps[0] / steps).tolist()
 
-    def score(self, x: np.ndarray, rung: int = 0) -> float:
-        raw = self.model.raw(x)
+    def score(self, x: np.ndarray, rung: int = 0, ctx: dict | None = None) -> float:
+        raw = self.model.raw_ctx(x, ctx) if hasattr(self.model, "raw_ctx") else self.model.raw(x)
         if self.squared:
             raw = max(raw, 0.0) ** 2
+        if self.sigmoid:
+            raw = 1.0 / (1.0 + np.exp(-raw))
         return self.scales[rung] * raw
 
-    def should_stop(self, x: np.ndarray, rung: int = 0) -> bool:
-        return self.score(x, rung) < self.threshold
+    def should_stop(self, x: np.ndarray, rung: int = 0, ctx: dict | None = None) -> bool:
+        return self.score(x, rung, ctx) < self.threshold
 
     def save(self, path: str | Path) -> None:
         Path(path).write_text(json.dumps({
             "version": 2, "threshold": self.threshold, "path": self.path, "scales": self.scales,
-            "squared": self.squared,
+            "squared": self.squared, "sigmoid": self.sigmoid,
             "features": self.features, "meta": self.meta, "model": self.model.to_json()}))
 
     @classmethod
     def load(cls, path: str | Path, threshold: float | None = None) -> "Stopper":
         d = json.loads(Path(path).read_text())
         m = d["model"]
-        model = RuleModel(m["rule"]) if "rule" in m else TreeEnsemble(m["init"], m["lr"], m["trees"])
+        if "rule" in m:
+            model = RuleModel(m["rule"])
+        elif "virtual" in m:
+            model = VirtualExpansionModel(m["virtual"]["total"], m["virtual"]["r"])
+        else:
+            model = TreeEnsemble(m["init"], m["lr"], m["trees"])
         return cls(model,
                    d["threshold"] if threshold is None else threshold,
                    d["path"], d.get("scales"), d["features"], d.get("meta"),
-                   bool(d.get("squared", False)))
+                   bool(d.get("squared", False)), bool(d.get("sigmoid", False)))

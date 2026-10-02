@@ -31,7 +31,7 @@ class MarginStopper:
     """Hand-written stand-in used only with the fake engine: stop when the best
     move's lower confidence bound clears every rival."""
 
-    def should_stop(self, x: np.ndarray, rung: int = 0) -> bool:
+    def should_stop(self, x: np.ndarray, rung: int = 0, ctx: dict | None = None) -> bool:
         return x[_LCB] > 0.0
 
 
