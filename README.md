@@ -14,7 +14,7 @@ Mikiri (見切り) is Japanese for the judgment that you have seen enough.
 
 ## The result
 
-5,600 recorded games against KataGo on 19x19, both sides running the same network:
+7,200 recorded games against KataGo on 19x19, both sides running the same network:
 
 | Against KataGo at 200 visits per move | Games | Record (W-L-D) | Elo gain (95% interval) |
 |---|---|---|---|
@@ -22,6 +22,7 @@ Mikiri (見切り) is Japanese for the judgment that you have seen enough.
 | **Mikiri at the same 200 visits, four-rung ladder** | 1,000 | 728-196-76 | **+206** (+181 to +232) |
 | **Mikiri at 160 visits, 20% fewer** (four-rung ladder) | 1,000 | 586-325-89 | **+93** (+72 to +114) |
 | **Mikiri with move sampling switched off** (paired openings, four-rung ladder) | 800 | 561-183-56 | **+178** (+153 to +205) |
+| **Mikiri with four-rung ladder and memory** | 1,200 | 908-219-73 | **+227** (+204 to +250) |
 | KataGo given twice the visits, for scale | 400 | 310-73-17 | +237 (+198 to +280) |
 | KataGo against itself, as a check on the harness | 400 | 185-183-32 | +2 (-30 to +35) |
 
@@ -119,6 +120,8 @@ When the shallow and deep search disagree, the most similar stored position has 
 
 In play, memory alone (no stopper) served 21% of Mikiri's moves over 600 games with no change in strength (-9 Elo, -37 to +19). It saves search visits. It does not save network evaluations (69 per move against 69), because KataGo already caches evaluations of positions it has seen. The strength comes from the stopping rule.
 
+With memory and the four-rung stopper together, the controller reinvests the visits that memory saves. Over 1,200 games that system gains +227 Elo (+204 to +250), with 21% of its moves served from memory, against +206 for the stopper alone. The two intervals overlap, and the combined system runs more network evaluations (109 per move against 99), so memory adds little on top of the stopper.
+
 ## Against prior stopping rules
 
 We re-implemented ten published rules for deciding how long to search, from their papers and source code, and ran them on the same dataset with the same scoring. Each threshold was swept so every rule is shown at its best. Numbers are how many times more visits uniform search needs to match the rule at a 200-visit mean budget (above 1.0 is a gain), with 95% intervals.
@@ -156,13 +159,15 @@ Compute is reported three ways because the answer depends on how you count. **Vi
 | KataGo 200 visits | KataGo 200 | 400 | 185-183-32 | 0.502 | +2 (-30 to +35) | 200 | 200 | 76 : 76 |
 | KataGo 283 visits | KataGo 200 | 400 | 247-126-27 | 0.651 | +108 (+76 to +143) | 283 | 283 | 98 : 73 |
 | KataGo 400 visits | KataGo 200 | 400 | 310-73-17 | 0.796 | +237 (+198 to +280) | 400 | 400 | 132 : 73 |
+| Mikiri (stopper), 100-visit grant | KataGo 100 | 400 | 262-119-19 | 0.679 | +130 (+95 to +167) | 100 | 117 | 50 : 40 |
+| Mikiri (stopper + memory), 200-visit grant | KataGo 200 | 1200 | 908-219-73 | 0.787 | +227 (+204 to +250) | 201 | 255 | 109 : 76 |
 | Mikiri (stopper), 200-visit grant, six-rung ladder | KataGo 200 | 600 | 471-87-42 | 0.820 | +263 (+230 to +301) | 201 | 305 | 100 : 76 |
 | Mikiri (stopper), 200-visit grant | KataGo 200 | 1000 | 728-196-76 | 0.766 | +206 (+181 to +232) | 200 | 251 | 99 : 74 |
 | Mikiri (stopper), 160-visit grant | KataGo 200 | 1000 | 586-325-89 | 0.630 | +93 (+72 to +114) | 160 | 197 | 80 : 74 |
 | Mikiri (memory), 200-visit grant | KataGo 200 | 600 | 276-292-32 | 0.487 | -9 (-37 to +19) | 158 | 158 | 69 : 69 |
 | Mikiri (stopper), 200-visit grant, paired openings, no sampling | KataGo 200 | 800 | 561-183-56 | 0.736 | +178 (+153 to +205) | 200 | 250 | 115 : 96 |
 
-*More runs are still in progress and will be added to this table: the full system with memory, other budgets, the b28 network, and smaller boards.*
+*More runs are still in progress and will be added to this table: head-to-head matches for the two strongest prior rules, other budgets, the b28 network, and smaller boards.*
 
 The paired-openings row is a control. Both players always play their engine's top move from 400 balanced openings, each played twice with colors swapped, so the gain cannot come from how moves are sampled.
 

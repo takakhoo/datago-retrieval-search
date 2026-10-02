@@ -83,13 +83,13 @@ With memory alone and no stopper, Mikiri is KataGo with an opening book that fil
 
 The saving does not carry over to network evaluations. Mikiri ran \memonlyEvals{} evaluations per move and KataGo \memonlyBaseEvals. KataGo keeps a cache of network evaluations for as long as its process lives, so a baseline that plays hundreds of games in one process has already paid for the positions that recur: its opening searches cost visits but few new evaluations. Exact memory removes search work that the evaluation cache had already made cheap. It would save evaluations for an engine that restarts between games, and it saves the tree-search overhead in any case, but in this harness its effect on the dominant cost is nil.
 
-The full system combines memory with the stopper and lets the controller reinvest what memory saves. Over \fullGames{} games it scores \fullScore\% (\fullRecord), $\fullElo$ Elo ($\fullEloLo$ to $\fullEloHi$), at \fullVisits{} visits and \fullEvals{} evaluations per move against \fullBaseEvals, with \fullHitRate\% of moves served from a memory that grew to \fullMemory{} positions.
+The full system combines memory with the stopper and lets the controller reinvest what memory saves. Over \fullGames{} games it scores \fullScore\% (\fullRecord), $\fullElo$ Elo ($\fullEloLo$ to $\fullEloHi$), at \fullVisits{} visits and \fullEvals{} evaluations per move against \fullBaseEvals, with \fullHitRate\% of moves served from a memory that grew to \fullMemory{} positions. The stopper alone gained $\mainElo$ ($\mainEloLo$ to $\mainEloHi$) at \mainEvals{} evaluations per move. The intervals overlap, and the reinvested visits are new searches that the evaluation cache does not cover, which is why evaluations rise. Memory adds little on top of the stopper in this setting.
 
 \subsection{Other budgets, another network, other boards}
 
 The same model, trained once on 19$\times$19 positions from the b18 network, was run without retraining in further settings.
 \begin{itemize}
-\item \textbf{Budgets.} Against KataGo at 100, 400, and 800 visits, at matched visits, Mikiri gains $\bhundredElo$ ($\bhundredEloLo$ to $\bhundredEloHi$), $\bfourElo$ ($\bfourEloLo$ to $\bfourEloHi$), and $\beightElo$ ($\beightEloLo$ to $\beightEloHi$) Elo.
+\item \textbf{Budgets.} Against KataGo at 100, 400, and 800 visits, at matched visits, Mikiri gains $\bhundredElo$ ($\bhundredEloLo$ to $\bhundredEloHi$), $\bfourElo$ ($\bfourEloLo$ to $\bfourEloHi$), and $\beightElo$ ($\beightEloLo$ to $\beightEloHi$) Elo. At 100 visits the first rung of the ladder is already half the budget, which leaves the rule less to reallocate than at 200.
 \item \textbf{A stronger network.} On the 28-block network, with both players using it, Mikiri gains $\bignetElo$ ($\bignetEloLo$ to $\bignetEloHi$) Elo.
 \item \textbf{Smaller boards.} On 13$\times$13 and 9$\times$9 it gains $\thirteenElo$ ($\thirteenEloLo$ to $\thirteenEloHi$) and $\nineElo$ ($\nineEloLo$ to $\nineEloHi$) Elo.
 \end{itemize}

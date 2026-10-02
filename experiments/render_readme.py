@@ -51,8 +51,8 @@ if train.exists():
 text = text.replace("{{training_sentence}}", sentence)
 pending_runs = [k for k in ("memonly", "full", "long", "bhundred", "bfour", "beight", "bignet", "thirteen", "nine", "lean")
                 if RUNS[k] not in rows]
-note = ("*More runs are still in progress and will be added to this table: the full system with memory, other budgets, "
-        "the b28 network, and smaller boards.*\n\n" if pending_runs else "")
+note = ("*More runs are still in progress and will be added to this table: head-to-head matches for the two strongest "
+        "prior rules, other budgets, the b28 network, and smaller boards.*\n\n" if pending_runs else "")
 text = text.replace("{{progress_note}}", note)
 total = sum(r["games"] for name, r in rows.items() if not name.startswith("pilot"))
 text = text.replace("{{total_games}}", f"{total:,}")

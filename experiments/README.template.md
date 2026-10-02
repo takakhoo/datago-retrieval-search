@@ -22,6 +22,7 @@ Mikiri (見切り) is Japanese for the judgment that you have seen enough.
 | **Mikiri at the same 200 visits, four-rung ladder** | {{main.games}} | {{main.wld}} | **{{main.elo}}** ({{main.elo_lo}} to {{main.elo_hi}}) |
 | **Mikiri at {{strict.visits}} visits, 20% fewer** (four-rung ladder) | {{strict.games}} | {{strict.wld}} | **{{strict.elo}}** ({{strict.elo_lo}} to {{strict.elo_hi}}) |
 | **Mikiri with move sampling switched off** (paired openings, four-rung ladder) | {{paired.games}} | {{paired.wld}} | **{{paired.elo}}** ({{paired.elo_lo}} to {{paired.elo_hi}}) |
+| **Mikiri with four-rung ladder and memory** | {{full.games}} | {{full.wld}} | **{{full.elo}}** ({{full.elo_lo}} to {{full.elo_hi}}) |
 | KataGo given twice the visits, for scale | {{unidouble.games}} | {{unidouble.wld}} | {{unidouble.elo}} ({{unidouble.elo_lo}} to {{unidouble.elo_hi}}) |
 | KataGo against itself, as a check on the harness | {{unisame.games}} | {{unisame.wld}} | {{unisame.elo}} ({{unisame.elo_lo}} to {{unisame.elo_hi}}) |
 
@@ -118,6 +119,8 @@ The original idea behind this project was *approximate* retrieval: find similar 
 When the shallow and deep search disagree, the most similar stored position has the right move 5.5% of the time. The policy network's own second choice has it 43% of the time. Transfer is reliable only when the stored position is the same position, which the exact key already finds.
 
 In play, memory alone (no stopper) served {{memonly.hit}}% of Mikiri's moves over {{memonly.games}} games with no change in strength ({{memonly.elo}} Elo, {{memonly.elo_lo}} to {{memonly.elo_hi}}). It saves search visits. It does not save network evaluations ({{memonly.evals}} per move against {{memonly.base_evals}}), because KataGo already caches evaluations of positions it has seen. The strength comes from the stopping rule.
+
+With memory and the four-rung stopper together, the controller reinvests the visits that memory saves. Over {{full.games}} games that system gains {{full.elo}} Elo ({{full.elo_lo}} to {{full.elo_hi}}), with {{full.hit}}% of its moves served from memory, against {{main.elo}} for the stopper alone. The two intervals overlap, and the combined system runs more network evaluations ({{full.evals}} per move against {{main.evals}}), so memory adds little on top of the stopper.
 
 ## Against prior stopping rules
 

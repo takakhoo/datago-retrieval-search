@@ -26,11 +26,18 @@ for run in sorted(p for p in src.iterdir() if (p / "summary.json").exists()):
     for key in ("out", "gpu", "workers", "memory_file"):
         summary.get("config", {}).pop(key, None)
     (out / "summary.json").write_text(json.dumps(summary, indent=1))
-    n = 0
-    with open(run / "games.jsonl") as f, gzip.open(out / "games.jsonl.gz", "wt", compresslevel=9) as g:
+    # A run being extended has more games on disk than its summary covers. Keep the two in step,
+    # and write the archive without a timestamp so an unchanged run packs to the same bytes.
+    lines = []
+    with open(run / "games.jsonl") as f:
         for line in f:
+            if len(lines) >= summary.get("games", 10 ** 9):
+                break
             rec = json.loads(line)
             rec.pop("trace", None)
-            g.write(json.dumps(rec, separators=(",", ":")) + "\n")
-            n += 1
+            lines.append(json.dumps(rec, separators=(",", ":")) + "\n")
+    n = len(lines)
+    with open(out / "games.jsonl.gz", "wb") as raw_out, gzip.GzipFile(
+            filename="", fileobj=raw_out, mode="wb", compresslevel=9, mtime=0) as g:
+        g.write("".join(lines).encode())
     print(f"{run.name}: {n} games, score {summary.get('score'):.3f}")

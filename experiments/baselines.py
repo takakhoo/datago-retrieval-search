@@ -86,6 +86,45 @@ def virtual_policy(P, N, Q, total: int) -> np.ndarray:
     return Nh / Nh.sum(axis=1, keepdims=True)
 
 
+def root_signals(P, N, Q, rungs) -> dict[str, np.ndarray]:
+    """KLD gain (lc0), VOI bound (Hay et al.) and BAI gap (Kaufmann and Koolen) at every rung."""
+    n, K = N.shape[:2]
+    rows = np.arange(n)
+    share = N / np.maximum(N.sum(axis=2, keepdims=True), 1)
+    visited = N > 0
+    best_q = np.where(visited, Q, -np.inf).argmax(axis=2)
+    prior = P / np.maximum(P.sum(axis=1, keepdims=True), 1e-9)
+    kld = np.zeros((n, K))
+    for k in range(K):
+        old = prior if k == 0 else share[:, k - 1]
+        new = np.maximum(share[:, k], 1e-4)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            term = np.where(old > 0, old * np.log(old / new), 0.0)
+        kld[:, k] = term.sum(axis=1) / (rungs[k] - (rungs[k - 1] if k else 0))
+
+    # Hay et al.: stop when both value-of-information bounds are below c.
+    voi = np.zeros((n, K))
+    bai = np.zeros((n, K))
+    for k in range(K):
+        a = best_q[:, k]
+        xa, na = Q[rows, k, a], np.maximum(N[rows, k, a], 1)
+        others = visited[:, k].copy()
+        others[rows, a] = False
+        xo = np.where(others, Q[:, k], -np.inf)
+        b = xo.argmax(axis=1)
+        xb = np.where(others.any(axis=1), Q[rows, k, b], 0.0)
+        t1 = xb / na * 2 * np.exp(-PHI * (xa - xb) ** 2 * na)
+        ni = np.maximum(N[:, k], 1)
+        t2 = np.where(others, (1 - xa)[:, None] / ni * 2 * np.exp(-PHI * (xa[:, None] - Q[:, k]) ** 2 * ni), 0.0)
+        voi[:, k] = np.maximum(t1, t2.max(axis=1))
+        beta = np.log(np.log(np.e * np.maximum(N[:, k], 1)) / 0.1)
+        rad = np.sqrt(np.maximum(beta, 0) / (2 * np.maximum(N[:, k], 1)))
+        upper = np.where(others, Q[:, k] + rad, -np.inf).max(axis=1)
+        lower = xa - rad[rows, a]
+        bai[:, k] = np.where(others.any(axis=1), upper - lower, 0.0)
+    return {"kld": kld, "voi": voi, "bai": bai}
+
+
 def frontier(lad, path, scores, points=200):
     out = []
     for t in np.unique(np.quantile(scores[:, path[:-1]].ravel(), np.linspace(0, 1, points))):
@@ -213,35 +252,8 @@ def main() -> None:
             add(label, stop, list(range(top + 1)), f"Nmax {rungs[top]}")
 
     # --- threshold rules on consecutive rungs ---
-    prior = P / np.maximum(P.sum(axis=1, keepdims=True), 1e-9)
-    kld = np.zeros((n, K))
-    for k in range(K):
-        old = prior if k == 0 else share[:, k - 1]
-        new = np.maximum(share[:, k], 1e-4)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            term = np.where(old > 0, old * np.log(old / new), 0.0)
-        kld[:, k] = term.sum(axis=1) / (rungs[k] - (rungs[k - 1] if k else 0))
-
-    # Hay et al.: stop when both value-of-information bounds are below c.
-    voi = np.zeros((n, K))
-    bai = np.zeros((n, K))
-    for k in range(K):
-        a = best_q[:, k]
-        xa, na = Q[rows, k, a], np.maximum(N[rows, k, a], 1)
-        others = visited[:, k].copy()
-        others[rows, a] = False
-        xo = np.where(others, Q[:, k], -np.inf)
-        b = xo.argmax(axis=1)
-        xb = np.where(others.any(axis=1), Q[rows, k, b], 0.0)
-        t1 = xb / na * 2 * np.exp(-PHI * (xa - xb) ** 2 * na)
-        ni = np.maximum(N[:, k], 1)
-        t2 = np.where(others, (1 - xa)[:, None] / ni * 2 * np.exp(-PHI * (xa[:, None] - Q[:, k]) ** 2 * ni), 0.0)
-        voi[:, k] = np.maximum(t1, t2.max(axis=1))
-        beta = np.log(np.log(np.e * np.maximum(N[:, k], 1)) / 0.1)
-        rad = np.sqrt(np.maximum(beta, 0) / (2 * np.maximum(N[:, k], 1)))
-        upper = np.where(others, Q[:, k] + rad, -np.inf).max(axis=1)
-        lower = xa - rad[rows, a]
-        bai[:, k] = np.where(others.any(axis=1), upper - lower, 0.0)
+    sig = root_signals(P, N, Q, rungs)
+    kld, voi, bai = sig["kld"], sig["voi"], sig["bai"]
 
     # --- V-MCTS: virtually expanded policies at k and k/2 for each maximum budget ---
     vm_points = []
