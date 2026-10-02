@@ -247,6 +247,25 @@
   "hit_rate": 0.0
  },
  {
+  "run": "rule_lcb_200",
+  "player": "Mikiri (hand-written LCB rule), 200-visit grant",
+  "baseline": "KataGo 200",
+  "games": 600,
+  "wld": "349-201-50",
+  "score": 0.6233333333333333,
+  "score_lo": 0.5866666666666667,
+  "score_hi": 0.6591666666666667,
+  "elo": 87.50526522123164,
+  "elo_lo": 60.83639306076589,
+  "elo_hi": 114.58127019613391,
+  "visits": 200.36834151870042,
+  "restart": 250.4911220249339,
+  "base_visits": 200.0,
+  "rows": 99.83469156457446,
+  "base_rows": 74.8895883320303,
+  "hit_rate": 0.0
+ },
+ {
   "run": "short_200",
   "player": "Mikiri (stopper), 200-visit grant, same ladder as V-MCTS",
   "baseline": "KataGo 200",

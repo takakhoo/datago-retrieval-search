@@ -14,7 +14,7 @@ Mikiri (見切り) is Japanese for the judgment that you have seen enough.
 
 ## The result
 
-10,000 recorded games against KataGo on 19x19, both sides running the same network:
+10,600 recorded games against KataGo on 19x19, both sides running the same network:
 
 | Against KataGo at 200 visits per move | Games | Record (W-L-D) | Elo gain (95% interval) |
 |---|---|---|---|
@@ -81,7 +81,7 @@ That division is the most important design choice in the project.
 
 ![The same stopping signals with and without the rate rule](results/figures/rate_rule.png)
 
-The bars show how many times more visits uniform search needs to match each rule (above 1.0 is a gain). With a flat threshold, the entropy gate from v1 of this project is worse than no gate, and random stopping is far worse. With the rate rule, even a hand-written confidence margin beats uniform search by 1.45x, and the learned model reaches 1.82x.
+The bars show how many times more visits uniform search needs to match each rule (above 1.0 is a gain). With a flat threshold, the entropy gate from v1 of this project is worse than no gate, and random stopping is far worse. With the rate rule, even a hand-written confidence margin beats uniform search by 1.45x, and the learned model reaches 1.82x. The same order holds in play: on the four-rung ladder at 200 visits, the hand-written margin with the rate rule gains +88 Elo (+61 to +115) over 600 games, the learned model +206, and v1's entropy gate with a flat threshold pending (pending to pending).
 
 ### 4. Training the stopper
 
@@ -188,6 +188,7 @@ Compute is reported three ways because the answer depends on how you count. **Vi
 | Mikiri (stopper), 160-visit grant | KataGo 200 | 1000 | 586-325-89 | 0.630 | +93 (+72 to +114) | 160 | 197 | 80 : 74 |
 | Mikiri (memory), 200-visit grant | KataGo 200 | 600 | 276-292-32 | 0.487 | -9 (-37 to +19) | 158 | 158 | 69 : 69 |
 | Mikiri (stopper), 200-visit grant, paired openings, no sampling | KataGo 200 | 800 | 561-183-56 | 0.736 | +178 (+153 to +205) | 200 | 250 | 115 : 96 |
+| Mikiri (hand-written LCB rule), 200-visit grant | KataGo 200 | 600 | 349-201-50 | 0.623 | +88 (+61 to +115) | 200 | 250 | 100 : 75 |
 | Mikiri (stopper), 200-visit grant, same ladder as V-MCTS | KataGo 200 | 600 | 404-160-36 | 0.703 | +150 (+121 to +180) | 200 | 350 | 92 : 74 |
 | V-MCTS rule (Ye et al. 2022) in the same player, 200-visit grant | KataGo 200 | 600 | 395-173-32 | 0.685 | +135 (+108 to +164) | 200 | 350 | 87 : 72 |
 

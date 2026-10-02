@@ -81,7 +81,7 @@ That division is the most important design choice in the project.
 
 ![The same stopping signals with and without the rate rule](results/figures/rate_rule.png)
 
-The bars show how many times more visits uniform search needs to match each rule (above 1.0 is a gain). With a flat threshold, the entropy gate from v1 of this project is worse than no gate, and random stopping is far worse. With the rate rule, even a hand-written confidence margin beats uniform search by 1.45x, and the learned model reaches 1.82x.
+The bars show how many times more visits uniform search needs to match each rule (above 1.0 is a gain). With a flat threshold, the entropy gate from v1 of this project is worse than no gate, and random stopping is far worse. With the rate rule, even a hand-written confidence margin beats uniform search by 1.45x, and the learned model reaches 1.82x. The same order holds in play: on the four-rung ladder at 200 visits, the hand-written margin with the rate rule gains {{rulelcb.elo}} Elo ({{rulelcb.elo_lo}} to {{rulelcb.elo_hi}}) over {{rulelcb.games}} games, the learned model {{main.elo}}, and v1's entropy gate with a flat threshold {{vonegate.elo}} ({{vonegate.elo_lo}} to {{vonegate.elo_hi}}).
 
 ### 4. Training the stopper
 
