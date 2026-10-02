@@ -47,7 +47,9 @@ Figure~\ref{fig:profile} shows DataGo's spending in the main match. It uses abou
 
 \subsection{Memory}
 
-With memory alone and no stopper, DataGo is KataGo with an opening book that fills itself. Over \memonlyGames{} games it served \memonlyHitRate\% of its moves from memory (\memonlyHitLate\% in the second half of the series), averaged \memonlyVisits{} visits per move, and scored \memonlyScore\% ($\memonlyElo$ Elo, $\memonlyEloLo$ to $\memonlyEloHi$).
+With memory alone and no stopper, DataGo is KataGo with an opening book that fills itself. Over \memonlyGames{} games it served \memonlyHitRate\% of its moves from memory (\memonlyHitLate\% in the second half of the series, from \memonlyMemory{} stored positions), averaged \memonlyVisits{} visits per move, and scored \memonlyScore\% ($\memonlyElo$ Elo, $\memonlyEloLo$ to $\memonlyEloHi$). Strength is unchanged, as it should be when a hit returns the search that would have been run, and a fifth of the visits are saved.
+
+The saving does not carry over to network evaluations. DataGo ran \memonlyEvals{} evaluations per move and KataGo \memonlyBaseEvals. KataGo keeps a cache of network evaluations for as long as its process lives, so a baseline that plays hundreds of games in one process has already paid for the positions that recur: its opening searches cost visits but few new evaluations. Exact memory removes search work that the evaluation cache had already made cheap. It would save evaluations for an engine that restarts between games, and it saves the tree-search overhead in any case, but in this harness its effect on the dominant cost is nil.
 
 The full system combines memory with the stopper and lets the controller reinvest what memory saves. Over \fullGames{} games it scores \fullScore\% (\fullRecord), $\fullElo$ Elo ($\fullEloLo$ to $\fullEloHi$), at \fullVisits{} visits and \fullEvals{} evaluations per move against \fullBaseEvals, with \fullHitRate\% of moves served from a memory that grew to \fullMemory{} positions.
 

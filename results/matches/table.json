@@ -114,6 +114,25 @@
   "hit_rate": 0.0
  },
  {
+  "run": "mem_only_200",
+  "player": "DataGo (memory), 200-visit grant",
+  "baseline": "KataGo 200",
+  "games": 600,
+  "wld": "276-292-32",
+  "score": 0.4866666666666667,
+  "score_lo": 0.44666666666666666,
+  "score_hi": 0.5266666666666666,
+  "elo": -9.267146020810351,
+  "elo_lo": -37.20131587009902,
+  "elo_hi": 18.54749702854643,
+  "visits": 157.69341718109965,
+  "restart": 157.69341718109965,
+  "base_visits": 200.0,
+  "rows": 68.64397392257544,
+  "base_rows": 69.23825459790841,
+  "hit_rate": 0.2115329140945018
+ },
+ {
   "run": "paired_greedy_200",
   "player": "DataGo (stopper), 200-visit grant, paired openings, no sampling",
   "baseline": "KataGo 200",
