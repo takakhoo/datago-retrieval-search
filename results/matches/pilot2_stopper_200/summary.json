@@ -1,0 +1,68 @@
+{
+ "player": "datago",
+ "games": 240,
+ "wins": 169,
+ "losses": 60,
+ "draws": 11,
+ "visits_per_move": 201.24608470652322,
+ "opponent_visits_per_move": {
+  "katago": 200.0
+ },
+ "restart_visits_per_move": 251.66144627536428,
+ "per_move": {
+  "rung": 0.7357006673021925,
+  "searched": 1.0
+ },
+ "reasons": {
+  "score": 51,
+  "resign": 189,
+  "move-cap": 0
+ },
+ "pairs": 120,
+ "score": 0.7270833333333333,
+ "score_lo": 0.6729166666666667,
+ "score_hi": 0.7791666666666667,
+ "elo": 170.2216525213662,
+ "elo_lo": 125.32114796874771,
+ "elo_hi": 219.02629477428394,
+ "z": 8.325216564429374,
+ "p_superior": 1.0,
+ "config": {
+  "name": "pilot2_stopper_200",
+  "net": "b18",
+  "baseline_net": null,
+  "size": 19,
+  "komi": 7.0,
+  "games": 240,
+  "budget": 200,
+  "path": "50,200,800,3200",
+  "stopper": "../runs/models/stopper_pilot.json",
+  "threshold": null,
+  "memory": false,
+  "store_max_move": 80,
+  "deepen": 0,
+  "control": true,
+  "play_share": 1.0,
+  "trace": true,
+  "paired": 0,
+  "opening_plies": 12,
+  "greedy": false,
+  "seed": 12
+ },
+ "minutes": 43.986330115795134,
+ "baseline_visits_per_move": 200.0,
+ "datago_total_visits_per_move_incl_deepening": 201.24608470652322,
+ "nn_rows_per_move": {
+  "datago": 96.12202097235462,
+  "katago": 77.42916850725474
+ },
+ "ledger": {
+  "granted": 5874400.0,
+  "played": 5911000.0,
+  "deepening": 0.0,
+  "deepened_entries": 0
+ },
+ "memory_entries": 0,
+ "final_threshold": 0.009070553705538737,
+ "mean_game_length": 244.21666666666667
+}

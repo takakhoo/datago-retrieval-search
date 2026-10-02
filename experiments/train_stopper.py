@@ -46,12 +46,15 @@ def make(kind: str, trees: int, depth: int):
 
 
 def fit(kind: str, X: np.ndarray, regret: np.ndarray, trees: int, depth: int, cut: float):
-    y = (regret > cut).astype(int) if kind == "clf" else regret
+    y = {"clf": (regret > cut).astype(int), "reg": regret, "sqrt": np.sqrt(regret)}[kind]
     return make(kind, trees, depth).fit(X, y)
 
 
 def raw(kind: str, model, X: np.ndarray) -> np.ndarray:
-    return model.decision_function(X) if kind == "clf" else model.predict(X)
+    if kind == "clf":
+        return model.decision_function(X)
+    pred = model.predict(X)
+    return np.maximum(pred, 0.0) ** 2 if kind == "sqrt" else pred
 
 
 def frontier(lad: Ladder, path: list[int], scores_on_path: np.ndarray, points: int = 120) -> list[dict]:
@@ -74,8 +77,9 @@ def at_cost(front: list[dict], budget: float, key: str = "cost_continue") -> dic
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("data")
-    ap.add_argument("--paths", default="50,200,800;50,200,800,3200;100,400,1600;50,100,200,400,800,1600,3200")
-    ap.add_argument("--kinds", default="reg")
+    ap.add_argument("--paths", default="50,200,800,3200;50,200,400,800,1600,3200")
+    ap.add_argument("--kinds", default="sqrt",
+                    help="reg: fit regret; sqrt: fit its square root and square the prediction")
     ap.add_argument("--rule", default="rate", choices=["rate", "flat"],
                     help="rate scales predicted regret by the visits needed to reach the next rung")
     ap.add_argument("--trees", type=int, default=150)
@@ -146,6 +150,7 @@ def main() -> None:
         stopper = Stopper(TreeEnsemble.from_sklearn(model), calib[len(calib) // 2]["threshold"],
                           visits_path,
                           Stopper.rate_scales(visits_path) if args.rule == "rate" else None,
+                          squared=kind == "sqrt",
                           meta={"kind": kind, "rule": args.rule, "positions": len(lad), "trees": args.trees,
                                 "depth": args.depth, "cut": args.cut, "calibration": calib,
                                 "note": "calibration is cross-fitted; thresholds map to mean cost"})

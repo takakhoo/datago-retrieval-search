@@ -106,6 +106,9 @@ def test_tree_ensemble_matches_sklearn(tmp_path):
     assert again.scales == [1.0, 0.25]
     assert again.score(X[0], 0) == pytest.approx(gbr.predict(X[:1])[0], abs=1e-9)
     assert again.score(X[0], 1) == pytest.approx(0.25 * gbr.predict(X[:1])[0], abs=1e-9)
+    sq = Stopper(ens, 0.1, [50, 200], squared=True)
+    sq.save(tmp_path / "sq.json")
+    assert Stopper.load(tmp_path / "sq.json").score(X[0]) == pytest.approx(max(gbr.predict(X[:1])[0], 0) ** 2)
 
 
 def test_series_ledger_never_overspends_and_memory_gets_hits(engine):

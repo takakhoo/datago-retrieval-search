@@ -89,8 +89,11 @@ class Stopper:
 
     def __init__(self, model: TreeEnsemble, threshold: float, path: list[int],
                  scales: list[float] | None = None, features: list[str] | None = None,
-                 meta: dict | None = None):
+                 meta: dict | None = None, squared: bool = False):
         self.model, self.threshold, self.path = model, threshold, list(path)
+        # A model fitted to the square root of regret is less swayed by a few huge
+        # blunders. Its output is squared back before use.
+        self.squared = squared
         self.scales = list(scales) if scales is not None else [1.0] * (len(path) - 1)
         self.features = features or STOPPER_FEATURES
         self.meta = meta or {}
@@ -105,7 +108,10 @@ class Stopper:
         return (steps[0] / steps).tolist()
 
     def score(self, x: np.ndarray, rung: int = 0) -> float:
-        return self.scales[rung] * self.model.raw(x)
+        raw = self.model.raw(x)
+        if self.squared:
+            raw = max(raw, 0.0) ** 2
+        return self.scales[rung] * raw
 
     def should_stop(self, x: np.ndarray, rung: int = 0) -> bool:
         return self.score(x, rung) < self.threshold
@@ -113,6 +119,7 @@ class Stopper:
     def save(self, path: str | Path) -> None:
         Path(path).write_text(json.dumps({
             "version": 2, "threshold": self.threshold, "path": self.path, "scales": self.scales,
+            "squared": self.squared,
             "features": self.features, "meta": self.meta, "model": self.model.to_json()}))
 
     @classmethod
@@ -121,4 +128,5 @@ class Stopper:
         m = d["model"]
         return cls(TreeEnsemble(m["init"], m["lr"], m["trees"]),
                    d["threshold"] if threshold is None else threshold,
-                   d["path"], d.get("scales"), d["features"], d.get("meta"))
+                   d["path"], d.get("scales"), d["features"], d.get("meta"),
+                   bool(d.get("squared", False)))

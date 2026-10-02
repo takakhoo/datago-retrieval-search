@@ -1,0 +1,68 @@
+{
+ "player": "datago",
+ "games": 400,
+ "wins": 77,
+ "losses": 301,
+ "draws": 22,
+ "visits_per_move": 100.0,
+ "opponent_visits_per_move": {
+  "katago": 200.0
+ },
+ "restart_visits_per_move": 100.0,
+ "per_move": {
+  "rung": 0.0,
+  "searched": 1.0
+ },
+ "reasons": {
+  "score": 47,
+  "resign": 353,
+  "move-cap": 0
+ },
+ "pairs": 200,
+ "score": 0.22,
+ "score_lo": 0.18125,
+ "score_hi": 0.26125,
+ "elo": -219.86876874730967,
+ "elo_lo": -261.9493191027233,
+ "elo_hi": -180.5764779080806,
+ "z": -13.569966664617986,
+ "p_superior": 0.0,
+ "config": {
+  "name": "uni_100_vs_200",
+  "net": "b18",
+  "baseline_net": null,
+  "size": 19,
+  "komi": 7.0,
+  "games": 400,
+  "budget": 200,
+  "path": "100",
+  "stopper": null,
+  "threshold": null,
+  "memory": false,
+  "store_max_move": 80,
+  "deepen": 0,
+  "control": false,
+  "play_share": 1.0,
+  "trace": false,
+  "paired": 0,
+  "opening_plies": 12,
+  "greedy": false,
+  "seed": 2
+ },
+ "minutes": 29.032561961809794,
+ "baseline_visits_per_move": 200.0,
+ "datago_total_visits_per_move_incl_deepening": 100.0,
+ "nn_rows_per_move": {
+  "datago": 39.570344827586204,
+  "katago": 70.85116223626177
+ },
+ "ledger": {
+  "granted": 8410000.0,
+  "played": 4205000.0,
+  "deepening": 0.0,
+  "deepened_entries": 0
+ },
+ "memory_entries": 0,
+ "final_threshold": null,
+ "mean_game_length": 209.105
+}
