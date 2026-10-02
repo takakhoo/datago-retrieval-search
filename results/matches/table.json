@@ -76,6 +76,25 @@
   "hit_rate": 0.0
  },
  {
+  "run": "main_stopper_160",
+  "player": "DataGo: stopper",
+  "baseline": "KataGo 200",
+  "games": 1000,
+  "wld": "586-325-89",
+  "score": 0.6305,
+  "score_lo": 0.602,
+  "score_hi": 0.658,
+  "elo": 92.82825927130231,
+  "elo_lo": 71.88536767365468,
+  "elo_hi": 113.67991502312822,
+  "visits": 160.0641235092305,
+  "restart": 196.75216467897403,
+  "base_visits": 200.0,
+  "rows": 80.07180199313838,
+  "base_rows": 74.12632291862164,
+  "hit_rate": 0.0
+ },
+ {
   "run": "pilot2_stopper_200",
   "player": "DataGo: stopper",
   "baseline": "KataGo 200",

@@ -15,7 +15,7 @@ Against KataGo at 200 visits per move, 19x19, same network:
 | | Games | Score | Elo (95% interval) |
 |---|---|---|---|
 | **DataGo, same visits per move** | {{main.games}} | {{main.score}}% | **{{main.elo}}** ({{main.elo_lo}} to {{main.elo_hi}}) |
-| **DataGo, same network evaluations** ({{strict.visits}} visits per move) | {{strict.games}} | {{strict.score}}% | **{{strict.elo}}** ({{strict.elo_lo}} to {{strict.elo_hi}}) |
+| **DataGo, 20% fewer visits** ({{strict.visits}} per move, fewer than KataGo even counting every restart) | {{strict.games}} | {{strict.score}}% | **{{strict.elo}}** ({{strict.elo_lo}} to {{strict.elo_hi}}) |
 | KataGo with twice the visits, for scale | {{unidouble.games}} | {{unidouble.score}}% | {{unidouble.elo}} ({{unidouble.elo_lo}} to {{unidouble.elo_hi}}) |
 | KataGo against itself, as a check | {{unisame.games}} | {{unisame.score}}% | {{unisame.elo}} ({{unisame.elo_lo}} to {{unisame.elo_hi}}) |
 

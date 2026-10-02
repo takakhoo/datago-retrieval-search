@@ -131,7 +131,7 @@ def matches_table() -> None:
 
 
 RUNS = {
-    "main": "main_200", "strict": "main_stopper_160", "paired": "paired_greedy_200",
+    "main": "main_200", "strict": "main_stopper_160", "lean": "main_140", "paired": "paired_greedy_200",
     "memonly": "mem_only_200", "full": "full_200", "long": "long_200",
     "bhundred": "budget_100", "bfour": "budget_400", "beight": "budget_800",
     "bignet": "b28_200", "thirteen": "size13_200", "nine": "size9_200",
