@@ -1,1 +1,20 @@
-% TODO limits
+\section{Limits}
+\label{sec:limits}
+
+\paragraph{One engine family, low budgets.}
+All results use KataGo networks at mean budgets of 100 to 800 visits per move. Elo per doubling of visits is steep in this range (about 230 at 200 visits in our matches), which is what makes reallocation valuable. At tournament budgets of tens of thousands of visits the curve is flatter, errors are rarer, and we have not measured what remains to be gained.
+
+\paragraph{The yardstick is a search.}
+Regret is defined by 1{,}600-visit forced searches, which are themselves imperfect. They are applied identically to every move and to every policy, so comparisons between policies are fair, but the absolute regret numbers inherit the engine's blind spots. The match results do not depend on the yardstick.
+
+\paragraph{Most of the headroom is out of reach of search statistics.}
+The oracle multiplier at 200 visits is 12; the learned stopper reaches 1.8. Among positions with more than 0.5\% regret at 200 visits, 57\% of the regret sits on a best move that had received under 10\% of the visits, and 12\% on one that had received under 1\%. A stopping rule that reads the search cannot see a move the search has not looked at. Closing this gap needs a different source of candidates. Section~\ref{sec:approx} shows that a similarity index is not one.
+
+\paragraph{Memory is an opening book.}
+Exact reuse is confined to the first few dozen moves, where search error at these budgets is already small. Its value is the compute it frees for later moves. Against opponents with a wider opening repertoire than KataGo's, hit rates will be lower than ours.
+
+\paragraph{The opponent is cooperative.}
+Adversarial policies defeat KataGo at any budget we could afford \citep{wang2023adversarial,tseng2025can}. DataGo reads the same network and the same search, and would stop early with full confidence in exactly the positions those attacks construct.
+
+\paragraph{No direct comparison with AlphaGo.}
+AlphaGo and AlphaGo Zero \citep{silver2016mastering,silver2017mastering} are not available to play. KataGo's public networks are among the strongest Go engines anyone can run, so they are the baseline here. What we show is an improvement over that baseline at equal compute.

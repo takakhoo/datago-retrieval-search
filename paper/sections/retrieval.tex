@@ -1,1 +1,36 @@
-% TODO retrieval
+\section{What a frozen engine can and cannot retrieve}
+\label{sec:retrieval}
+
+\subsection{Exact positions recur often}
+\label{sec:reuse}
+
+How much could an exact-match memory ever serve? We replayed the 300 self-play games behind the ladder dataset in order and asked, for each position, whether its symmetry-canonical key had already occurred in an earlier game. Figure~\ref{fig:reuse} shows the answer for the second half of the games, when the memory holds 150 to 300 games. A position at move 10 had been seen before 86\% of the time, at move 20 51\% of the time, and at move 30 30\% of the time. Games stayed on known ground for 24 moves on average, and one for 108. Over whole games, 11.5\% of all positions were repeats.
+
+These games used a higher early move temperature (0.8) than KataGo's default (0.5), so they are more varied than default play. The reuse rate is large for two reasons: a strong engine's opening choices are concentrated on a few lines, and canonicalising over the eight symmetries and over move order merges what look like different games.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{reuse}
+\caption{Share of positions whose canonical key had already occurred in an earlier game, by move number, with a memory of 150 to 300 earlier games.}
+\label{fig:reuse}
+\end{figure}
+
+\subsection{Near matches do not transfer}
+\label{sec:approx}
+
+The first version of DataGo was designed around approximate retrieval: find stored positions that resemble the current one and reuse their analysis. We tested the idea directly. Each position in the ladder dataset is embedded with KataGo's raw policy and ownership maps, compared against every position from other games in all eight orientations, and matched to its nearest neighbours by cosine similarity. A neighbour's 3{,}200-visit move is mapped through the aligning symmetry and offered as a proposal.
+
+Proposals matter in the 1{,}605 positions (27\%) where the 200-visit move differs from the 3{,}200-visit move. There the nearest neighbour's move is the 3{,}200-visit move 5.5\% of the time, and one of five neighbours has it 7.8\% of the time. The policy network's highest-prior alternative to the 200-visit move is right 43\% of the time, and one of its top five 85\%. An index of stored searches is a much worse source of candidate moves than the network the engine already carries.
+
+Figure~\ref{fig:similarity} shows why. A neighbour's best move is this position's best move in 96\% of cases when the similarity exceeds 0.999, which in practice means the same position. Agreement is 86\% between 0.97 and 0.999, 27\% between 0.90 and 0.97, 11\% between 0.8 and 0.9, and under 4\% below that. After move 20 the median nearest-neighbour similarity is 0.75 or lower. Retrieval is useful exactly where the exact key already finds the position, and nowhere else.
+
+The same holds for deciding when to think. The similarity-weighted regret of a position's five nearest neighbours predicts its own regret with an AUC of 0.55. The search's own confidence margin reaches 0.73.
+
+We do not claim that approximate retrieval cannot help Go engines. \citet{humphreys2022retrieval} show that it can when the network is trained to read its neighbours and the index holds tens of millions of positions. Our index holds 6{,}000, and our network is frozen. Within those limits the result is unambiguous, and it matches what is known about Go: \citet{lan2022alphazero} change a strong engine's move by adding two stones that should not matter.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{similarity}
+\caption{How often the nearest stored position's 3{,}200-visit move is also this position's, by embedding similarity. Numbers under the bars are position counts.}
+\label{fig:similarity}
+\end{figure}
