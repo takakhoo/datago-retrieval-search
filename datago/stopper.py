@@ -1,0 +1,108 @@
+"""Learned stopping rule for the visit ladder.
+
+The model predicts, from the search just finished (and how it changed since
+the previous rung), how much winrate the current best move is still expected
+to give up. Search stops once that prediction drops below a threshold.
+
+The model is a gradient-boosted tree ensemble stored as plain JSON and
+evaluated with NumPy, so playing needs no scikit-learn and no pickle.
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import numpy as np
+
+from .features import FEATURE_NAMES
+
+TRAJECTORY_NAMES = ["best_changed", "n_changes", "abs_d_winrate", "d_winrate",
+                    "d_top1_share", "d_lcb_margin"]
+STOPPER_FEATURES = FEATURE_NAMES + TRAJECTORY_NAMES
+_WR = FEATURE_NAMES.index("root_winrate")
+_TOP1 = FEATURE_NAMES.index("top1_share")
+_LCB = FEATURE_NAMES.index("lcb_margin")
+
+
+def trajectory(prev: np.ndarray | None, cur: np.ndarray, prev_move: int | None,
+               cur_move: int, n_changes: int) -> tuple[np.ndarray, int]:
+    """Change features between consecutive rungs. Returns (features, updated change count)."""
+    if prev is None:
+        return np.zeros(len(TRAJECTORY_NAMES)), 0
+    changed = float(prev_move != cur_move)
+    n_changes += int(changed)
+    dw = cur[_WR] - prev[_WR]
+    return np.array([changed, n_changes, abs(dw), dw, cur[_TOP1] - prev[_TOP1],
+                     cur[_LCB] - prev[_LCB]]), n_changes
+
+
+class TreeEnsemble:
+    """Sum of regression trees: init + lr * sum_t tree_t(x)."""
+
+    def __init__(self, init: float, lr: float, trees: list[dict]):
+        self.init, self.lr = init, lr
+        self.trees = [{k: np.asarray(v) for k, v in t.items()} for t in trees]
+
+    def raw(self, x: np.ndarray) -> float:
+        total = self.init
+        for t in self.trees:
+            node = 0
+            left, right, feat, thr = t["left"], t["right"], t["feature"], t["threshold"]
+            while left[node] != -1:
+                node = left[node] if x[feat[node]] <= thr[node] else right[node]
+            total += self.lr * t["value"][node]
+        return float(total)
+
+    def raw_batch(self, X: np.ndarray) -> np.ndarray:
+        return np.array([self.raw(x) for x in X])
+
+    @classmethod
+    def from_sklearn(cls, gbm) -> "TreeEnsemble":
+        """Export a fitted GradientBoostingRegressor or binary GradientBoostingClassifier."""
+        trees = []
+        for est in gbm.estimators_[:, 0]:
+            t = est.tree_
+            trees.append({
+                "left": t.children_left.tolist(), "right": t.children_right.tolist(),
+                "feature": np.maximum(t.feature, 0).tolist(), "threshold": t.threshold.tolist(),
+                "value": t.value[:, 0, 0].tolist(),
+            })
+        zero = np.zeros((1, gbm.n_features_in_))
+        if hasattr(gbm, "predict_proba"):
+            init = float(gbm._raw_predict_init(zero).ravel()[0])
+        else:
+            init = float(gbm.init_.predict(zero).ravel()[0])
+        return cls(init, float(gbm.learning_rate), trees)
+
+    def to_json(self) -> dict:
+        return {"init": self.init, "lr": self.lr,
+                "trees": [{k: v.tolist() for k, v in t.items()} for t in self.trees]}
+
+
+class Stopper:
+    def __init__(self, model: TreeEnsemble, threshold: float, path: list[int],
+                 features: list[str] | None = None, meta: dict | None = None):
+        self.model, self.threshold, self.path = model, threshold, list(path)
+        self.features = features or STOPPER_FEATURES
+        self.meta = meta or {}
+        if self.features != STOPPER_FEATURES:
+            raise ValueError("stopper was trained on a different feature list")
+
+    def score(self, x: np.ndarray) -> float:
+        return self.model.raw(x)
+
+    def should_stop(self, x: np.ndarray) -> bool:
+        return self.score(x) < self.threshold
+
+    def save(self, path: str | Path) -> None:
+        Path(path).write_text(json.dumps({
+            "version": 1, "threshold": self.threshold, "path": self.path,
+            "features": self.features, "meta": self.meta, "model": self.model.to_json()}))
+
+    @classmethod
+    def load(cls, path: str | Path, threshold: float | None = None) -> "Stopper":
+        d = json.loads(Path(path).read_text())
+        m = d["model"]
+        return cls(TreeEnsemble(m["init"], m["lr"], m["trees"]),
+                   d["threshold"] if threshold is None else threshold,
+                   d["path"], d["features"], d.get("meta"))

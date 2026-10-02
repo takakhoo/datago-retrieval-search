@@ -28,7 +28,8 @@ class GameRecord:
     margin: float | None
     visits: dict[str, int] = field(default_factory=dict)
     turns: dict[str, int] = field(default_factory=dict)
-    flags: dict[str, dict[str, int]] = field(default_factory=dict)
+    restart_visits: dict[str, int] = field(default_factory=dict)
+    counts: dict[str, dict[str, float]] = field(default_factory=dict)
     trace: list[dict] | None = None
 
     def score_for(self, name: str) -> float:
@@ -75,7 +76,7 @@ def play_game(black: Player, white: Player, cfg: GameConfig, rng: np.random.Gene
     players = {BLACK: black, WHITE: white}
     visits = {black.name: 0, white.name: 0}
     turns = {black.name: 0, white.name: 0}
-    flags: dict[str, dict[str, int]] = {black.name: {}, white.name: {}}
+    counts: dict[str, dict[str, float]] = {black.name: {}, white.name: {}}
     low_streak = {BLACK: 0, WHITE: 0}
     trace = [] if cfg.keep_trace else None
     max_moves = cfg.max_moves or 2 * cfg.size * cfg.size
@@ -88,12 +89,12 @@ def play_game(black: Player, white: Player, cfg: GameConfig, rng: np.random.Gene
         d = player.decide(board, cfg.komi, rng)
         visits[player.name] += d.visits
         turns[player.name] += 1
-        for k, v in d.flags.items():
-            flags[player.name][k] = flags[player.name].get(k, 0) + int(bool(v))
+        for k, v in d.counts.items():
+            counts[player.name][k] = counts[player.name].get(k, 0) + v
         if trace is not None:
             trace.append({"n": len(board.moves), "p": player.name, "v": d.visits,
                           "wr": round(d.winrate, 4), "mv": point_to_gtp(d.point, cfg.size),
-                          **{k: bool(v) for k, v in d.flags.items()}})
+                          **d.counts})
         low_streak[color] = low_streak[color] + 1 if d.winrate < cfg.resign_threshold else 0
         if low_streak[color] >= cfg.resign_consecutive and len(board.moves) >= min_resign_move:
             winner, reason = ("W" if color == BLACK else "B"), "resign"
@@ -110,7 +111,9 @@ def play_game(black: Player, white: Player, cfg: GameConfig, rng: np.random.Gene
     return GameRecord(
         black=black.name, white=white.name, size=cfg.size, komi=cfg.komi, opening=opening_id,
         moves=[point_to_gtp(p, cfg.size) for _, p in board.moves], winner=winner, reason=reason,
-        margin=margin, visits=visits, turns=turns, flags=flags, trace=trace,
+        margin=margin, visits=visits, turns=turns,
+        restart_visits={n: int(c.pop("restart_visits", 0)) for n, c in counts.items()},
+        counts=counts, trace=trace,
     )
 
 
@@ -213,10 +216,10 @@ def summarize(records: Sequence[GameRecord], name: str) -> dict:
         t = sum(r.turns.get(n, 0) for r in mine)
         return v / max(t, 1)
 
-    flags: dict[str, int] = {}
+    counts: dict[str, float] = {}
     for r in mine:
-        for k, v in r.flags.get(name, {}).items():
-            flags[k] = flags.get(k, 0) + v
+        for k, v in r.counts.get(name, {}).items():
+            counts[k] = counts.get(k, 0) + v
     turns = sum(r.turns.get(name, 0) for r in mine)
     out = {
         "player": name, "games": len(mine),
@@ -225,7 +228,8 @@ def summarize(records: Sequence[GameRecord], name: str) -> dict:
         "draws": sum(r.score_for(name) == 0.5 for r in mine),
         "visits_per_move": per_move(name),
         "opponent_visits_per_move": {n: per_move(n) for n in opp_names},
-        "flag_rates": {k: v / max(turns, 1) for k, v in flags.items()},
+        "restart_visits_per_move": sum(r.restart_visits.get(name, 0) for r in mine) / max(turns, 1),
+        "per_move": {k: v / max(turns, 1) for k, v in counts.items()},
         "reasons": {k: sum(r.reason == k for r in mine) for k in ("score", "resign", "move-cap")},
     }
     out.update(paired_summary(pair_scores))

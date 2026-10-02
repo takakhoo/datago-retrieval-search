@@ -1,12 +1,13 @@
 """Players: the uniform-budget KataGo baseline and DataGo.
 
-Both go through the same engine, the same move-selection rule, and the same
-visit accounting. The only difference is how DataGo spends and saves visits.
+Both go through the same kind of engine, the same move-selection rule, and the
+same visit accounting. The only difference is how DataGo spends and saves
+visits.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Callable, Protocol
+from typing import Protocol
 
 import numpy as np
 
@@ -14,11 +15,16 @@ from .board import Board
 from .engine import AnalysisEngine, SearchResult
 from .features import extract
 from .memory import Memory
+from .stopper import Stopper, trajectory
 
 
 @dataclass
 class Temperature:
-    """KataGo-style move sampling: sharp late, a little noise early."""
+    """KataGo-style move sampling: sharp late, a little noise early.
+
+    Defaults are KataGo's GTP defaults (chosenMoveTemperatureEarly 0.5,
+    chosenMoveTemperatureHalflife 19, chosenMoveTemperature 0.1).
+    """
     early: float = 0.5
     late: float = 0.1
     halflife: float = 19.0
@@ -44,10 +50,12 @@ def pick_move(result: SearchResult, move_number: int, size: int,
 
 @dataclass
 class Decision:
+    """visits is the continuation cost (the deepest search run). Numeric
+    entries in `counts` are summed per game by the match runner."""
     point: int
     visits: int
     winrate: float
-    flags: dict = field(default_factory=dict)
+    counts: dict[str, float] = field(default_factory=dict)
 
 
 class Player(Protocol):
@@ -65,46 +73,53 @@ class KataGoPlayer:
     def decide(self, board: Board, komi: float, rng: np.random.Generator) -> Decision:
         result = self.engine.search(board, self.visits, komi)
         point = pick_move(result, len(board.moves), board.size, rng, self.temp)
-        return Decision(point, result.visits, result.winrate)
-
-
-Gate = Callable[[np.ndarray], bool]
+        return Decision(point, result.visits, result.winrate, {"restart_visits": result.visits})
 
 
 class DataGoPlayer:
-    """Shallow search, then a gate decides whether to pay for a deep one.
+    """Visit ladder with a learned stopping rule, backed by a search memory.
 
-    Deep searches are written to memory. A later exact hit (same position up
-    to symmetry) with at least `reuse_visits` stored visits replaces the whole
-    search and costs zero visits.
+    1. If the position (up to symmetry) is in memory, play from the stored
+       search. Cost: zero visits.
+    2. Otherwise search at path[0] visits and ask the stopper whether the
+       decision is settled. If not, search at the next rung, and so on.
+    3. Store the final search for positions early enough to recur.
+
+    With stopper=None the player always stops at path[0], which makes
+    DataGoPlayer([v], None, None) identical to KataGoPlayer(v).
     """
 
-    def __init__(self, engine: AnalysisEngine, base_visits: int, deep_visits: int,
-                 gate: Gate | None, memory: Memory | None = None,
-                 reuse_visits: int | None = None, store: bool = True,
+    def __init__(self, engine: AnalysisEngine, path: list[int], stopper: Stopper | None = None,
+                 memory: Memory | None = None, store_max_move: int = 80,
                  temp: Temperature | None = Temperature(), name: str = "datago"):
-        self.engine, self.base_visits, self.deep_visits = engine, base_visits, deep_visits
-        self.gate, self.memory, self.store, self.temp, self.name = gate, memory, store, temp, name
-        self.reuse_visits = deep_visits if reuse_visits is None else reuse_visits
+        self.engine, self.path, self.stopper = engine, list(path), stopper
+        self.memory, self.store_max_move, self.temp, self.name = memory, store_max_move, temp, name
+
+    def search(self, board: Board, komi: float) -> tuple[SearchResult, int, int]:
+        """Run the ladder. Returns (final search, restart cost, index of final rung)."""
+        prev_x, prev_move, n_changes, restart = None, None, 0, 0
+        for j, v in enumerate(self.path):
+            res = self.engine.search(board, v, komi)
+            restart += res.visits
+            if j == len(self.path) - 1 or self.stopper is None:
+                break
+            x = extract(res, board)
+            t, n_changes = trajectory(prev_x, x, prev_move, res.best.point, n_changes)
+            if self.stopper.should_stop(np.concatenate([x, t])):
+                break
+            prev_x, prev_move = x, res.best.point
+        return res, restart, j
 
     def decide(self, board: Board, komi: float, rng: np.random.Generator) -> Decision:
         move_number = len(board.moves)
         if self.memory is not None:
-            cached = self.memory.get(board, komi, self.reuse_visits)
+            cached = self.memory.get(board, komi)
             if cached is not None:
                 point = pick_move(cached, move_number, board.size, rng, self.temp)
-                return Decision(point, 0, cached.winrate, {"hit": True})
-
-        result = self.engine.search(board, self.base_visits, komi)
-        spent = result.visits
-        flags = {}
-        if self.gate is not None and self.gate(extract(result, board)):
-            deep = self.engine.search(board, self.deep_visits, komi)
-            spent += deep.visits
-            flags["deep"] = True
-            flags["changed"] = deep.best.point != result.best.point
-            result = deep
-            if self.memory is not None and self.store:
-                self.memory.put(board, komi, deep)
-        point = pick_move(result, move_number, board.size, rng, self.temp)
-        return Decision(point, spent, result.winrate, flags)
+                return Decision(point, 0, cached.winrate, {"hit": 1, "restart_visits": 0})
+        res, restart, j = self.search(board, komi)
+        if self.memory is not None and move_number <= self.store_max_move:
+            self.memory.put(board, komi, res)
+        point = pick_move(res, move_number, board.size, rng, self.temp)
+        return Decision(point, res.visits, res.winrate,
+                        {"restart_visits": restart, "rung": j, "searched": 1})
