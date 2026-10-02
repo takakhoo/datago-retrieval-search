@@ -1,1 +1,18 @@
-% TODO intro
+\section{Introduction}
+
+Engines in the AlphaGo line \citep{silver2016mastering,silver2017mastering} choose a move by running a tree search guided by a policy and value network, and they are usually compared at a fixed number of search visits per move. KataGo \citep{wu2019accelerating}, one of the strongest engines anyone can download, follows the same convention: at 200 visits per move, every move gets 200 visits. A forced recapture and a whole-board fight receive the same attention, and a position the engine analysed an hour ago in another game is analysed again from nothing.
+
+This paper measures what those two habits cost. We keep the network and the search fixed and change only how many visits a move receives. The system, DataGo, makes two kinds of decision. Before searching, it checks whether it has already searched this position, in any of its eight orientations. While searching, it climbs a short ladder of budgets and asks after each rung whether the decision is settled.
+
+The project began with a different idea. Its first version proposed retrieval-augmented search: store deep analyses, find similar positions with an approximate nearest-neighbour index, and reuse what was found. It reported 9--0--1 and 8--0--2 records against KataGo. When we rebuilt the evaluation we found that those records came from a protocol error that let DataGo place extra stones (Section~\ref{sec:setup}), and that retrieved moves had never reached the board. So we started again from the questions, with a testbed in which every visit is counted and both players are otherwise identical.
+
+\paragraph{What we find.}
+\begin{enumerate}
+\item \textbf{Search error is rare, concentrated, and partly predictable.} At 200 visits, 71\% of positions have no regret at all and the worst tenth hold 84\% of it. No single search statistic identifies them well (AUC about 0.74), yet a small model with a simple stopping rule recovers a large share of the waste (Section~\ref{sec:offline}).
+\item \textbf{A learned stop is worth more than a third of a doubling of search, and often much more.} Offline, DataGo's stopper matches uniform search at 1.7 to 1.9 times the visits. In matches against KataGo at 200 visits it gains $\mainElo$ Elo at equal visits and $\strictElo$ Elo at equal network evaluations, where doubling KataGo's budget gains $\unidoubleElo$ (Section~\ref{sec:matches}).
+\item \textbf{The rule matters more than the model.} Dividing predicted regret by the cost of the next rung is what turns a stopping signal into a gain. With a flat threshold, the entropy gate of the first version is worse than no gate. Most features can be removed without loss.
+\item \textbf{Exact memory is an opening book that builds itself.} Positions recur often enough that \fullHitRate\% of DataGo's moves in a long series cost nothing. The visits saved are spent later in the game, where errors live.
+\item \textbf{Approximate retrieval does not help a frozen engine.} A stored search transfers when the position is the same and almost never otherwise (Section~\ref{sec:approx}).
+\end{enumerate}
+
+Everything is released: the testbed, the 6{,}000-position ladder dataset, the stopping model, every game record, and the audit of the earlier results.\footnote{\url{https://github.com/takakhoo/datago-retrieval-search}}

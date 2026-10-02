@@ -13,9 +13,12 @@
 \graphicspath{{../results/figures/}{../results/demo/}}
 
 \title{DataGo: Learned Stopping and Exact Search Memory\\ on a Frozen Go Engine}
-\author{Benjamin Huh \and Jason Peng \and Taka Khoo \and Olir Eswaramoorthy \and David Roos \and Victor Lun Pun\\[4pt]
-Thayer School of Engineering, Dartmouth College}
+\author{Taka Khoo\\[2pt]
+Thayer School of Engineering, Dartmouth College\\
+\texttt{taka.khoo.th@dartmouth.edu}}
 \date{October 2026}
+
+\input{numbers}
 
 \begin{document}
 \maketitle
@@ -29,6 +32,9 @@ Thayer School of Engineering, Dartmouth College}
 \input{sections/matches}
 \input{sections/retrieval}
 \input{sections/limits}
+
+\section*{Acknowledgments}
+The first version of DataGo was a team project with Benjamin Huh, Jason Peng, Olir Eswaramoorthy, David Roos, and Victor Lun Pun, whose questions about uncertainty gating and reuse of deep searches this work takes up. Its code and report are preserved in the repository under \texttt{legacy/}. Experiments ran on the Dartmouth LISP Lab's machines. KataGo and its networks are the work of David J. Wu and the KataGo community.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

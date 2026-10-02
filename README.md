@@ -23,6 +23,6 @@ python -m datago.demo --fake --games 2   # watch the ladder, stopper, and memory
 
 Real play needs a KataGo binary and network. See [`experiments/`](experiments/) for the scripts behind every number, and [`results/README.md`](results/README.md) for what each result file is.
 
-## Team
+## Credits
 
-Benjamin Huh, Jason Peng, Taka Khoo, Olir Eswaramoorthy, David Roos, Victor Lun Pun (Thayer School of Engineering, Dartmouth College).
+v2 (this rebuild, the experiments, and the paper in [`paper/`](paper/)) is by Taka Khoo. The first version, preserved in [`legacy/v1/`](legacy/v1/), was a team project by Benjamin Huh, Jason Peng, Taka Khoo, Olir Eswaramoorthy, David Roos, and Victor Lun Pun at the Thayer School of Engineering, Dartmouth College.

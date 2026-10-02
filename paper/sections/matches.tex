@@ -1,1 +1,62 @@
-% TODO matches
+\section{Matches}
+\label{sec:matches}
+
+All matches in this section are played against KataGo at a fixed budget, from the empty board, with alternating colours and KataGo's default move sampling for both players unless noted. Table~\ref{tab:matches} lists every match we ran.
+
+\begin{table}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\input{tables/matches}
+\caption{All matches. \emph{Visits} is the mean size of the deepest search per move, \emph{Restart} counts every search requested, and \emph{Evals} is network evaluations per move for the player and for its opponent, read from each engine's log.}
+\label{tab:matches}
+\end{table}
+
+\subsection{What a visit is worth}
+
+To read the other results we first need the exchange rate between compute and strength in this setting. KataGo against itself at 200 visits scores \unisameScore\% over \unisameGames{} games ($\unisameElo$ Elo, $\unisameEloLo$ to $\unisameEloHi$), which checks that the harness has no side bias. At 100 visits it loses $\unihalfElo$ Elo to the 200-visit engine, at 283 visits it gains $\unirootElo$, and at 400 visits $\unidoubleElo$. A doubling is worth about 230 Elo here. In network evaluations the uniform engine runs \unihalfEvals, \unisameEvals, \unirootEvals, and \unidoubleEvals{} per move at the four budgets: fewer than its visits, because consecutive searches share cached evaluations.
+
+\subsection{The stopping rule at equal visits and at equal evaluations}
+
+With the ladder 50, 200, 800, 3{,}200 and the controller holding its mean at the opponent's budget, DataGo scores \mainScore\% over \mainGames{} games (\mainRecord), a gain of $\mainElo$ Elo (95\% interval $\mainEloLo$ to $\mainEloHi$), at \mainVisits{} visits per move. Counting every restarted search it requested \mainRestart{} visits per move, and it ran \mainEvals{} network evaluations per move to KataGo's \mainBaseEvals.
+
+Visits understate DataGo's cost in one respect. A fixed-budget engine re-meets much of its previous tree on the next move and finds those evaluations cached. DataGo's searches vary in size, so less carries over. The strictest comparison therefore matches network evaluations. We reran the match with DataGo granted 160 visits per move. It then ran \strictEvals{} evaluations per move to KataGo's \strictBaseEvals{} and scored \strictScore\% over \strictGames{} games (\strictRecord), a gain of $\strictElo$ Elo ($\strictEloLo$ to $\strictEloHi$).
+
+Figure~\ref{fig:elo} places these results against the uniform curve under all three measures of compute.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{elo_vs_compute}
+\caption{Elo against KataGo at 200 visits, as a function of compute relative to that baseline, counted three ways. The line is KataGo at uniform budgets. Bars are 95\% intervals.}
+\label{fig:elo}
+\end{figure}
+
+\subsection{Without move sampling}
+
+KataGo's default play samples among well-visited moves early in the game. A search that stops when one move dominates has sharper visit counts than a fixed-budget search, so sampling could favour DataGo for reasons unrelated to search quality. To rule this out we sampled 400 balanced openings of 12 moves, played each twice with colours swapped, and had both players always play their engine's top move. DataGo scores \pairedScore\% over \pairedGames{} games (\pairedRecord), $\pairedElo$ Elo ($\pairedEloLo$ to $\pairedEloHi$), at \pairedVisits{} visits per move.
+
+\subsection{Where the visits go}
+
+Figure~\ref{fig:profile} shows DataGo's spending in the main match. It uses well under the budget in the opening, where Section~\ref{sec:offline} found almost no regret to recover, and more than the budget through the middle game. It also spends by stakes: least when it believes the game is decided and most when the game is in the balance. Neither behaviour was programmed. Both follow from predicting regret in winrate units.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{profile_main}
+\caption{Mean visits per DataGo move in the main match, by move number and by DataGo's own winrate estimate.}
+\label{fig:profile}
+\end{figure}
+
+\subsection{Memory}
+
+With memory alone and no stopper, DataGo is KataGo with an opening book that fills itself. Over \memonlyGames{} games it served \memonlyHitRate\% of its moves from memory (\memonlyHitLate\% in the second half of the series), averaged \memonlyVisits{} visits per move, and scored \memonlyScore\% ($\memonlyElo$ Elo, $\memonlyEloLo$ to $\memonlyEloHi$).
+
+The full system combines memory with the stopper and lets the controller reinvest what memory saves. Over \fullGames{} games it scores \fullScore\% (\fullRecord), $\fullElo$ Elo ($\fullEloLo$ to $\fullEloHi$), at \fullVisits{} visits and \fullEvals{} evaluations per move against \fullBaseEvals, with \fullHitRate\% of moves served from a memory that grew to \fullMemory{} positions.
+
+\subsection{Other budgets, a longer ladder, another network, other boards}
+
+The same model, trained once on 19$\times$19 positions from the b18 network, was run without retraining in six further settings.
+\begin{itemize}
+\item \textbf{Budgets.} Against KataGo at 100, 400, and 800 visits, at matched visits, DataGo gains $\bhundredElo$ ($\bhundredEloLo$ to $\bhundredEloHi$), $\bfourElo$ ($\bfourEloLo$ to $\bfourEloHi$), and $\beightElo$ ($\beightEloLo$ to $\beightEloHi$) Elo.
+\item \textbf{Longer ladder.} The six-rung ladder 50, 200, 400, 800, 1{,}600, 3{,}200, the best offline by continuation cost, gains $\longElo$ ($\longEloLo$ to $\longEloHi$) Elo at \longVisits{} visits, \longRestart{} restart visits, and \longEvals{} evaluations per move.
+\item \textbf{A stronger network.} On the 28-block network, with both players using it, DataGo gains $\bignetElo$ ($\bignetEloLo$ to $\bignetEloHi$) Elo.
+\item \textbf{Smaller boards.} On 13$\times$13 and 9$\times$9 it gains $\thirteenElo$ ($\thirteenEloLo$ to $\thirteenEloHi$) and $\nineElo$ ($\nineEloLo$ to $\nineEloHi$) Elo.
+\end{itemize}

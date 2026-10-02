@@ -19,6 +19,25 @@
   "hit_rate": 0.0
  },
  {
+  "run": "uni_200_vs_200",
+  "player": "KataGo 200 visits",
+  "baseline": "KataGo 200",
+  "games": 400,
+  "wld": "185-183-32",
+  "score": 0.5025,
+  "score_lo": 0.45625,
+  "score_hi": 0.55,
+  "elo": 1.7371924043128415,
+  "elo_lo": -30.478556999265027,
+  "elo_hi": 34.86007028756008,
+  "visits": 200.0,
+  "restart": 200.0,
+  "base_visits": 200.0,
+  "rows": 75.66206536175402,
+  "base_rows": 75.5111870456623,
+  "hit_rate": 0.0
+ },
+ {
   "run": "uni_283_vs_200",
   "player": "KataGo 283 visits",
   "baseline": "KataGo 200",
