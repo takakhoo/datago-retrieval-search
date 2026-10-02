@@ -89,13 +89,13 @@ def test_game_terminates_and_accounts_visits(engine):
         replay.play_gtp(mv)
 
 
-def test_match_is_color_balanced_and_deeper_fake_search_wins(engine, tmp_path):
+def test_match_is_color_balanced_and_accounts_compute(engine, tmp_path):
     cfg = GameConfig(size=5, komi=0.5, max_moves=50)
     rng = np.random.default_rng(3)
     openings = sample_openings(engine, 12, cfg, plies=2, rng=rng, visits=30,
                                balance=0.5, check_visits=30, workers=4)
     assert len({tuple(o) for o in openings}) == 12
-    weak, strong = KataGoPlayer(engine, 4, name="weak"), KataGoPlayer(engine, 400, name="strong")
+    weak, strong = KataGoPlayer(engine, 2, name="weak"), KataGoPlayer(engine, 2000, name="strong")
     out = tmp_path / "games.jsonl"
     recs = run_match(strong, weak, cfg, openings, seed=5, workers=4, out_path=out)
     assert len(recs) == 24 and len(out.read_text().splitlines()) == 24
@@ -103,7 +103,22 @@ def test_match_is_color_balanced_and_deeper_fake_search_wins(engine, tmp_path):
     s = summarize(recs, "strong")
     assert s["pairs"] == 12 and s["wins"] + s["losses"] + s["draws"] == 24
     assert s["visits_per_move"] > 20 * s["opponent_visits_per_move"]["weak"]
-    assert s["score"] > 0.5
+    assert 0.0 <= s["score_lo"] <= s["score"] <= s["score_hi"] <= 1.0
+
+
+def test_fake_engine_picks_better_moves_with_more_visits(engine):
+    from datago.fake_engine import true_values
+    rng = np.random.default_rng(0)
+    gain = []
+    for _ in range(40):
+        board = Board(7)
+        for _ in range(int(rng.integers(0, 12))):
+            board.play(int(rng.choice([p for p in board.legal_moves() if p != PASS])))
+        truth = true_values(board, 7.5)
+        shallow = engine.search(board, 4, 7.5).best.point
+        deep = engine.search(board, 4000, 7.5).best.point
+        gain.append(truth[deep] - truth[shallow])
+    assert np.mean(gain) > 0.01
 
 
 def test_pick_move_is_greedy_without_temperature_and_samples_with_it(engine):

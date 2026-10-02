@@ -16,7 +16,7 @@ import numpy as np
 
 from .board import BLACK, PASS, Board, point_to_gtp
 
-NOISE = 0.6
+NOISE = 0.2
 
 
 def _rng(*parts) -> np.random.Generator:

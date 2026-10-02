@@ -8,10 +8,12 @@ from __future__ import annotations
 
 import itertools
 import json
+import os
 import subprocess
 import threading
 from concurrent.futures import Future
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Sequence
 
 from .board import BLACK, Board, color_name, gtp_to_point, point_to_gtp
@@ -26,6 +28,7 @@ RULES = {
     "friendlyPassOk": False,
 }
 RULES_TAG = "area-psk"
+RAW_KEYS = ("rawStWrError", "rawStScoreError", "rawVarTimeLeft", "rawScoreSelfplayStdev")
 
 
 @dataclass
@@ -39,6 +42,7 @@ class MoveStat:
     utility: float
     order: int
     pv: list[int] = field(default_factory=list)
+    score_stdev: float = 0.0
 
 
 @dataclass
@@ -52,6 +56,8 @@ class SearchResult:
     raw_score_lead: float | None = None
     policy: list[float] | None = None
     ownership: list[float] | None = None
+    # KataGo's own raw-net error predictions: rawStWrError, rawStScoreError, rawVarTimeLeft.
+    raw: dict[str, float] = field(default_factory=dict)
 
     @property
     def best(self) -> MoveStat:
@@ -72,6 +78,9 @@ def parse_response(resp: dict[str, Any], size: int, to_move: int) -> SearchResul
 
     moves = []
     for info in resp["moveInfos"]:
+        # Root symmetry pruning reports mirrored copies of one searched move.
+        if "isSymmetryOf" in info:
+            continue
         moves.append(MoveStat(
             point=gtp_to_point(info["move"], size),
             visits=int(info["visits"]),
@@ -82,6 +91,7 @@ def parse_response(resp: dict[str, Any], size: int, to_move: int) -> SearchResul
             utility=sign * info.get("utility", 0.0),
             order=int(info.get("order", len(moves))),
             pv=[gtp_to_point(m, size) for m in info.get("pv", [])],
+            score_stdev=float(info.get("scoreStdev", 0.0)),
         ))
     moves.sort(key=lambda m: m.order)
     root = resp["rootInfo"]
@@ -93,22 +103,22 @@ def parse_response(resp: dict[str, Any], size: int, to_move: int) -> SearchResul
         raw_winrate=wr(root["rawWinrate"]) if "rawWinrate" in root else None,
         raw_score_lead=sign * root["rawLead"] if "rawLead" in root else None,
         policy=resp.get("policy"),
-        ownership=resp.get("ownership"),
+        ownership=[sign * x for x in resp["ownership"]] if "ownership" in resp else None,
+        raw={k: float(root[k]) for k in RAW_KEYS if k in root},
     )
 
 
 class AnalysisEngine:
     """Thread-safe multiplexer over one analysis-engine subprocess.
 
-    All winrates are requested from Black's perspective and converted to the
-    side to move in parse_response, so the result does not depend on the
-    engine's reportAnalysisWinratesAs default.
+    The engine config must set reportAnalysisWinratesAs = BLACK (as
+    configs/analysis.cfg does). parse_response converts to the side to move.
     """
 
-    def __init__(self, command: Sequence[str], stderr=subprocess.DEVNULL):
+    def __init__(self, command: Sequence[str], stderr=subprocess.DEVNULL, env=None):
         self.proc = subprocess.Popen(
             list(command), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            stderr=stderr, text=True, bufsize=1,
+            stderr=stderr, text=True, bufsize=1, env=env,
         )
         self._ids = itertools.count()
         self._pending: dict[str, tuple[Future, int, int]] = {}
@@ -169,8 +179,9 @@ class AnalysisEngine:
             "boardYSize": size,
             "maxVisits": int(visits),
             "analyzeTurns": [len(board.moves)],
-            "overrideSettings": {"reportAnalysisWinratesAs": "BLACK", **(overrides or {})},
         }
+        if overrides:
+            query["overrideSettings"] = overrides
         if include_policy:
             query["includePolicy"] = True
         if include_ownership:
@@ -213,5 +224,27 @@ class AnalysisEngine:
         self.close()
 
 
-def katago_command(binary: str, model: str, config: str, extra: Sequence[str] = ()) -> list[str]:
-    return [binary, "analysis", "-model", model, "-config", config, *extra]
+NETS = {
+    "b6": "kata1-b6c96-s175395328-d26788732.txt.gz",
+    "b10": "kata1-b10c128-s1141046784-d204142634.txt.gz",
+    "b18": "kata1-b18c384nbt-s9996604416-d4316597426.bin.gz",
+    "b28": "kata1-b28c512nbt-s13255194368-d5935380940.bin.gz",
+}
+
+
+def open_katago(net: str = "b18", gpu: int | None = None, config: str | None = None,
+                threads: int | None = None, stderr=subprocess.DEVNULL) -> AnalysisEngine:
+    """Start `katago analysis`. Paths come from $KATAGO and $DG (see README)."""
+    root = Path(os.environ.get("DG", "."))
+    binary = os.environ.get("KATAGO", "katago")
+    model = NETS.get(net, net)
+    if not os.path.isabs(model):
+        model = str(root / "nets" / model)
+    config = config or str(Path(__file__).resolve().parent.parent / "configs" / "analysis.cfg")
+    cmd = [binary, "analysis", "-model", model, "-config", config]
+    if threads:
+        cmd += ["-override-config", f"numAnalysisThreads={threads}"]
+    env = dict(os.environ)
+    if gpu is not None:
+        env["CUDA_VISIBLE_DEVICES"] = str(gpu)
+    return AnalysisEngine(cmd, stderr=stderr or subprocess.DEVNULL, env=env)
