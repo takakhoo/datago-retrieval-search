@@ -95,6 +95,25 @@
   "hit_rate": 0.0
  },
  {
+  "run": "paired_greedy_200",
+  "player": "DataGo: stopper, paired openings, no sampling",
+  "baseline": "KataGo 200",
+  "games": 800,
+  "wld": "561-183-56",
+  "score": 0.73625,
+  "score_lo": 0.7075,
+  "score_hi": 0.765,
+  "elo": 178.3331357957635,
+  "elo_lo": 153.4402295112514,
+  "elo_hi": 205.03742915275254,
+  "visits": 199.9357227618336,
+  "restart": 249.91429701577815,
+  "base_visits": 200.0,
+  "rows": 114.64759592141695,
+  "base_rows": 96.46354566385264,
+  "hit_rate": 0.0
+ },
+ {
   "run": "pilot2_stopper_200",
   "player": "DataGo: stopper",
   "baseline": "KataGo 200",
