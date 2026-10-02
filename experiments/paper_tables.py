@@ -135,11 +135,12 @@ def prediction_table() -> None:
     if not p.exists():
         return
     rows = json.loads(p.read_text())["prediction"]
-    lines = [r"\begin{tabular}{rrrrr}", r"\toprule",
-             r"Mean visits & Offline regret & Equivalent & Predicted & Measured Elo \\",
-             r"per move & (\% winrate) & uniform visits & Elo & (95\% interval) \\", r"\midrule"]
+    lines = [r"\begin{tabular}{lrrrrr}", r"\toprule",
+             r" & Mean visits & Offline regret & Equivalent & Predicted & Measured Elo \\",
+             r"Ladder & per move & (\% winrate) & uniform visits & Elo & (95\% interval) \\", r"\midrule"]
     for r in rows:
-        lines.append(f"{r['visits']:.0f} & {100 * r['offline_regret']:.2f} & {r['equivalent_uniform_visits']:.0f} & "
+        lines.append(f"{r.get('ladder', 'four-rung')} & {r['visits']:.0f} & {100 * r['offline_regret']:.2f} & "
+                     f"{r['equivalent_uniform_visits']:.0f} & "
                      f"${r['predicted_elo']:+.0f}$ & ${r['measured_elo']:+.0f}$ "
                      f"(${r['measured_lo']:+.0f}$ to ${r['measured_hi']:+.0f}$) \\\\")
     lines += [r"\bottomrule", r"\end{tabular}"]

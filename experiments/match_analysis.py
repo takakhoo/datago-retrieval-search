@@ -67,7 +67,8 @@ def main() -> None:
         regret, equiv = offline_equivalent(s["visits_per_move"], policy)
         predicted = float(np.interp(np.log2(equiv), logv, elo))
         report["prediction"].append({
-            "run": run, "visits": s["visits_per_move"], "offline_regret": regret,
+            "run": run, "ladder": "six-rung" if policy == six else "four-rung",
+            "visits": s["visits_per_move"], "offline_regret": regret,
             "equivalent_uniform_visits": equiv, "predicted_elo": predicted,
             "measured_elo": s["elo"], "measured_lo": s["elo_lo"], "measured_hi": s["elo_hi"]})
 

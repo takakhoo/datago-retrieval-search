@@ -70,6 +70,24 @@ Table~\ref{tab:rules} runs hand-written stopping signals through the same ladder
 \label{tab:rules}
 \end{table}
 
+\subsection{Against published stopping rules}
+\label{sec:baselines}
+
+How does this compare with what has been published? We re-implemented ten stopping rules from their papers and source code and ran them on the same data, where every rule sees the same root statistics and is scored by the same forced values. To give each rule its natural setting we use the full doubling ladder, so a rule may stop at 50, 100, 200, and so on up to 3{,}200 visits. Table~\ref{tab:baselines} gives the results.
+
+\begin{table}[t]
+\centering\footnotesize
+\resizebox{\linewidth}{!}{\input{tables/baselines}}
+\caption{Compute multipliers on the doubling ladder, with 95\% bootstrap intervals over games. Rules with a threshold are swept and shown at their best point for each mean budget. Rules without one are shown at the configuration nearest the budget, with its mean cost in visits. The last column applies the rate rule to the same signal where that is possible.}
+\label{tab:baselines}
+\end{table}
+
+The rules fall into four groups. \emph{BEHIND} and \emph{UNST} search longer when the player is losing or when the most-visited move is not the highest-valued one \citep{huang2010time}. \emph{STOP} ends a search once the runner-up cannot overtake the leader in the visits that remain, or in a fraction $p$ of them, and \emph{CLOSE} extends it when the top two moves are close in visits \citep{baier2016time}. \emph{Smart pruning} is Leela Chess Zero's form of STOP, which ships with a stop on the per-visit KL gain of the visit distribution \citep{lc0_options}. Two rules come with a statistical rationale: the \emph{VOI} rule stops when a bound on the value of further samples falls below their cost \citep{hay2012selecting}, and the \emph{BAI} rule stops when the leader's confidence interval separates from every rival's \citep{kaufmann2017monte}. Three are learned. The \emph{state-only} rule predicts regret from what is known before any search, in the spirit of \citet{muppidi2026finding}. For \emph{DS-MCTS} \citep{lan2021learning} we train a classifier on root statistics to the authors' label $U(s,n)$, in place of their board-input networks. For \emph{V-MCTS} \citep{ye2022spending} we run the authors' virtual expansion on KataGo's root priors, visits, and winrates with their published $r=0.2$ and $\epsilon=0.1$. The last two are adaptations to a different engine, and we do not claim they reproduce the authors' systems.
+
+Every rule in the table is charged continuation cost, the size of the deepest search, which is what a rule living inside the engine pays. Section~\ref{sec:setup} showed that a restarted search costs about the same in network evaluations. A reader who prefers to charge Mikiri for every restart should compare its four-rung figure of 1.44 at 200 visits with the 1.60 of V-MCTS, which stops inside a single search and has no restarts to charge; the matches in Section~\ref{sec:matches} settle the question in network evaluations.
+
+Three things stand out. First, the rules with a stopping guarantee are far worse than uniform search here (0.34 and 0.77 at 200 visits). They stop on confidence in the leading move, and that confidence says little about whether the game is still in doubt. Second, V-MCTS is the strongest published rule, at 1.60, and Mikiri at 2.13 exceeds it by \pairedVmctsTwo{} at 200 visits and by \pairedVmctsFour{} at 400, as paired differences over the same resampled games. Third, the rate rule improves every signal it can be applied to. It lifts the DS-MCTS classifier from 1.48 to 1.75, and at 400 visits that combination ties Mikiri (difference \pairedDsRateFour). Mikiri's own model with a flat threshold reaches only 1.40. The price on the next rung matters more than which learned signal it is applied to.
+
 \subsection{The model needs little}
 
 Appendix~\ref{app:training} reports ablations and training diagnostics. Removing the trajectory features, removing KataGo's raw error predictions, or keeping only seven features changes the multiplier at 200 visits by at most 0.09. A model of 80 depth-2 trees does nearly as well as one of 400 depth-3 trees. Trained on 300 labeled positions the stopper already reaches 1.50, against 1.82 with 4{,}800. Two choices matter. Fitting the square root of regret instead of regret raises the multiplier from 1.74 to 1.82, because a few very large blunders otherwise dominate the fit. Replacing the rate rule with a flat threshold lowers it to 1.41.

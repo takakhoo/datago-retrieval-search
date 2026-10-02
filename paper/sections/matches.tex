@@ -19,6 +19,8 @@ To read the other results we first need the exchange rate between compute and st
 
 With the ladder 50, 200, 800, 3{,}200 and the controller holding its mean at the opponent's budget, Mikiri scores \mainScore\% over \mainGames{} games (\mainRecord), a gain of $\mainElo$ Elo (95\% interval $\mainEloLo$ to $\mainEloHi$), at \mainVisits{} visits per move. Counting every restarted search it requested \mainRestart{} visits per move, and it ran \mainEvals{} network evaluations per move to KataGo's \mainBaseEvals.
 
+A longer ladder does better. With six rungs (50, 200, 400, 800, 1{,}600, 3{,}200), the best ladder offline by continuation cost, Mikiri scores \longScore\% over \longGames{} games (\longRecord), a gain of $\longElo$ Elo ($\longEloLo$ to $\longEloHi$), at \longVisits{} visits per move. That is more than KataGo gains from doubling its budget ($\unidoubleElo$). The finer ladder restarts more often, so it requested \longRestart{} visits per move with restarts counted, and it ran \longEvals{} evaluations per move to KataGo's \longBaseEvals. Unless we say otherwise, the analyses below use the four-rung match, which has the most games and a full trace.
+
 Visits understate Mikiri's cost in one respect. A fixed-budget engine re-meets much of its previous tree on the next move and finds those evaluations cached. Mikiri's searches vary in size, so less carries over, and it runs more network evaluations per visit. We therefore reran the match with Mikiri granted fewer visits. At a grant of 160 it averaged \strictVisits{} visits per move, \strictRestart{} with every restarted search counted, and \strictEvals{} network evaluations to KataGo's \strictBaseEvals. It scored \strictScore\% over \strictGames{} games (\strictRecord), a gain of $\strictElo$ Elo ($\strictEloLo$ to $\strictEloHi$). At a grant of 140 it averaged \leanVisits{} visits, \leanRestart{} restart visits, and \leanEvals{} evaluations to KataGo's \leanBaseEvals, and gained $\leanElo$ Elo ($\leanEloLo$ to $\leanEloHi$) over \leanGames{} games.
 
 Figure~\ref{fig:elo} places these results against the uniform curve under all three measures of compute. Both Mikiri runs lie above the curve under each. The comparison at equal evaluations is direct: Mikiri in the main match and KataGo at 283 visits run \mainEvals{} and \unirootEvals{} evaluations per move and gain $\mainElo$ and $\unirootElo$ Elo.
@@ -41,7 +43,11 @@ The ladder dataset gives a forecast that can be checked. For each run we take th
 \label{tab:prediction}
 \end{table}
 
-For the main match the forecast is within nine Elo of the result. At 160 visits it is about 30 Elo too high, outside the measured interval. Regret measured on self-play positions is a good guide to match strength and a slightly optimistic one.
+For the four-rung match at 200 visits the forecast is within nine Elo of the result. At 160 visits it is about 30 Elo too high, and for the six-rung ladder about 40 too low; both fall just outside the measured intervals. The forecast orders the three configurations correctly. Regret measured on self-play positions is a usable guide to match strength, good to a few tens of Elo, which makes the ladder dataset a cheap way to choose among stopping rules before playing any games.
+
+\subsection{Prior rules in play}
+
+Section~\ref{sec:baselines} compares ten published stopping rules offline. We packaged the two strongest so that they run in the same player, under the same controller, at the same 200-visit budget. The V-MCTS rule \citep{ye2022spending}, with the authors' constants, gains $\vmctsElo$ Elo ($\vmctsEloLo$ to $\vmctsEloHi$) over \vmctsGames{} games. The DS-MCTS-style classifier \citep{lan2021learning} gains $\dsmctsElo$ Elo ($\dsmctsEloLo$ to $\dsmctsEloHi$) over \dsmctsGames{} games.
 
 \subsection{In-game ablations}
 
@@ -79,12 +85,11 @@ The saving does not carry over to network evaluations. Mikiri ran \memonlyEvals{
 
 The full system combines memory with the stopper and lets the controller reinvest what memory saves. Over \fullGames{} games it scores \fullScore\% (\fullRecord), $\fullElo$ Elo ($\fullEloLo$ to $\fullEloHi$), at \fullVisits{} visits and \fullEvals{} evaluations per move against \fullBaseEvals, with \fullHitRate\% of moves served from a memory that grew to \fullMemory{} positions.
 
-\subsection{Other budgets, a longer ladder, another network, other boards}
+\subsection{Other budgets, another network, other boards}
 
-The same model, trained once on 19$\times$19 positions from the b18 network, was run without retraining in six further settings.
+The same model, trained once on 19$\times$19 positions from the b18 network, was run without retraining in further settings.
 \begin{itemize}
 \item \textbf{Budgets.} Against KataGo at 100, 400, and 800 visits, at matched visits, Mikiri gains $\bhundredElo$ ($\bhundredEloLo$ to $\bhundredEloHi$), $\bfourElo$ ($\bfourEloLo$ to $\bfourEloHi$), and $\beightElo$ ($\beightEloLo$ to $\beightEloHi$) Elo.
-\item \textbf{Longer ladder.} The six-rung ladder 50, 200, 400, 800, 1{,}600, 3{,}200, the best offline by continuation cost, gains $\longElo$ ($\longEloLo$ to $\longEloHi$) Elo at \longVisits{} visits, \longRestart{} restart visits, and \longEvals{} evaluations per move.
 \item \textbf{A stronger network.} On the 28-block network, with both players using it, Mikiri gains $\bignetElo$ ($\bignetEloLo$ to $\bignetEloHi$) Elo.
 \item \textbf{Smaller boards.} On 13$\times$13 and 9$\times$9 it gains $\thirteenElo$ ($\thirteenEloLo$ to $\thirteenEloHi$) and $\nineElo$ ($\nineEloLo$ to $\nineEloHi$) Elo.
 \end{itemize}

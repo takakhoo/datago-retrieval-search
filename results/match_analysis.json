@@ -2,6 +2,7 @@
  "prediction": [
   {
    "run": "main_stopper_160",
+   "ladder": "four-rung",
    "visits": 160.0641235092305,
    "offline_regret": 0.008239521813843385,
    "equivalent_uniform_visits": 296.7066478838745,
@@ -12,6 +13,7 @@
   },
   {
    "run": "main_200",
+   "ladder": "four-rung",
    "visits": 200.39262090131376,
    "offline_regret": 0.007439088837377348,
    "equivalent_uniform_visits": 359.75931788387663,
@@ -22,6 +24,7 @@
   },
   {
    "run": "long_200",
+   "ladder": "six-rung",
    "visits": 200.95963508047163,
    "offline_regret": 0.007135956781999327,
    "equivalent_uniform_visits": 387.64369522215003,

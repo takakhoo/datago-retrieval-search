@@ -140,6 +140,8 @@ We re-implemented ten published rules for deciding how long to search, from thei
 
 Two things stand out. Mikiri is ahead of the strongest prior rule, V-MCTS at its published settings, by 0.54 (0.28 to 0.84) in a paired test over the same games. And Mikiri's rate rule improves other people's signals too: it lifts the DS-MCTS-style classifier from 1.48x to 1.75x.
 
+One caveat on accounting: the table charges every rule the size of its deepest search. Mikiri restarts its search at each rung, and if every restart is charged in full its four-rung ladder comes to 1.44x, below V-MCTS, which stops inside one search and has nothing to restart. On fresh engines a restarted search cost about the same network evaluations as one continuous search, and the head-to-head matches below report evaluations for both players.
+
 These are re-implementations from root search statistics on KataGo, with the adaptations listed in the paper. The two strongest are also being played against KataGo directly, and those match results are added to the table below as they finish.
 
 ## Match results
