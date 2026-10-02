@@ -137,6 +137,7 @@ RUNS = {
     "bignet": "b28_200", "thirteen": "size13_200", "nine": "size9_200",
     "unihalf": "uni_100_vs_200", "unisame": "uni_200_vs_200", "uniroot": "uni_283_vs_200",
     "unidouble": "uni_400_vs_200", "pilot": "pilot2_stopper_200",
+    "rulelcb": "rule_lcb_200", "vonegate": "v1gate_200",
 }
 
 

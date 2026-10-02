@@ -79,6 +79,33 @@ class TreeEnsemble:
                 "trees": [{k: v.tolist() for k, v in t.items()} for t in self.trees]}
 
 
+_ENT = FEATURE_NAMES.index("visit_entropy")
+_PHASE = FEATURE_NAMES.index("phase")
+
+RULES = {
+    # The best rival's winrate minus the chosen move's lower confidence bound, floored at zero.
+    "lcb_margin": lambda x: max(-x[_LCB], 0.0) + 1e-6 * x[_ENT],
+    # The first version's gate: visit entropy scaled by a linear game-phase factor.
+    "v1_entropy": lambda x: x[_ENT] * (0.5 * x[_PHASE] + 0.75),
+}
+
+
+class RuleModel:
+    """A hand-written stopping signal with the same interface as TreeEnsemble."""
+
+    def __init__(self, rule: str):
+        self.rule, self.fn = rule, RULES[rule]
+
+    def raw(self, x: np.ndarray) -> float:
+        return float(self.fn(x))
+
+    def raw_batch(self, X: np.ndarray) -> np.ndarray:
+        return np.array([self.raw(x) for x in X])
+
+    def to_json(self) -> dict:
+        return {"rule": self.rule}
+
+
 class Stopper:
     """Stop at rung j when scale[j] * predicted_regret < threshold.
 
@@ -126,7 +153,8 @@ class Stopper:
     def load(cls, path: str | Path, threshold: float | None = None) -> "Stopper":
         d = json.loads(Path(path).read_text())
         m = d["model"]
-        return cls(TreeEnsemble(m["init"], m["lr"], m["trees"]),
+        model = RuleModel(m["rule"]) if "rule" in m else TreeEnsemble(m["init"], m["lr"], m["trees"])
+        return cls(model,
                    d["threshold"] if threshold is None else threshold,
                    d["path"], d.get("scales"), d["features"], d.get("meta"),
                    bool(d.get("squared", False)))

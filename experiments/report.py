@@ -29,6 +29,10 @@ def describe(name: str, s: dict) -> str:
     if c.get("memory"):
         parts.append("memory" + (" + deepening" if c.get("deepen") else ""))
     grant = c.get("grant") or c["budget"]
+    if "rule_lcb" in str(c.get("stopper")):
+        parts = ["hand-written LCB rule"]
+    elif "rule_v1" in str(c.get("stopper")):
+        parts = ["v1 entropy gate, flat threshold"]
     label = f"Mikiri ({' + '.join(parts)}), {grant:g}-visit grant"
     if "long" in name:
         label += ", six-rung ladder"
