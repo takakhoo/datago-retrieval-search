@@ -80,23 +80,39 @@ class TreeEnsemble:
 
 
 class Stopper:
+    """Stop at rung j when scale[j] * predicted_regret < threshold.
+
+    With scale[j] proportional to 1 / (visits needed to reach the next rung),
+    the rule compares the regret still on the table with the price of going
+    on, so a high rung needs more at stake than a low one to continue.
+    """
+
     def __init__(self, model: TreeEnsemble, threshold: float, path: list[int],
-                 features: list[str] | None = None, meta: dict | None = None):
+                 scales: list[float] | None = None, features: list[str] | None = None,
+                 meta: dict | None = None):
         self.model, self.threshold, self.path = model, threshold, list(path)
+        self.scales = list(scales) if scales is not None else [1.0] * (len(path) - 1)
         self.features = features or STOPPER_FEATURES
         self.meta = meta or {}
         if self.features != STOPPER_FEATURES:
             raise ValueError("stopper was trained on a different feature list")
+        if len(self.scales) != len(self.path) - 1:
+            raise ValueError("need one scale per non-final rung")
 
-    def score(self, x: np.ndarray) -> float:
-        return self.model.raw(x)
+    @staticmethod
+    def rate_scales(path: list[int]) -> list[float]:
+        steps = np.diff(np.asarray(path, dtype=float))
+        return (steps[0] / steps).tolist()
 
-    def should_stop(self, x: np.ndarray) -> bool:
-        return self.score(x) < self.threshold
+    def score(self, x: np.ndarray, rung: int = 0) -> float:
+        return self.scales[rung] * self.model.raw(x)
+
+    def should_stop(self, x: np.ndarray, rung: int = 0) -> bool:
+        return self.score(x, rung) < self.threshold
 
     def save(self, path: str | Path) -> None:
         Path(path).write_text(json.dumps({
-            "version": 1, "threshold": self.threshold, "path": self.path,
+            "version": 2, "threshold": self.threshold, "path": self.path, "scales": self.scales,
             "features": self.features, "meta": self.meta, "model": self.model.to_json()}))
 
     @classmethod
@@ -105,4 +121,4 @@ class Stopper:
         m = d["model"]
         return cls(TreeEnsemble(m["init"], m["lr"], m["trees"]),
                    d["threshold"] if threshold is None else threshold,
-                   d["path"], d["features"], d.get("meta"))
+                   d["path"], d.get("scales"), d["features"], d.get("meta"))

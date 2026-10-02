@@ -105,7 +105,7 @@ class DataGoPlayer:
                 break
             x = extract(res, board)
             t, n_changes = trajectory(prev_x, x, prev_move, res.best.point, n_changes)
-            if self.stopper.should_stop(np.concatenate([x, t])):
+            if self.stopper.should_stop(np.concatenate([x, t]), j):
                 break
             prev_x, prev_move = x, res.best.point
         return res, restart, j

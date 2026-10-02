@@ -74,8 +74,10 @@ def at_cost(front: list[dict], budget: float, key: str = "cost_continue") -> dic
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("data")
-    ap.add_argument("--paths", default="50,200,800;100,400,1600;50,100,200,400,800;50,200,800,3200")
-    ap.add_argument("--kinds", default="reg,clf")
+    ap.add_argument("--paths", default="50,200,800;50,200,800,3200;100,400,1600;50,100,200,400,800,1600,3200")
+    ap.add_argument("--kinds", default="reg")
+    ap.add_argument("--rule", default="rate", choices=["rate", "flat"],
+                    help="rate scales predicted regret by the visits needed to reach the next rung")
     ap.add_argument("--trees", type=int, default=150)
     ap.add_argument("--depth", type=int, default=3)
     ap.add_argument("--cut", type=float, default=0.005)
@@ -109,6 +111,9 @@ def main() -> None:
                 model = fit(kind, X[tr][:, :-1].reshape(-1, X.shape[2]),
                             regret[tr][:, :-1].reshape(-1), args.trees, args.depth, args.cut)
                 scores[te, :-1] = raw(kind, model, X[te][:, :-1].reshape(-1, X.shape[2])).reshape(-1, P - 1)
+            scales = np.array(Stopper.rate_scales([int(v) for v in pstr.split(",")])
+                              if args.rule == "rate" else [1.0] * (P - 1))
+            scores[:, :-1] *= scales[None, :]
             front = frontier(lad, path, scores)
             oracle = frontier(lad, path, regret)
             key = f"{pstr}:{kind}"
@@ -137,12 +142,14 @@ def main() -> None:
         calib = [{"threshold": r["threshold"], "cost_continue": r["cost_continue"],
                   "cost_restart": r["cost_restart"], "regret": r["regret"],
                   "equivalent_visits": r["equivalent_visits"]} for r in front]
+        visits_path = [int(v) for v in pstr.split(",")]
         stopper = Stopper(TreeEnsemble.from_sklearn(model), calib[len(calib) // 2]["threshold"],
-                          [int(v) for v in pstr.split(",")],
-                          meta={"kind": kind, "positions": len(lad), "trees": args.trees,
+                          visits_path,
+                          Stopper.rate_scales(visits_path) if args.rule == "rate" else None,
+                          meta={"kind": kind, "rule": args.rule, "positions": len(lad), "trees": args.trees,
                                 "depth": args.depth, "cut": args.cut, "calibration": calib,
                                 "note": "calibration is cross-fitted; thresholds map to mean cost"})
-        name = f"stopper_{pstr.replace(',', '-')}_{kind}.json"
+        name = f"stopper_{pstr.replace(',', '-')}.json"
         stopper.save(out / name)
         print(f"\nexported {out / name}")
 

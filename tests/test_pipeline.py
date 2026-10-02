@@ -101,9 +101,11 @@ def test_tree_ensemble_matches_sklearn(tmp_path):
     gbc = sklearn.GradientBoostingClassifier(n_estimators=40, max_depth=3).fit(X, y > 0.3)
     ens_c = TreeEnsemble.from_sklearn(gbc)
     assert np.allclose(ens_c.raw_batch(X[:50]), gbc.decision_function(X[:50]), atol=1e-9)
-    Stopper(ens, 0.1, [50, 200]).save(tmp_path / "s.json")
+    Stopper(ens, 0.1, [50, 200, 800], Stopper.rate_scales([50, 200, 800])).save(tmp_path / "s.json")
     again = Stopper.load(tmp_path / "s.json")
-    assert again.score(X[0]) == pytest.approx(gbr.predict(X[:1])[0], abs=1e-9)
+    assert again.scales == [1.0, 0.25]
+    assert again.score(X[0], 0) == pytest.approx(gbr.predict(X[:1])[0], abs=1e-9)
+    assert again.score(X[0], 1) == pytest.approx(0.25 * gbr.predict(X[:1])[0], abs=1e-9)
 
 
 def test_series_ledger_never_overspends_and_memory_gets_hits(engine):

@@ -1,0 +1,28 @@
+\section{Testbed}
+\label{sec:setup}
+
+Every number in this paper comes from one harness, built so that the two players differ only in how they spend visits.
+
+\paragraph{Engine.}
+Both players call KataGo v1.18.2 (CUDA backend) through its JSON analysis engine \citep{katago_analysis}. A query names a position, a visit limit, and optionally the root moves the search may consider. Each query is an independent search: the engine clears its tree afterwards, so no player inherits a tree from an earlier move. We run one search thread per query, which removes virtual-loss effects and makes a visit mean the same thing at every budget, and we get throughput from 64 concurrent queries. The analysis engine widens the root by default (\texttt{wideRootNoise} 0.04). We set it to zero, as the engine's documentation advises for play. Unless stated otherwise the network is \texttt{kata1-b18c384nbt-s9996604416-d4316597426}.
+
+\paragraph{Rules and move selection.}
+Games use area scoring, positional superko, no suicide, and komi 7. Under these rules KataGo puts Black's winning chances from the empty board at 48\% with komi 7 and at 37\% with komi 7.5, so komi 7 is the fair setting; a tied game counts half a point for each side. Both players choose moves the way KataGo's GTP front end does by default: they sample in proportion to visits raised to $1/T$, with $T$ falling from 0.5 toward 0.1 with a half-life of 19 moves, among moves holding at least 2\% of the visits. A player resigns after three consecutive turns below 3\% winrate, and never before move 90. Games that reach two passes are scored on the board by Tromp-Taylor area.
+
+\paragraph{Position identity.}
+The harness keeps its own board with captures, simple ko, and positional superko. Over 40 recorded games (7{,}247 moves, 381 captures) its stones agreed with KataGo's own board at every one of 309 checkpoints. A position's key is a hash of the lexicographically smallest encoding of stones, ko point, and side to move over the eight board symmetries, together with komi and rules. Symmetric positions share a key, and stored moves are mapped back through the query's own symmetry.
+
+\paragraph{Three measures of compute.}
+A player that searches a position at 50 visits and then at 200 has issued 250 visits of queries. Whether it has done 250 visits of work depends on the engine. With one search thread, KataGo's search is deterministic given its cached network evaluations, and the 50-visit tree is a prefix of the 200-visit tree. We measured this directly on fresh engines: over six midgame positions, a 200-visit search followed by a 400-visit search evaluated 366 to 396 network rows, against 353 to 395 rows for the 400-visit search alone. Restarting at a higher budget therefore costs about what extending the tree in place would. We report three numbers for every match and leave the choice to the reader:
+\begin{itemize}
+  \item \textbf{continuation visits}: the size of the deepest search run for a move, which is what an in-engine implementation would pay;
+  \item \textbf{restart visits}: the sum of every search requested, an upper bound;
+  \item \textbf{network rows}: evaluations each player's own engine process actually executed, read from its log at exit.
+\end{itemize}
+Each player runs in its own KataGo process so the third number is attributable. Budgets are matched on continuation visits.
+
+\paragraph{Match formats.}
+A \emph{series} is repeated play from the empty board with alternating colours, which is how an engine is used in practice and is the setting in which positions recur. Consecutive games form colour-balanced pairs, and intervals are bootstrap percentiles over pairs. Elo differences are $-400\log_{10}(1/s-1)$ for score $s$.
+
+\paragraph{What changed from the first version.}
+The first version of DataGo reported 9--0--1 and 8--0--2 records against KataGo. Those matches drove one KataGo process through GTP and analysed positions with \texttt{kata-genmove\_analyze}, a command that also plays the move it generates. Every deep search therefore added a black stone before White replied, and retrieved moves were never sent to the engine. We reproduce the behaviour with the original controller in the repository's \texttt{legacy/AUDIT.md}: three black stones after one black turn. None of the earlier numbers are used here.
