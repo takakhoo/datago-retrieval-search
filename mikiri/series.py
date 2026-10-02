@@ -117,10 +117,12 @@ class BudgetController:
 def run_series(a: Player, b: Player, cfg: GameConfig, games: int, seed: int = 0,
                workers: int = 32, out_path: str | Path | None = None,
                after_game: Callable[[GameRecord], None] | None = None,
-               progress: Callable[[int, int, GameRecord], None] | None = None) -> list[GameRecord]:
+               progress: Callable[[int, int, GameRecord], None] | None = None,
+               skip: set[int] | None = None) -> list[GameRecord]:
     """Play `games` games from the empty board, alternating colors.
 
     Games 2k and 2k+1 share opening id k, so pair statistics are balanced by color.
+    `skip` lists game indices already played by an interrupted run.
     """
     seeds = np.random.SeedSequence(seed).spawn(games)
     lock = threading.Lock()
@@ -136,7 +138,8 @@ def run_series(a: Player, b: Player, cfg: GameConfig, games: int, seed: int = 0,
 
     try:
         with ThreadPoolExecutor(workers) as pool:
-            for fut in as_completed([pool.submit(run, i) for i in range(games)]):
+            todo = [i for i in range(games) if not skip or i not in skip]
+            for fut in as_completed([pool.submit(run, i) for i in todo]):
                 rec = fut.result()
                 with lock:
                     records.append(rec)

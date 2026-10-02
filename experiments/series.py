@@ -20,7 +20,7 @@ from pathlib import Path
 from mikiri.engine import open_katago
 import numpy as np
 
-from mikiri.match import GameConfig, run_match, sample_openings, summarize
+from mikiri.match import GameConfig, load_records, run_match, sample_openings, summarize
 from mikiri.memory import Memory
 from mikiri.players import MikiriPlayer, KataGoPlayer, Temperature
 from mikiri.series import BudgetController, Deepener, Ledger, run_series
@@ -62,6 +62,8 @@ def main() -> None:
     ap.add_argument("--opening-plies", type=int, default=12)
     ap.add_argument("--greedy", action="store_true",
                     help="both players always play the engine's top move (no sampling)")
+    ap.add_argument("--resume", action="store_true",
+                    help="continue an interrupted series: keep the games already recorded and play the rest")
     ap.add_argument("--workers", type=int, default=48)
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
@@ -92,6 +94,7 @@ def main() -> None:
         t0 = time.time()
 
         def progress(done, total, rec):
+            done += len(earlier)
             if done % 50 == 0 or done == total:
                 s = summarize(records_so_far, "mikiri")
                 print(f"{done}/{total} games  score {s['score']:.3f}  "
@@ -101,6 +104,10 @@ def main() -> None:
                       f"{(time.time() - t0) / 60:.1f} min", flush=True)
 
         records_so_far: list = []
+        earlier: list = []
+        if args.resume and not args.paired and (out / "games.jsonl").exists():
+            earlier = load_records(out / "games.jsonl")
+            print(f"resuming: {len(earlier)} games already recorded", flush=True)
         accountant = hook or Deepener("mikiri", Memory(), eng_d, ledger, 1, args.komi, enabled=False)
         if stopper is not None and args.control:
             controller = BudgetController(stopper, grant, share=args.play_share)
@@ -109,6 +116,13 @@ def main() -> None:
         def after(rec):
             records_so_far.append(rec)
             accountant(rec)
+
+        was_enabled = getattr(accountant, "enabled", False)
+        accountant.enabled = False  # replaying old records must not trigger new deepening
+        for rec in earlier:
+            after(rec)
+        accountant.enabled = was_enabled
+        done = {2 * r.opening + (0 if r.black == "mikiri" else 1) for r in earlier}
 
         if args.paired:
             openings = sample_openings(eng_k, args.paired, cfg, args.opening_plies,
@@ -119,21 +133,27 @@ def main() -> None:
             records = run_match(mikiri, katago, cfg, openings, args.seed, args.workers,
                                 out / "games.jsonl", progress, after)
         else:
-            records = run_series(mikiri, katago, cfg, args.games, args.seed, args.workers,
-                                 out / "games.jsonl", after, progress)
+            new = run_series(mikiri, katago, cfg, args.games, args.seed, args.workers,
+                             out / "games.jsonl", after, progress, skip=done)
+            records = earlier + new
         elapsed = time.time() - t0
         eng_d.close()
         eng_k.close()
 
     s = summarize(records, "mikiri")
-    turns_d = sum(r.turns["mikiri"] for r in records)
-    turns_k = sum(r.turns["katago"] for r in records)
+    # The engine logs only cover games played by this process, so evaluations
+    # per move are computed over those games.
+    fresh = records[len(earlier):]
+    turns_d = sum(r.turns["mikiri"] for r in fresh)
+    turns_k = sum(r.turns["katago"] for r in fresh)
     rows_d, rows_k = nn_rows(log_d), nn_rows(log_k)
     s.update({
-        "config": vars(args), "minutes": elapsed / 60,
-        "baseline_visits_per_move": sum(r.visits["katago"] for r in records) / max(turns_k, 1),
+        "config": vars(args), "minutes": elapsed / 60, "resumed_from_games": len(earlier),
+        "baseline_visits_per_move": sum(r.visits["katago"] for r in records) / max(
+            sum(r.turns["katago"] for r in records), 1),
         "mikiri_total_visits_per_move_incl_deepening":
-            (sum(r.visits["mikiri"] for r in records) + ledger.deepening) / max(turns_d, 1),
+            (sum(r.visits["mikiri"] for r in records) + ledger.deepening) / max(
+                sum(r.turns["mikiri"] for r in records), 1),
         "nn_rows_per_move": {"mikiri": rows_d / max(turns_d, 1) if rows_d else None,
                              "katago": rows_k / max(turns_k, 1) if rows_k else None},
         "ledger": {"granted": ledger.granted, "played": ledger.played,
