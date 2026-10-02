@@ -1,0 +1,35 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amsfonts}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage{url}
+\graphicspath{{../results/figures/}{../results/demo/}}
+
+\title{DataGo: Learned Stopping and Exact Search Memory\\ on a Frozen Go Engine}
+\author{Benjamin Huh \and Jason Peng \and Taka Khoo \and Olir Eswaramoorthy \and David Roos \and Victor Lun Pun\\[4pt]
+Thayer School of Engineering, Dartmouth College}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\input{sections/abstract}
+\input{sections/intro}
+\input{sections/related}
+\input{sections/setup}
+\input{sections/method}
+\input{sections/offline}
+\input{sections/matches}
+\input{sections/retrieval}
+\input{sections/limits}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}
