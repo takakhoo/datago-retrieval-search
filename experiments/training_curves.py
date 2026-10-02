@@ -109,12 +109,18 @@ def main() -> None:
               "data_curve": data_curve, "calibration": calibration, "permutation_importance": feats}
     Path(args.out).write_text(json.dumps(report, indent=1))
 
+    plot(report, Path(args.figures))
+
+
+def plot(report: dict, out: Path) -> None:
+    b, data_curve = report["boosting"], report["data_curve"]
+    train_curve, test_curve = b["train"], b["held_out"]
     fig, axes = plt.subplots(1, 2, figsize=(10.4, 3.7))
     t = np.arange(1, len(train_curve) + 1)
     axes[0].plot(t, 1e3 * np.array(train_curve), color=GRAY, label="Training games")
     axes[0].plot(t, 1e3 * np.array(test_curve), color=BLUE, label="Held-out games")
-    axes[0].axvline(PARAMS["n_estimators"], color=MUTED, linewidth=0.8, linestyle=(0, (3, 3)))
-    axes[0].text(PARAMS["n_estimators"] + 6, 1e3 * max(train_curve[0], test_curve[0]) * 0.985,
+    axes[0].axvline(b["deployed_trees"], color=MUTED, linewidth=0.8, linestyle=(0, (3, 3)))
+    axes[0].text(b["deployed_trees"] + 6, 1e3 * max(train_curve[0], test_curve[0]) * 0.985,
                  "deployed model", color=MUTED, fontsize=8, va="top")
     axes[0].set_xlabel("Boosting rounds (trees)")
     axes[0].set_ylabel(r"Squared error of $\sqrt{\mathrm{regret}}$ ($\times 10^{-3}$)")
@@ -137,28 +143,39 @@ def main() -> None:
     axes[1].set_ylabel("Compute multiplier at 200 visits")
     axes[1].set_title("How much data it needs")
     axes[1].legend(loc="lower right")
-    save(fig, Path(args.figures), "training")
+    save(fig, out, "training")
 
-    fig, axes = plt.subplots(1, 2, figsize=(10.4, 3.7))
-    cp = [100 * c["predicted"] for c in calibration]
-    cr = [100 * c["realized"] for c in calibration]
-    lim = max(cp + cr) * 1.08
-    axes[0].plot([0, lim], [0, lim], color=MUTED, linewidth=0.8)
-    axes[0].plot(cp, cr, color=BLUE, marker="o", markersize=6)
-    axes[0].set_xlim(0, lim)
-    axes[0].set_ylim(0, lim)
-    axes[0].set_xlabel("Predicted remaining regret (% winrate)")
-    axes[0].set_ylabel("Realized (% winrate)")
-    axes[0].set_title("Predictions are calibrated on held-out games")
-    top = feats[:10][::-1]
+    cal, feats = report["calibration"], report["permutation_importance"]
+    fig, axes = plt.subplots(1, 2, figsize=(11.4, 3.7), gridspec_kw={"wspace": 0.78, "width_ratios": [1.1, 1]})
+    deciles = np.arange(1, len(cal) + 1)
+    bars = axes[0].bar(deciles, [100 * c["realized"] for c in cal], width=0.62, color=BLUE)
+    for bar, c in zip(bars, cal):
+        axes[0].text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.06,
+                     f"{100 * c['realized']:.2f}", ha="center", fontsize=7.5, color=INK)
+    axes[0].set_xticks(deciles)
+    axes[0].set_ylim(0, 100 * cal[-1]["realized"] * 1.12)
+    axes[0].grid(axis="x", visible=False)
+    axes[0].set_xlabel("Decile of the stopper's predicted stake (held-out games)")
+    axes[0].set_ylabel("Realized regret (% winrate)")
+    axes[0].set_title("Higher predicted stake, higher real regret")
+    top = feats[:8][::-1]
     axes[1].barh(range(len(top)), [100 * d["increase_in_error"] for d in top], color=BLUE, height=0.62)
     axes[1].set_yticks(range(len(top)))
-    axes[1].set_yticklabels([d["feature"].replace("_", " ") for d in top], color=INK)
+    pretty = {"wr_x_lcb_margin": "game undecided x move contested", "best_prior": "prior of chosen move",
+              "raw_wr_error": "KataGo's predicted winrate error", "lcb_margin": "confidence margin (LCB)",
+              "visit_entropy": "visit entropy", "q_gap": "value gap to best rival",
+              "top1_share": "top move's visit share", "max_prior": "largest prior",
+              "undecided": "game undecided", "log_visits": "log visits"}
+    axes[1].set_yticklabels([pretty.get(d["feature"], d["feature"].replace("_", " ")) for d in top], color=INK)
     axes[1].grid(axis="y", visible=False)
     axes[1].set_xlabel("Increase in held-out error when shuffled (%)")
     axes[1].set_title("What the model relies on")
-    save(fig, Path(args.figures), "stopper_diagnostics")
+    save(fig, out, "stopper_diagnostics")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "--replot":
+        plot(json.loads(Path("results/stopper/training.json").read_text()), Path("results/figures"))
+    else:
+        main()

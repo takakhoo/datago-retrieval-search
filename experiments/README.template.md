@@ -75,11 +75,11 @@ The model is a gradient-boosted tree regressor on statistics the search already 
 
 ![Training curves for the stopper](results/figures/training.png)
 
-Left: error on held-out games levels off by the 150 trees we deploy. Right: {{training_sentence}}
+Left: error on held-out games levels off after about 100 trees. We deploy 150. Right: {{training_sentence}}
 
 ![Calibration and feature importance](results/figures/stopper_diagnostics.png)
 
-Left: predicted and realized regret agree on games the model never saw. Right: the model leans on a few signals. Ablations agree: seven features do nearly as well as all of them, and 80 depth-2 trees do as well as 400 depth-3 trees. The rule matters more than the model.
+Left: on games the model never saw, positions it scores higher really do carry more regret, from 0.02% of winrate in the lowest tenth to 4.2% in the highest. Right: the model leans mostly on one signal, the product of how undecided the game is and how contested the move is. Ablations agree: seven features do nearly as well as all of them, and 80 depth-2 trees do as well as 400 depth-3 trees. The rule matters more than the model.
 
 ### 5. What it buys, offline
 
