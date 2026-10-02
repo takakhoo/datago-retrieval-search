@@ -95,6 +95,25 @@
   "hit_rate": 0.0
  },
  {
+  "run": "dsmcts_200",
+  "player": "DS-MCTS-style rule (Lan et al. 2021) in the same player, 200-visit grant",
+  "baseline": "KataGo 200",
+  "games": 600,
+  "wld": "395-157-48",
+  "score": 0.6983333333333334,
+  "score_lo": 0.6625,
+  "score_hi": 0.7333333333333333,
+  "elo": 145.81417923884433,
+  "elo_lo": 117.16484217672065,
+  "elo_hi": 175.733077532105,
+  "visits": 200.26718818862935,
+  "restart": 350.5343763772587,
+  "base_visits": 200.0,
+  "rows": 105.31207304980167,
+  "base_rows": 76.51894975599697,
+  "hit_rate": 0.0
+ },
+ {
   "run": "full_200",
   "player": "Mikiri (stopper + memory), 200-visit grant",
   "baseline": "KataGo 200",

@@ -77,8 +77,8 @@ def main() -> None:
     # Other rules carry their own cross-fitted calibration in the model file.
     for run, label, model in (("double_200", "Mikiri, seven-rung", "stopper_b18_double"),
                               ("short_200", "Mikiri, V-MCTS ladder", "stopper_b18_short"),
-                              ("vmcts_200", "V-MCTS rule", "baseline_vmcts"),
-                              ("dsmcts_200", "DS-MCTS-style rule", "baseline_dsmcts")):
+                              ("vmcts_200", "V-MCTS", "baseline_vmcts"),
+                              ("dsmcts_200", "DS-MCTS-style", "baseline_dsmcts")):
         p = RES / "matches" / run / "summary.json"
         if not p.exists():
             continue

@@ -35,7 +35,7 @@
   },
   {
    "run": "vmcts_200",
-   "ladder": "V-MCTS rule",
+   "ladder": "V-MCTS",
    "visits": 200.2250637919665,
    "offline_regret": 0.00802224996978354,
    "equivalent_uniform_visits": 312.4826218402849,
@@ -43,6 +43,17 @@
    "measured_elo": 134.95200708113003,
    "measured_lo": 107.53812491703204,
    "measured_hi": 164.06978603561973
+  },
+  {
+   "run": "dsmcts_200",
+   "ladder": "DS-MCTS-style",
+   "visits": 200.26718818862935,
+   "offline_regret": 0.008211462057575232,
+   "equivalent_uniform_visits": 298.5754547917313,
+   "predicted_elo": 128.3568277322496,
+   "measured_elo": 145.81417923884433,
+   "measured_lo": 117.16484217672065,
+   "measured_hi": 175.733077532105
   }
  ],
  "colour": {

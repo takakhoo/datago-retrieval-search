@@ -141,16 +141,17 @@ These are re-implementations from root search statistics on KataGo, with the ada
 
 ### Head to head, in real games
 
-The strongest prior rule, V-MCTS, was packaged into the same player and held to the same 200 visits per move by the same controller.
+The two strongest prior rules were packaged into the same player and held to the same 200 visits per move by the same controller.
 
 | Against KataGo at 200 visits | Games | Elo gain (95% interval) | Network evaluations per move (it : KataGo) |
 |---|---|---|---|
 | V-MCTS rule, published settings | {{vmcts.games}} | {{vmcts.elo}} ({{vmcts.elo_lo}} to {{vmcts.elo_hi}}) | {{vmcts.evals}} : {{vmcts.base_evals}} |
+| DS-MCTS-style rule | {{dsmcts.games}} | {{dsmcts.elo}} ({{dsmcts.elo_lo}} to {{dsmcts.elo_hi}}) | {{dsmcts.evals}} : {{dsmcts.base_evals}} |
 | Mikiri, four-rung ladder | {{main.games}} | {{main.elo}} ({{main.elo_lo}} to {{main.elo_hi}}) | {{main.evals}} : {{main.base_evals}} |
 | Mikiri, six-rung ladder | {{long.games}} | {{long.elo}} ({{long.elo_lo}} to {{long.elo_hi}}) | {{long.evals}} : {{long.base_evals}} |
 | Mikiri's rule on V-MCTS's own ladder (50, 100, 200, 400) | {{short.games}} | {{short.elo}} ({{short.elo_lo}} to {{short.elo_hi}}) | {{short.evals}} : {{short.base_evals}} |
 
-At equal visits Mikiri is clearly ahead: the intervals do not overlap. Counted in network evaluations it is closer. V-MCTS never searches past 400 visits, so more of its work is already in KataGo's cache, and it ran {{vmcts.evals}} evaluations per move to Mikiri's {{main.evals}}. Interpolating between Mikiri's 160-visit and 200-visit matches puts it at about +135 Elo at {{vmcts.evals}} evaluations, level with V-MCTS. The last row is the controlled test, with both rules on the same ladder so that they differ in nothing else (offline, 1.80x for Mikiri's rule against 1.60x). Rows that say pending are still being played.
+At equal visits Mikiri is clearly ahead of both: the intervals do not overlap. The DS-MCTS-style rule also runs more network evaluations than Mikiri, so Mikiri leads it on every measure. Against V-MCTS, counting network evaluations, it is closer. V-MCTS never searches past 400 visits, so more of its work is already in KataGo's cache, and it ran {{vmcts.evals}} evaluations per move to Mikiri's {{main.evals}}. Interpolating between Mikiri's 160-visit and 200-visit matches puts it at about +135 Elo at {{vmcts.evals}} evaluations, level with V-MCTS. The last row is the controlled test, with both rules on the same ladder so that they differ in nothing else (offline, 1.80x for Mikiri's rule against 1.60x). Rows that say pending are still being played.
 
 ## Match results
 
