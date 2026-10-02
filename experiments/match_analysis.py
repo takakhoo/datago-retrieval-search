@@ -69,14 +69,14 @@ def main() -> None:
         regret, equiv = offline_equivalent(s["visits_per_move"], policy)
         predicted = float(np.interp(np.log2(equiv), logv, elo))
         report["prediction"].append({
-            "run": run, "ladder": "Mikiri, six-rung" if policy == six else "Mikiri, four-rung",
+            "run": run, "ladder": "Mikiri, 6 rungs" if policy == six else "Mikiri, 4 rungs",
             "visits": s["visits_per_move"], "offline_regret": regret,
             "equivalent_uniform_visits": equiv, "predicted_elo": predicted,
             "measured_elo": s["elo"], "measured_lo": s["elo_lo"], "measured_hi": s["elo_hi"]})
 
     # Other rules carry their own cross-fitted calibration in the model file.
-    for run, label, model in (("double_200", "Mikiri, seven-rung", "stopper_b18_double"),
-                              ("short_200", "Mikiri, V-MCTS ladder", "stopper_b18_short"),
+    for run, label, model in (("double_200", "Mikiri, 7 rungs", "stopper_b18_double"),
+                              ("short_200", "Mikiri, short ladder", "stopper_b18_short"),
                               ("vmcts_200", "V-MCTS", "baseline_vmcts"),
                               ("dsmcts_200", "DS-MCTS-style", "baseline_dsmcts")):
         p = RES / "matches" / run / "summary.json"

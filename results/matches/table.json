@@ -247,6 +247,25 @@
   "hit_rate": 0.0
  },
  {
+  "run": "short_200",
+  "player": "Mikiri (stopper), 200-visit grant, same ladder as V-MCTS",
+  "baseline": "KataGo 200",
+  "games": 600,
+  "wld": "404-160-36",
+  "score": 0.7033333333333334,
+  "score_lo": 0.6675,
+  "score_hi": 0.7383333333333333,
+  "elo": 149.95697946111193,
+  "elo_lo": 121.06384815899574,
+  "elo_hi": 180.2016295255343,
+  "visits": 200.0901420638927,
+  "restart": 350.1802841277854,
+  "base_visits": 200.0,
+  "rows": 91.65196509699287,
+  "base_rows": 73.75415688927919,
+  "hit_rate": 0.0
+ },
+ {
   "run": "vmcts_200",
   "player": "V-MCTS rule (Ye et al. 2022) in the same player, 200-visit grant",
   "baseline": "KataGo 200",

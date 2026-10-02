@@ -2,7 +2,7 @@
  "prediction": [
   {
    "run": "main_stopper_160",
-   "ladder": "Mikiri, four-rung",
+   "ladder": "Mikiri, 4 rungs",
    "visits": 160.0641235092305,
    "offline_regret": 0.008239521813843385,
    "equivalent_uniform_visits": 296.7066478838745,
@@ -13,7 +13,7 @@
   },
   {
    "run": "main_200",
-   "ladder": "Mikiri, four-rung",
+   "ladder": "Mikiri, 4 rungs",
    "visits": 200.39262090131376,
    "offline_regret": 0.007439088837377348,
    "equivalent_uniform_visits": 359.75931788387663,
@@ -24,7 +24,7 @@
   },
   {
    "run": "long_200",
-   "ladder": "Mikiri, six-rung",
+   "ladder": "Mikiri, 6 rungs",
    "visits": 200.76309620872402,
    "offline_regret": 0.007140789085538788,
    "equivalent_uniform_visits": 387.1566557237724,
@@ -32,6 +32,17 @@
    "measured_elo": 227.55665123012315,
    "measured_lo": 202.63049362317514,
    "measured_hi": 253.59086784817566
+  },
+  {
+   "run": "short_200",
+   "ladder": "Mikiri, short ladder",
+   "visits": 200.0901420638927,
+   "offline_regret": 0.0074607050625212995,
+   "equivalent_uniform_visits": 357.8654479124983,
+   "predicted_elo": 195.5130731206723,
+   "measured_elo": 149.95697946111193,
+   "measured_lo": 121.06384815899574,
+   "measured_hi": 180.2016295255343
   },
   {
    "run": "vmcts_200",
