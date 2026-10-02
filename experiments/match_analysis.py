@@ -58,12 +58,13 @@ def score(rec: dict, name: str = "mikiri") -> float:
 def main() -> None:
     logv, elo = uniform_elo_curve()
     report: dict = {"prediction": [], "colour": {}, "advantage": {}}
-    for run in ("main_140", "main_stopper_160", "main_200"):
+    four, six = "50,200,800,3200:sqrt", "50,200,400,800,1600,3200:sqrt"
+    for run, policy in (("main_140", four), ("main_stopper_160", four), ("main_200", four), ("long_200", six)):
         p = RES / "matches" / run / "summary.json"
         if not p.exists():
             continue
         s = json.loads(p.read_text())
-        regret, equiv = offline_equivalent(s["visits_per_move"])
+        regret, equiv = offline_equivalent(s["visits_per_move"], policy)
         predicted = float(np.interp(np.log2(equiv), logv, elo))
         report["prediction"].append({
             "run": run, "visits": s["visits_per_move"], "offline_regret": regret,

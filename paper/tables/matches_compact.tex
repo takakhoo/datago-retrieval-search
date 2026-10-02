@@ -1,0 +1,23 @@
+\begin{tabular}{lrrrrrr}
+\toprule
+Player (vs.\ KataGo at 200 visits) & Games & W--L--D & Elo (95\% interval) & Visits & Restart & Evals \\
+\midrule
+KataGo, 100 visits & 400 & 77--301--22 & $-220$ ($-262$, $-181$) & 100 & 100 & 40 : 71 \\
+KataGo, 283 visits & 400 & 247--126--27 & $+108$ ($+76$, $+143$) & 283 & 283 & 98 : 73 \\
+KataGo, 400 visits & 400 & 310--73--17 & $+237$ ($+198$, $+280$) & 400 & 400 & 132 : 73 \\
+\midrule
+Mikiri, six-rung ladder & 600 & 471--87--42 & $+263$ ($+230$, $+301$) & 201 & 305 & 100 : 76 \\
+Mikiri, four-rung ladder & 1,000 & 728--196--76 & $+206$ ($+181$, $+232$) & 200 & 251 & 99 : 74 \\
+Mikiri, four-rung, 160-visit grant & 1,000 & 586--325--89 & $+93$ ($+72$, $+114$) & 160 & 197 & 80 : 74 \\
+Mikiri, four-rung, 140-visit grant & \multicolumn{6}{c}{(running)} \\
+Mikiri, four-rung, no move sampling & 800 & 561--183--56 & $+178$ ($+153$, $+205$) & 200 & 250 & 115 : 96 \\
+\midrule
+V-MCTS rule (Ye et al.) & \multicolumn{6}{c}{(running)} \\
+DS-MCTS-style rule (Lan et al.) & \multicolumn{6}{c}{(running)} \\
+LCB margin with rate rule, no learning & \multicolumn{6}{c}{(running)} \\
+Entropy gate, flat threshold & \multicolumn{6}{c}{(running)} \\
+\midrule
+Memory only & 600 & 276--292--32 & $-9$ ($-37$, $+19$) & 158 & 158 & 69 : 69 \\
+Mikiri four-rung + memory & \multicolumn{6}{c}{(running)} \\
+\bottomrule
+\end{tabular}

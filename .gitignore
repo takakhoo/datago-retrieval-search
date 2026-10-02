@@ -6,3 +6,5 @@ __pycache__/
 .DS_Store
 runs/
 *.tmp
+paper/ijcai/kit.zip
+paper/ijcai/FormattingGuidelines-IJCAI-ECAI-26/

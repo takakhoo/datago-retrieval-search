@@ -19,6 +19,16 @@
    "measured_elo": 206.00516488898438,
    "measured_lo": 181.2521802789472,
    "measured_hi": 231.73794395543936
+  },
+  {
+   "run": "long_200",
+   "visits": 200.95963508047163,
+   "offline_regret": 0.007135956781999327,
+   "equivalent_uniform_visits": 387.64369522215003,
+   "predicted_elo": 225.14724362754464,
+   "measured_elo": 263.4165389121643,
+   "measured_lo": 230.16311862260898,
+   "measured_hi": 301.3310666634446
   }
  ],
  "colour": {

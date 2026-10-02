@@ -146,6 +146,101 @@ def prediction_table() -> None:
     write("prediction", "\n".join(lines) + "\n")
 
 
+COMPACT = [
+    ("uni_100_vs_200", "KataGo, 100 visits"), ("uni_283_vs_200", "KataGo, 283 visits"),
+    ("uni_400_vs_200", "KataGo, 400 visits"), None,
+    ("long_200", "Mikiri, six-rung ladder"), ("main_200", "Mikiri, four-rung ladder"),
+    ("main_stopper_160", "Mikiri, four-rung, 160-visit grant"), ("main_140", "Mikiri, four-rung, 140-visit grant"),
+    ("paired_greedy_200", "Mikiri, four-rung, no move sampling"), None,
+    ("vmcts_200", "V-MCTS rule (Ye et al.)"), ("dsmcts_200", "DS-MCTS-style rule (Lan et al.)"),
+    ("rule_lcb_200", "LCB margin with rate rule, no learning"), ("v1gate_200", "Entropy gate, flat threshold"), None,
+    ("mem_only_200", "Memory only"), ("full_200", "Mikiri four-rung + memory"),
+]
+OTHER = [
+    ("budget_100", "KataGo 100 visits, 19x19, b18"), ("budget_400", "KataGo 400 visits, 19x19, b18"),
+    ("budget_800", "KataGo 800 visits, 19x19, b18"), ("b28_200", "KataGo 200 visits, 19x19, b28 network"),
+    ("size13_200", "KataGo 200 visits, 13x13, b18"), ("size9_200", "KataGo 200 visits, 9x9, b18"),
+]
+
+
+def compact_tables() -> None:
+    p = RES / "matches/table.json"
+    if not p.exists():
+        return
+    rows = {r["run"]: r for r in json.loads(p.read_text())}
+
+    def line(label: str, r: dict | None) -> str:
+        if r is None:
+            return f"{label} & \\multicolumn{{6}}{{c}}{{(running)}} \\\\"
+        ev = f"{r['rows']:.0f} : {r['base_rows']:.0f}" if r["rows"] else "--"
+        return (f"{label} & {r['games']:,} & {r['wld'].replace('-', '--')} & "
+                f"${r['elo']:+.0f}$ (${r['elo_lo']:+.0f}$, ${r['elo_hi']:+.0f}$) & "
+                f"{r['visits']:.0f} & {r['restart']:.0f} & {ev} \\\\").replace(",", "{,}", 0)
+
+    head = [r"\begin{tabular}{lrrrrrr}", r"\toprule",
+            r"Player (vs.\ KataGo at 200 visits) & Games & W--L--D & Elo (95\% interval) & Visits & Restart & Evals \\",
+            r"\midrule"]
+    body = [r"\midrule" if item is None else line(item[1], rows.get(item[0])) for item in COMPACT]
+    write("matches_compact", "\n".join(head + body + [r"\bottomrule", r"\end{tabular}"]) + "\n")
+    head2 = [r"\begin{tabular}{lrrrr}", r"\toprule",
+             r"Opponent and setting & Games & W--L--D & Elo (95\% interval) & Visits \\", r"\midrule"]
+    body2 = []
+    for run, label in OTHER:
+        r = rows.get(run)
+        body2.append(f"{label} & \\multicolumn{{4}}{{c}}{{(running)}} \\\\" if r is None else
+                     f"{label} & {r['games']} & {r['wld'].replace('-', '--')} & "
+                     f"${r['elo']:+.0f}$ (${r['elo_lo']:+.0f}$, ${r['elo_hi']:+.0f}$) & {r['visits']:.0f} \\\\")
+    write("matches_other", "\n".join(head2 + body2 + [r"\bottomrule", r"\end{tabular}"]) + "\n")
+
+
+def baselines_table() -> None:
+    p = RES / "baselines.json"
+    if not p.exists():
+        return
+    b = json.loads(p.read_text())
+    d = b["ladders"]["doubling"]
+
+    def cell(key: str, budget: str) -> str:
+        v = d.get(key, {}).get(budget)
+        return f"{v['multiplier']:.2f} [{v['lo']:.2f}, {v['hi']:.2f}]" if v else "--"
+
+    def point(rule: str, lo: float, hi: float) -> str:
+        pts = [x for x in b["point_rules"][rule] if lo <= x["cost"] <= hi]
+        return f"{pts[0]['multiplier']:.2f} at {pts[0]['cost']:.0f}" if pts else "--"
+
+    rows = [
+        ("VOI stop \\cite{hay2012selecting}", cell("VOI stop | flat", "200"), cell("VOI stop | flat", "400"), cell("VOI stop | rate", "200")),
+        ("BAI stop \\cite{kaufmann2017monte}", cell("BAI stop | flat", "200"), cell("BAI stop | flat", "400"), cell("BAI stop | rate", "200")),
+        ("BEHIND \\cite{huang2010time}", point("BEHIND (v=0.6)", 150, 260), point("BEHIND (v=0.6)", 300, 520), "--"),
+        ("STOP, $p=0.45$ \\cite{baier2016time}", point("STOP (p=0.45)", 120, 270), point("STOP (p=0.45)", 300, 520), "--"),
+        ("Smart pruning \\cite{lc0_options}", point("smart pruning (factor 1.33)", 150, 260), point("smart pruning (factor 1.33)", 300, 520), "--"),
+        ("CLOSE \\cite{baier2016time}", point("CLOSE (d=0.4)", 150, 260), point("CLOSE (d=0.4)", 300, 520), "--"),
+        ("UNST \\cite{huang2010time}", point("UNST", 150, 260), point("UNST", 300, 520), "--"),
+        ("KLD gain \\cite{lc0_options}", cell("KLD gain | flat", "200"), cell("KLD gain | flat", "400"), "--"),
+        ("State only \\cite{muppidi2026finding}", cell("state only | flat", "200"), cell("state only | flat", "400"), cell("state only | rate", "200")),
+        ("DS-MCTS \\cite{lan2021learning}", cell("DS-MCTS | flat", "200"), cell("DS-MCTS | flat", "400"), cell("DS-MCTS | rate", "200")),
+        ("V-MCTS \\cite{ye2022spending}", cell("V-MCTS (r=0.2, eps=0.1) | as published", "200"),
+         cell("V-MCTS (r=0.2, eps=0.1) | as published", "400"), "--"),
+        ("LCB margin", cell("LCB margin | flat", "200"), cell("LCB margin | flat", "400"), cell("LCB margin | rate", "200")),
+        ("\\textbf{Mikiri}", cell("Mikiri | flat", "200"), cell("Mikiri | flat", "400"),
+         "\\textbf{" + cell("Mikiri | rate", "200") + "}"),
+    ]
+    lines = [r"\begin{tabular}{llll}", r"\toprule",
+             r"Rule & As published, 200 & As published, 400 & With rate rule, 200 \\", r"\midrule"]
+    lines += [" & ".join(r) + " \\\\" for r in rows]
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("baselines", "\n".join(lines) + "\n")
+    pr = b["paired"]
+    extra = ["% paired differences"]
+    for key, name in (("Mikiri minus V-MCTS published at 200", "pairedVmctsTwo"),
+                      ("Mikiri minus V-MCTS published at 400", "pairedVmctsFour"),
+                      ("Mikiri minus DS-MCTS flat at 200", "pairedDsTwo"),
+                      ("Mikiri minus DS-MCTS rate at 400", "pairedDsRateFour")):
+        v = pr[key]
+        extra.append("\\newcommand{\\" + name + "}{" + f"{v['difference']:.2f} [{v['lo']:.2f}, {v['hi']:.2f}]" + "}")
+    (OUT / "baseline_numbers.tex").write_text("\n".join(extra) + "\n")
+
+
 RUNS = {
     "main": "main_200", "strict": "main_stopper_160", "lean": "main_140", "paired": "paired_greedy_200",
     "memonly": "mem_only_200", "full": "full_200", "long": "long_200",
@@ -153,7 +248,7 @@ RUNS = {
     "bignet": "b28_200", "thirteen": "size13_200", "nine": "size9_200",
     "unihalf": "uni_100_vs_200", "unisame": "uni_200_vs_200", "uniroot": "uni_283_vs_200",
     "unidouble": "uni_400_vs_200", "pilot": "pilot2_stopper_200",
-    "rulelcb": "rule_lcb_200", "vonegate": "v1gate_200",
+    "rulelcb": "rule_lcb_200", "vonegate": "v1gate_200", "vmcts": "vmcts_200", "dsmcts": "dsmcts_200",
 }
 
 
@@ -205,3 +300,5 @@ if __name__ == "__main__":
     auc_table()
     matches_table()
     prediction_table()
+    compact_tables()
+    baselines_table()
