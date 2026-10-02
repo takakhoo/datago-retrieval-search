@@ -1,0 +1,56 @@
+{
+ "positions": 6000,
+ "shallow": 200,
+ "k": 5,
+ "shallow_differs_from_deep": 0.2675,
+ "proposal": {
+  "positions": 1605,
+  "nearest_neighbour_deep_move_is_right": 0.05482866043613707,
+  "any_of_5_neighbours_right": 0.0778816199376947,
+  "policy_top_alternative_is_right": 0.4336448598130841,
+  "any_of_policy_top_5_alternatives_right": 0.8485981308411215,
+  "nearest_neighbour_is_near_duplicate": 0.040498442367601244
+ },
+ "agreement_by_similarity": [
+  {
+   "similarity": "-1.000-0.600",
+   "positions": 2784,
+   "neighbour_deep_move_matches": 0.008620689655172414
+  },
+  {
+   "similarity": "0.600-0.800",
+   "positions": 2100,
+   "neighbour_deep_move_matches": 0.03380952380952381
+  },
+  {
+   "similarity": "0.800-0.900",
+   "positions": 446,
+   "neighbour_deep_move_matches": 0.10538116591928251
+  },
+  {
+   "similarity": "0.900-0.970",
+   "positions": 170,
+   "neighbour_deep_move_matches": 0.27058823529411763
+  },
+  {
+   "similarity": "0.970-0.999",
+   "positions": 131,
+   "neighbour_deep_move_matches": 0.8625954198473282
+  },
+  {
+   "similarity": "0.999-1.010",
+   "positions": 369,
+   "neighbour_deep_move_matches": 0.959349593495935
+  }
+ ],
+ "median_nn_similarity_by_move": {
+  "0-20": 0.9999988675117493,
+  "20-60": 0.752541184425354,
+  "60-120": 0.6144953966140747,
+  "120-400": 0.5292820930480957
+ },
+ "gating_auc": {
+  "knn_regret": 0.54754302313518,
+  "lcb_margin_feature": 0.7297101359062144
+ }
+}

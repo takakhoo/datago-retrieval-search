@@ -43,6 +43,8 @@ def main() -> None:
     ap.add_argument("--komi", type=float, default=7.0)
     ap.add_argument("--games", type=int, default=400)
     ap.add_argument("--budget", type=int, default=200, help="baseline visits per move")
+    ap.add_argument("--grant", type=float, default=None,
+                    help="visits granted per DataGo move (default: the baseline budget)")
     ap.add_argument("--path", default="200", help="DataGo visit ladder, comma separated")
     ap.add_argument("--stopper", default=None)
     ap.add_argument("--threshold", type=float, default=None)
@@ -81,7 +83,8 @@ def main() -> None:
         datago = DataGoPlayer(eng_d, path, stopper, memory, args.store_max_move, temp, name="datago")
         katago = KataGoPlayer(eng_k, args.budget, temp, name="katago")
 
-        ledger = Ledger(budget_per_move=args.budget)
+        grant = args.grant if args.grant is not None else args.budget
+        ledger = Ledger(budget_per_move=grant)
         hook = None
         if memory is not None:
             hook = Deepener("datago", memory, eng_d, ledger, args.deepen or 1, args.komi,
@@ -100,7 +103,7 @@ def main() -> None:
         records_so_far: list = []
         accountant = hook or Deepener("datago", Memory(), eng_d, ledger, 1, args.komi, enabled=False)
         if stopper is not None and args.control:
-            controller = BudgetController(stopper, args.budget, share=args.play_share)
+            controller = BudgetController(stopper, grant, share=args.play_share)
             datago.on_decision = controller.record
 
         def after(rec):

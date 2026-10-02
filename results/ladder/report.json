@@ -1,0 +1,602 @@
+{
+ "positions": 6000,
+ "games": 300,
+ "rungs": [
+  50,
+  100,
+  200,
+  400,
+  800,
+  1600,
+  3200
+ ],
+ "uniform": [
+  {
+   "visits": 50,
+   "regret": 0.014677155574786662,
+   "share_with_regret_over_2pct": 0.1655,
+   "share_with_any_regret": 0.3446666666666667,
+   "move_differs_from_3200": 0.33266666666666667
+  },
+  {
+   "visits": 100,
+   "regret": 0.011889268688349997,
+   "share_with_regret_over_2pct": 0.14,
+   "share_with_any_regret": 0.31916666666666665,
+   "move_differs_from_3200": 0.302
+  },
+  {
+   "visits": 200,
+   "regret": 0.00986941996261999,
+   "share_with_regret_over_2pct": 0.1175,
+   "share_with_any_regret": 0.2925,
+   "move_differs_from_3200": 0.2675
+  },
+  {
+   "visits": 400,
+   "regret": 0.0069999088266066625,
+   "share_with_regret_over_2pct": 0.09183333333333334,
+   "share_with_any_regret": 0.25766666666666665,
+   "move_differs_from_3200": 0.22483333333333333
+  },
+  {
+   "visits": 800,
+   "regret": 0.004819198560988332,
+   "share_with_regret_over_2pct": 0.06633333333333333,
+   "share_with_any_regret": 0.21516666666666667,
+   "move_differs_from_3200": 0.17266666666666666
+  },
+  {
+   "visits": 1600,
+   "regret": 0.003048477491316668,
+   "share_with_regret_over_2pct": 0.044333333333333336,
+   "share_with_any_regret": 0.17983333333333335,
+   "move_differs_from_3200": 0.11333333333333333
+  },
+  {
+   "visits": 3200,
+   "regret": 0.0017231278946049993,
+   "share_with_regret_over_2pct": 0.024833333333333332,
+   "share_with_any_regret": 0.13583333333333333,
+   "move_differs_from_3200": 0.0
+  }
+ ],
+ "concentration": [
+  {
+   "visits": 50,
+   "top_5pct_of_positions_hold": 0.5786600071904677,
+   "top_10pct_of_positions_hold": 0.7778586702615191
+  },
+  {
+   "visits": 100,
+   "top_5pct_of_positions_hold": 0.6133418082051953,
+   "top_10pct_of_positions_hold": 0.805616664698822
+  },
+  {
+   "visits": 200,
+   "top_5pct_of_positions_hold": 0.6464732141485352,
+   "top_10pct_of_positions_hold": 0.8356069045801731
+  },
+  {
+   "visits": 400,
+   "top_5pct_of_positions_hold": 0.6746272392149478,
+   "top_10pct_of_positions_hold": 0.8648399395131394
+  },
+  {
+   "visits": 800,
+   "top_5pct_of_positions_hold": 0.7216494838449038,
+   "top_10pct_of_positions_hold": 0.9041237164410919
+  },
+  {
+   "visits": 1600,
+   "top_5pct_of_positions_hold": 0.762884165447958,
+   "top_10pct_of_positions_hold": 0.9399235742716386
+  },
+  {
+   "visits": 3200,
+   "top_5pct_of_positions_hold": 0.8464945237737943,
+   "top_10pct_of_positions_hold": 0.9826872940578575
+  }
+ ],
+ "regret_at_200_by_move_number": [
+  {
+   "moves": "0-40",
+   "positions": 1211,
+   "regret": 0.001922943278282411
+  },
+  {
+   "moves": "40-100",
+   "positions": 1957,
+   "regret": 0.007353109727848749
+  },
+  {
+   "moves": "100-160",
+   "positions": 1581,
+   "regret": 0.016113215117027197
+  },
+  {
+   "moves": "160-1000",
+   "positions": 1251,
+   "regret": 0.013607359415107913
+  }
+ ],
+ "auc": {
+  "lcb_margin (low)": [
+   0.7387694199217503,
+   0.7281421725220005,
+   0.7297101359062144,
+   0.7152078659777386,
+   0.7254473514211887,
+   0.7473151138031788
+  ],
+  "top1_share (low)": [
+   0.7454895849483352,
+   0.7377212631118881,
+   0.7412539890030087,
+   0.7326163830354516,
+   0.7392416482096714,
+   0.7621628173380421
+  ],
+  "visit_entropy": [
+   0.7262263421235033,
+   0.7189251781399779,
+   0.7220558149185601,
+   0.716190940809797,
+   0.7285305924695459,
+   0.7512835980845984
+  ],
+  "v1 entropy gate": [
+   0.73353033030397,
+   0.7269313485847018,
+   0.7301092644465194,
+   0.7243851783919291,
+   0.7361639442598744,
+   0.7586768182010046
+  ],
+  "visit_value_disagree": [
+   0.6008496429516001,
+   0.5924977410230219,
+   0.5929038281979458,
+   0.6015372168284789,
+   0.6134689922480621,
+   0.6258512374600763
+  ],
+  "policy_surprise": [
+   0.6467190193253016,
+   0.6303926169511669,
+   0.6309240377632533,
+   0.6228116648891832,
+   0.6132320505721668,
+   0.5824976315431551
+  ],
+  "value_surprise": [
+   0.5664833069613038,
+   0.5547789640135146,
+   0.5591617387695819,
+   0.5651108705379033,
+   0.5612160852713178,
+   0.5725375083833992
+  ],
+  "katago rawStWrError": [
+   0.5802206073470803,
+   0.576387260474778,
+   0.5845956634505655,
+   0.586040452308277,
+   0.5982084025470653,
+   0.6168127019637086
+  ],
+  "undecided": [
+   0.4502342417623508,
+   0.442980781507818,
+   0.45649847494553375,
+   0.45602260468765327,
+   0.45508351790328533,
+   0.4505183051229018
+  ]
+ },
+ "heuristic_rules": {
+  "path": "50,200,800,3200",
+  "rows": [
+   {
+    "rule": "v1 entropy gate",
+    "scaling": "flat",
+    "budget": 100.0,
+    "cost": 96.5,
+    "regret": 0.013831229838963333,
+    "equivalent_visits": 61.70370407316048,
+    "multiplier": 0.6394166225197977,
+    "multiplier_restart": 0.5509259292246471
+   },
+   {
+    "rule": "v1 entropy gate",
+    "scaling": "flat",
+    "budget": 200.0,
+    "cost": 195.2,
+    "regret": 0.011290971280063334,
+    "equivalent_visits": 122.7913571745726,
+    "multiplier": 0.6290540838861302,
+    "multiplier_restart": 0.5040696107330567
+   },
+   {
+    "rule": "v1 entropy gate",
+    "scaling": "flat",
+    "budget": 400.0,
+    "cost": 395.575,
+    "regret": 0.008185713717171667,
+    "equivalent_visits": 300.37342407117944,
+    "multiplier": 0.7593336891137697,
+    "multiplier_restart": 0.5880834511606985
+   },
+   {
+    "rule": "v1 entropy gate",
+    "scaling": "flat",
+    "budget": 800.0,
+    "cost": 786.0,
+    "regret": 0.005876392770365,
+    "equivalent_visits": 571.6794687405741,
+    "multiplier": 0.7273275683722317,
+    "multiplier_restart": 0.5543110556631294
+   },
+   {
+    "rule": "v1 entropy gate",
+    "scaling": "rate",
+    "budget": 100.0,
+    "cost": 98.125,
+    "regret": 0.011511646807765,
+    "equivalent_visits": 113.8358936165292,
+    "multiplier": 1.1601110177480682,
+    "multiplier_restart": 0.9971027178090149
+   },
+   {
+    "rule": "v1 entropy gate",
+    "scaling": "rate",
+    "budget": 200.0,
+    "cost": 198.5,
+    "regret": 0.009273163203844999,
+    "equivalent_visits": 230.9835903082447,
+    "multiplier": 1.163645291225414,
+    "multiplier_restart": 0.9313854447913092
+   },
+   {
+    "rule": "v1 entropy gate",
+    "scaling": "rate",
+    "budget": 400.0,
+    "cost": 399.85,
+    "regret": 0.0062206045110666675,
+    "equivalent_visits": 512.4327248119921,
+    "multiplier": 1.2815623979292037,
+    "multiplier_restart": 0.9921893471253235
+   },
+   {
+    "rule": "v1 entropy gate",
+    "scaling": "rate",
+    "budget": 800.0,
+    "cost": 777.55,
+    "regret": 0.004551287922519999,
+    "equivalent_visits": 888.4559849067922,
+    "multiplier": 1.1426351808974242,
+    "multiplier_restart": 0.87097835263067
+   },
+   {
+    "rule": "lcb margin",
+    "scaling": "flat",
+    "budget": 100.0,
+    "cost": 95.5,
+    "regret": 0.011767778281581666,
+    "equivalent_visits": 104.25729037008114,
+    "multiplier": 1.0916993756029438,
+    "multiplier_restart": 0.9420839491272391
+   },
+   {
+    "rule": "lcb margin",
+    "scaling": "flat",
+    "budget": 200.0,
+    "cost": 199.6,
+    "regret": 0.009379163887803332,
+    "equivalent_visits": 225.1443125768908,
+    "multiplier": 1.1279775179202947,
+    "multiplier_restart": 0.9025025891644474
+   },
+   {
+    "rule": "lcb margin",
+    "scaling": "flat",
+    "budget": 400.0,
+    "cost": 388.35,
+    "regret": 0.007724376999746667,
+    "equivalent_visits": 335.78296946235713,
+    "multiplier": 0.8646400655654876,
+    "multiplier_restart": 0.6700471653499211
+   },
+   {
+    "rule": "lcb margin",
+    "scaling": "flat",
+    "budget": 800.0,
+    "cost": 779.7,
+    "regret": 0.006298117682433334,
+    "equivalent_visits": 499.96173867082643,
+    "multiplier": 0.6412232123519641,
+    "multiplier_restart": 0.4887530031323251
+   },
+   {
+    "rule": "lcb margin",
+    "scaling": "rate",
+    "budget": 100.0,
+    "cost": 98.35,
+    "regret": 0.010691187356921669,
+    "equivalent_visits": 150.85410866438025,
+    "multiplier": 1.5338496051284216,
+    "multiplier_restart": 1.3178867967185228
+   },
+   {
+    "rule": "lcb margin",
+    "scaling": "rate",
+    "budget": 200.0,
+    "cost": 195.475,
+    "regret": 0.008436222362145,
+    "equivalent_visits": 282.7362885611639,
+    "multiplier": 1.44640638731891,
+    "multiplier_restart": 1.1589136025187754
+   },
+   {
+    "rule": "lcb margin",
+    "scaling": "rate",
+    "budget": 400.0,
+    "cost": 393.125,
+    "regret": 0.007058505845744999,
+    "equivalent_visits": 394.37810038162115,
+    "multiplier": 1.0031875367418026,
+    "multiplier_restart": 0.7770997051854603
+   },
+   {
+    "rule": "lcb margin",
+    "scaling": "rate",
+    "budget": 800.0,
+    "cost": 779.275,
+    "regret": 0.006211048080259999,
+    "equivalent_visits": 513.9916304639802,
+    "multiplier": 0.6595766968836164,
+    "multiplier_restart": 0.5027468590498975
+   },
+   {
+    "rule": "unstable (visits vs value)",
+    "scaling": "flat",
+    "budget": 100.0,
+    "cost": 98.75,
+    "regret": 0.013179198691408331,
+    "equivalent_visits": 72.5631535194739,
+    "multiplier": 0.7348167445010015,
+    "multiplier_restart": 0.6309839436475991
+   },
+   {
+    "rule": "unstable (visits vs value)",
+    "scaling": "flat",
+    "budget": 200.0,
+    "cost": 195.175,
+    "regret": 0.011664193033550001,
+    "equivalent_visits": 108.02999483818577,
+    "multiplier": 0.5535032398523672,
+    "multiplier_restart": 0.44353357672718946
+   },
+   {
+    "rule": "unstable (visits vs value)",
+    "scaling": "flat",
+    "budget": 400.0,
+    "cost": 394.475,
+    "regret": 0.009206300750061666,
+    "equivalent_visits": 234.74449955532234,
+    "multiplier": 0.5950808024724566,
+    "multiplier_restart": 0.46091596221347403
+   },
+   {
+    "rule": "unstable (visits vs value)",
+    "scaling": "flat",
+    "budget": 800.0,
+    "cost": 790.85,
+    "regret": 0.005974768500905,
+    "equivalent_visits": 554.0801542632648,
+    "multiplier": 0.7006134592694756,
+    "multiplier_restart": 0.5338987803654508
+   },
+   {
+    "rule": "unstable (visits vs value)",
+    "scaling": "rate",
+    "budget": 100.0,
+    "cost": 95.625,
+    "regret": 0.012278859619568334,
+    "equivalent_visits": 90.76800997569207,
+    "multiplier": 0.9492079474582177,
+    "multiplier_restart": 0.8189594885024849
+   },
+   {
+    "rule": "unstable (visits vs value)",
+    "scaling": "rate",
+    "budget": 200.0,
+    "cost": 186.425,
+    "regret": 0.011681267560016667,
+    "equivalent_visits": 107.3988516457033,
+    "multiplier": 0.5760968306058913,
+    "multiplier_restart": 0.4631257078296822
+   },
+   {
+    "rule": "unstable (visits vs value)",
+    "scaling": "rate",
+    "budget": 400.0,
+    "cost": 392.8,
+    "regret": 0.00813212361543,
+    "equivalent_visits": 304.2870349015779,
+    "multiplier": 0.7746614941486198,
+    "multiplier_restart": 0.6000927588119469
+   },
+   {
+    "rule": "unstable (visits vs value)",
+    "scaling": "rate",
+    "budget": 800.0,
+    "cost": 786.05,
+    "regret": 0.004887345936748333,
+    "equivalent_visits": 782.8576048900783,
+    "multiplier": 0.9959386869665776,
+    "multiplier_restart": 0.7590242436397888
+   },
+   {
+    "rule": "random",
+    "scaling": "flat",
+    "budget": 100.0,
+    "cost": 99.15,
+    "regret": 0.013633377900636666,
+    "equivalent_visits": 64.81490067687865,
+    "multiplier": 0.6537055035489525,
+    "multiplier_restart": 0.561006064716203
+   },
+   {
+    "rule": "random",
+    "scaling": "flat",
+    "budget": 200.0,
+    "cost": 194.55,
+    "regret": 0.012556218429165,
+    "equivalent_visits": 84.71966106404165,
+    "multiplier": 0.43546471891051985,
+    "multiplier_restart": 0.3490235968032477
+   },
+   {
+    "rule": "random",
+    "scaling": "flat",
+    "budget": 400.0,
+    "cost": 391.775,
+    "regret": 0.011475433983305,
+    "equivalent_visits": 115.25936761003932,
+    "multiplier": 0.294197862574282,
+    "multiplier_restart": 0.22792044217923535
+   },
+   {
+    "rule": "random",
+    "scaling": "flat",
+    "budget": 800.0,
+    "cost": 777.925,
+    "regret": 0.009688966762678332,
+    "equivalent_visits": 208.91070070925272,
+    "multiplier": 0.2685486399193402,
+    "multiplier_restart": 0.2047006898545769
+   },
+   {
+    "rule": "random",
+    "scaling": "rate",
+    "budget": 100.0,
+    "cost": 98.125,
+    "regret": 0.01309655082007,
+    "equivalent_visits": 74.06964903361191,
+    "multiplier": 0.7548499264571914,
+    "multiplier_restart": 0.6487852470097393
+   },
+   {
+    "rule": "random",
+    "scaling": "rate",
+    "budget": 200.0,
+    "cost": 194.325,
+    "regret": 0.010936389063138333,
+    "equivalent_visits": 138.67982449495213,
+    "multiplier": 0.7136489103046553,
+    "multiplier_restart": 0.5720328248107471
+   },
+   {
+    "rule": "random",
+    "scaling": "rate",
+    "budget": 400.0,
+    "cost": 398.65,
+    "regret": 0.008521235414809999,
+    "equivalent_visits": 276.9893952316261,
+    "multiplier": 0.6948185005183145,
+    "multiplier_restart": 0.5379827694515591
+   },
+   {
+    "rule": "random",
+    "scaling": "rate",
+    "budget": 800.0,
+    "cost": 798.775,
+    "regret": 0.006204167349195,
+    "equivalent_visits": 515.1169947437515,
+    "multiplier": 0.644883721628433,
+    "multiplier_restart": 0.49135193928054904
+   },
+   {
+    "rule": "oracle",
+    "scaling": "flat",
+    "budget": 100.0,
+    "cost": 98.6,
+    "regret": 0.005781687657861667,
+    "equivalent_visits": 589.150018035207,
+    "multiplier": 5.975152312730295,
+    "multiplier_restart": 5.131968798216089
+   },
+   {
+    "rule": "oracle",
+    "scaling": "flat",
+    "budget": 200.0,
+    "cost": 195.0,
+    "regret": 0.0023091732808333335,
+    "equivalent_visits": 2355.266267449072,
+    "multiplier": 12.078288551020883,
+    "multiplier_restart": 9.67917644157153
+   },
+   {
+    "rule": "oracle",
+    "scaling": "flat",
+    "budget": 400.0,
+    "cost": 392.1,
+    "regret": 0.0009335763435100002,
+    "equivalent_visits": 3200.0000000000027,
+    "multiplier": 8.161183371588887,
+    "multiplier_restart": 6.322444678609068
+   },
+   {
+    "rule": "oracle",
+    "scaling": "flat",
+    "budget": 800.0,
+    "cost": 576.95,
+    "regret": 0.0007735672799233333,
+    "equivalent_visits": 3200.0000000000027,
+    "multiplier": 5.54640783430107,
+    "multiplier_restart": 4.251926654265217
+   },
+   {
+    "rule": "oracle",
+    "scaling": "rate",
+    "budget": 100.0,
+    "cost": 99.5,
+    "regret": 0.00461672261536,
+    "equivalent_visits": 865.9877436811589,
+    "multiplier": 8.703394408855868,
+    "multiplier_restart": 7.465411583458266
+   },
+   {
+    "rule": "oracle",
+    "scaling": "rate",
+    "budget": 200.0,
+    "cost": 197.6,
+    "regret": 0.002031866827708333,
+    "equivalent_visits": 2722.8600876671067,
+    "multiplier": 13.779656314104791,
+    "multiplier_restart": 11.032658377905618
+   },
+   {
+    "rule": "oracle",
+    "scaling": "rate",
+    "budget": 400.0,
+    "cost": 380.125,
+    "regret": 0.000908746605135,
+    "equivalent_visits": 3200.0000000000027,
+    "multiplier": 8.418283459388366,
+    "multiplier_restart": 6.528391703502216
+   },
+   {
+    "rule": "oracle",
+    "scaling": "rate",
+    "budget": 800.0,
+    "cost": 575.775,
+    "regret": 0.0007736065799066667,
+    "equivalent_visits": 3200.0000000000027,
+    "multiplier": 5.557726542486219,
+    "multiplier_restart": 4.260796236296661
+   }
+  ]
+ }
+}

@@ -5,6 +5,7 @@ already occurred in an earlier game. This is the ceiling on what an exact-match
 memory can ever serve, before any question of whether the stored search helps.
 """
 import argparse
+import gzip
 import json
 from collections import defaultdict
 
@@ -17,7 +18,8 @@ ap.add_argument("games")
 ap.add_argument("--out", default=None)
 args = ap.parse_args()
 
-games = [json.loads(l) for l in open(args.games)]
+opener = gzip.open if args.games.endswith(".gz") else open
+games = [json.loads(l) for l in opener(args.games, "rt")]
 seen: set[str] = set()
 hits = defaultdict(list)      # move number -> list of 0/1
 by_game = []

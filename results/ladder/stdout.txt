@@ -1,0 +1,167 @@
+{
+ "positions": 6000,
+ "games": 300,
+ "uniform": [
+  {
+   "visits": 50,
+   "regret": 0.014677155574786662,
+   "share_with_regret_over_2pct": 0.1655,
+   "share_with_any_regret": 0.3446666666666667,
+   "move_differs_from_3200": 0.33266666666666667
+  },
+  {
+   "visits": 100,
+   "regret": 0.011889268688349997,
+   "share_with_regret_over_2pct": 0.14,
+   "share_with_any_regret": 0.31916666666666665,
+   "move_differs_from_3200": 0.302
+  },
+  {
+   "visits": 200,
+   "regret": 0.00986941996261999,
+   "share_with_regret_over_2pct": 0.1175,
+   "share_with_any_regret": 0.2925,
+   "move_differs_from_3200": 0.2675
+  },
+  {
+   "visits": 400,
+   "regret": 0.0069999088266066625,
+   "share_with_regret_over_2pct": 0.09183333333333334,
+   "share_with_any_regret": 0.25766666666666665,
+   "move_differs_from_3200": 0.22483333333333333
+  },
+  {
+   "visits": 800,
+   "regret": 0.004819198560988332,
+   "share_with_regret_over_2pct": 0.06633333333333333,
+   "share_with_any_regret": 0.21516666666666667,
+   "move_differs_from_3200": 0.17266666666666666
+  },
+  {
+   "visits": 1600,
+   "regret": 0.003048477491316668,
+   "share_with_regret_over_2pct": 0.044333333333333336,
+   "share_with_any_regret": 0.17983333333333335,
+   "move_differs_from_3200": 0.11333333333333333
+  },
+  {
+   "visits": 3200,
+   "regret": 0.0017231278946049993,
+   "share_with_regret_over_2pct": 0.024833333333333332,
+   "share_with_any_regret": 0.13583333333333333,
+   "move_differs_from_3200": 0.0
+  }
+ ],
+ "concentration": [
+  {
+   "visits": 50,
+   "top_5pct_of_positions_hold": 0.5786600071904677,
+   "top_10pct_of_positions_hold": 0.7778586702615191
+  },
+  {
+   "visits": 100,
+   "top_5pct_of_positions_hold": 0.6133418082051953,
+   "top_10pct_of_positions_hold": 0.805616664698822
+  },
+  {
+   "visits": 200,
+   "top_5pct_of_positions_hold": 0.6464732141485352,
+   "top_10pct_of_positions_hold": 0.8356069045801731
+  },
+  {
+   "visits": 400,
+   "top_5pct_of_positions_hold": 0.6746272392149478,
+   "top_10pct_of_positions_hold": 0.8648399395131394
+  },
+  {
+   "visits": 800,
+   "top_5pct_of_positions_hold": 0.7216494838449038,
+   "top_10pct_of_positions_hold": 0.9041237164410919
+  },
+  {
+   "visits": 1600,
+   "top_5pct_of_positions_hold": 0.762884165447958,
+   "top_10pct_of_positions_hold": 0.9399235742716386
+  },
+  {
+   "visits": 3200,
+   "top_5pct_of_positions_hold": 0.8464945237737943,
+   "top_10pct_of_positions_hold": 0.9826872940578575
+  }
+ ],
+ "regret_at_200_by_move_number": [
+  {
+   "moves": "0-40",
+   "positions": 1211,
+   "regret": 0.001922943278282411
+  },
+  {
+   "moves": "40-100",
+   "positions": 1957,
+   "regret": 0.007353109727848749
+  },
+  {
+   "moves": "100-160",
+   "positions": 1581,
+   "regret": 0.016113215117027197
+  },
+  {
+   "moves": "160-1000",
+   "positions": 1251,
+   "regret": 0.013607359415107913
+  }
+ ]
+}
+
+AUC for remaining regret > 0.5% (per non-final rung)
+  lcb_margin (low)         0.739 0.728 0.730 0.715 0.725 0.747
+  top1_share (low)         0.745 0.738 0.741 0.733 0.739 0.762
+  visit_entropy            0.726 0.719 0.722 0.716 0.729 0.751
+  v1 entropy gate          0.734 0.727 0.730 0.724 0.736 0.759
+  visit_value_disagree     0.601 0.592 0.593 0.602 0.613 0.626
+  policy_surprise          0.647 0.630 0.631 0.623 0.613 0.582
+  value_surprise           0.566 0.555 0.559 0.565 0.561 0.573
+  katago rawStWrError      0.580 0.576 0.585 0.586 0.598 0.617
+  undecided                0.450 0.443 0.456 0.456 0.455 0.451
+
+hand-written stopping rules on ladder 50,200,800,3200 (continuation cost)
+  v1 entropy gate              flat  budget   100: cost   96.5 regret 0.01383 x0.64
+  v1 entropy gate              flat  budget   200: cost  195.2 regret 0.01129 x0.63
+  v1 entropy gate              flat  budget   400: cost  395.6 regret 0.00819 x0.76
+  v1 entropy gate              flat  budget   800: cost  786.0 regret 0.00588 x0.73
+  v1 entropy gate              rate  budget   100: cost   98.1 regret 0.01151 x1.16
+  v1 entropy gate              rate  budget   200: cost  198.5 regret 0.00927 x1.16
+  v1 entropy gate              rate  budget   400: cost  399.9 regret 0.00622 x1.28
+  v1 entropy gate              rate  budget   800: cost  777.5 regret 0.00455 x1.14
+  lcb margin                   flat  budget   100: cost   95.5 regret 0.01177 x1.09
+  lcb margin                   flat  budget   200: cost  199.6 regret 0.00938 x1.13
+  lcb margin                   flat  budget   400: cost  388.4 regret 0.00772 x0.86
+  lcb margin                   flat  budget   800: cost  779.7 regret 0.00630 x0.64
+  lcb margin                   rate  budget   100: cost   98.3 regret 0.01069 x1.53
+  lcb margin                   rate  budget   200: cost  195.5 regret 0.00844 x1.45
+  lcb margin                   rate  budget   400: cost  393.1 regret 0.00706 x1.00
+  lcb margin                   rate  budget   800: cost  779.3 regret 0.00621 x0.66
+  unstable (visits vs value)   flat  budget   100: cost   98.8 regret 0.01318 x0.73
+  unstable (visits vs value)   flat  budget   200: cost  195.2 regret 0.01166 x0.55
+  unstable (visits vs value)   flat  budget   400: cost  394.5 regret 0.00921 x0.60
+  unstable (visits vs value)   flat  budget   800: cost  790.9 regret 0.00597 x0.70
+  unstable (visits vs value)   rate  budget   100: cost   95.6 regret 0.01228 x0.95
+  unstable (visits vs value)   rate  budget   200: cost  186.4 regret 0.01168 x0.58
+  unstable (visits vs value)   rate  budget   400: cost  392.8 regret 0.00813 x0.77
+  unstable (visits vs value)   rate  budget   800: cost  786.0 regret 0.00489 x1.00
+  random                       flat  budget   100: cost   99.2 regret 0.01363 x0.65
+  random                       flat  budget   200: cost  194.6 regret 0.01256 x0.44
+  random                       flat  budget   400: cost  391.8 regret 0.01148 x0.29
+  random                       flat  budget   800: cost  777.9 regret 0.00969 x0.27
+  random                       rate  budget   100: cost   98.1 regret 0.01310 x0.75
+  random                       rate  budget   200: cost  194.3 regret 0.01094 x0.71
+  random                       rate  budget   400: cost  398.6 regret 0.00852 x0.69
+  random                       rate  budget   800: cost  798.8 regret 0.00620 x0.64
+  oracle                       flat  budget   100: cost   98.6 regret 0.00578 x5.98
+  oracle                       flat  budget   200: cost  195.0 regret 0.00231 x12.08
+  oracle                       flat  budget   400: cost  392.1 regret 0.00093 x8.16
+  oracle                       flat  budget   800: cost  577.0 regret 0.00077 x5.55
+  oracle                       rate  budget   100: cost   99.5 regret 0.00462 x8.70
+  oracle                       rate  budget   200: cost  197.6 regret 0.00203 x13.78
+  oracle                       rate  budget   400: cost  380.1 regret 0.00091 x8.42
+  oracle                       rate  budget   800: cost  575.8 regret 0.00077 x5.56

@@ -8,6 +8,7 @@ move, and its cost is the visits it used.
 """
 from __future__ import annotations
 
+import gzip
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -57,45 +58,61 @@ def result_from_summary(summary: dict, size: int) -> SearchResult:
                         raw=summary.get("raw") or {})
 
 
-def load(path: str | Path, keep_maps: bool = False) -> Ladder:
-    ids, game, move_number, feats, move, q, score = [], [], [], [], [], [], []
+def _open(path: str | Path):
+    path = str(path)
+    return gzip.open(path, "rt") if path.endswith(".gz") else open(path)
+
+
+def load(path: str | Path, keep_maps: bool = False, maps_path: str | Path | None = None) -> Ladder:
+    """Load a ladder dataset (.jsonl or .jsonl.gz).
+
+    The raw policy and ownership maps are only needed for the approximate
+    retrieval study. They may sit in the records themselves or in a separate
+    file given by maps_path, one line per position with the same ids.
+    """
+    ids, game, move_number, feats, move, q, score, best = [], [], [], [], [], [], [], []
     policy, ownership = [], []
+    maps = {}
+    if keep_maps and maps_path:
+        with _open(maps_path) as f:
+            for line in f:
+                m = json.loads(line)
+                maps[m["id"]] = m
     rungs = None
-    for line in open(path):
-        rec = json.loads(line)
-        size = rec["size"]
-        keys = sorted(rec["ladder"], key=int)
-        if rungs is None:
-            rungs = np.array([int(k) for k in keys])
-        board = Board(size, superko=False)
-        for mv in rec["moves"]:
-            board.play_gtp(mv)
-        f_row, m_row, q_row, s_row = [], [], [], []
-        for k in keys:
-            res = result_from_summary(rec["ladder"][k], size)
-            f_row.append(extract(res, board))
-            best = rec["ladder"][k]["moves"][0][0]
-            m_row.append(gtp_to_point(best, size))
-            q_row.append(rec["forced"][best]["winrate"])
-            s_row.append(rec["forced"][best]["score"])
-        ids.append(rec["id"])
-        game.append(rec["game"])
-        move_number.append(rec["move_number"])
-        feats.append(f_row)
-        move.append(m_row)
-        q.append(q_row)
-        score.append(s_row)
-        if keep_maps:
-            policy.append(rec["policy"])
-            ownership.append(rec["ownership"])
+    with _open(path) as f:
+        for line in f:
+            rec = json.loads(line)
+            size = rec["size"]
+            keys = sorted(rec["ladder"], key=int)
+            if rungs is None:
+                rungs = np.array([int(k) for k in keys])
+            board = Board(size, superko=False)
+            for mv in rec["moves"]:
+                board.play_gtp(mv)
+            f_row, m_row, q_row, s_row = [], [], [], []
+            for k in keys:
+                res = result_from_summary(rec["ladder"][k], size)
+                f_row.append(extract(res, board))
+                chosen = rec["ladder"][k]["moves"][0][0]
+                m_row.append(gtp_to_point(chosen, size))
+                q_row.append(rec["forced"][chosen]["winrate"])
+                s_row.append(rec["forced"][chosen]["score"])
+            ids.append(rec["id"])
+            game.append(rec["game"])
+            move_number.append(rec["move_number"])
+            feats.append(f_row)
+            move.append(m_row)
+            q.append(q_row)
+            score.append(s_row)
+            best.append(max(v["winrate"] for v in rec["forced"].values()))
+            if keep_maps:
+                src = rec if "policy" in rec else maps[rec["id"]]
+                policy.append(src["policy"])
+                ownership.append(src["ownership"])
     q = np.array(q)
-    best = np.array([
-        max(f["winrate"] for f in json.loads(line)["forced"].values())
-        for line in open(path)
-    ])
     return Ladder(
         rungs, ids, np.array(game), np.array(move_number), np.array(feats), np.array(move),
-        q, np.array(score), best[:, None] - q,
+        q, np.array(score), np.array(best)[:, None] - q,
         np.array(policy, dtype=np.float32) if keep_maps else None,
         np.array(ownership, dtype=np.float32) if keep_maps else None,
     )

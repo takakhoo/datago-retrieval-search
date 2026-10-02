@@ -1,0 +1,103 @@
+{
+ "games": 300,
+ "table": [
+  {
+   "move": 0,
+   "hit_rate": 0.9966666666666667,
+   "hit_rate_second_half": 1.0
+  },
+  {
+   "move": 1,
+   "hit_rate": 0.99,
+   "hit_rate_second_half": 0.9933333333333333
+  },
+  {
+   "move": 2,
+   "hit_rate": 0.9833333333333333,
+   "hit_rate_second_half": 0.9933333333333333
+  },
+  {
+   "move": 3,
+   "hit_rate": 0.95,
+   "hit_rate_second_half": 0.9866666666666667
+  },
+  {
+   "move": 4,
+   "hit_rate": 0.9233333333333333,
+   "hit_rate_second_half": 0.96
+  },
+  {
+   "move": 5,
+   "hit_rate": 0.9166666666666666,
+   "hit_rate_second_half": 0.96
+  },
+  {
+   "move": 6,
+   "hit_rate": 0.8933333333333333,
+   "hit_rate_second_half": 0.9333333333333333
+  },
+  {
+   "move": 7,
+   "hit_rate": 0.87,
+   "hit_rate_second_half": 0.92
+  },
+  {
+   "move": 8,
+   "hit_rate": 0.85,
+   "hit_rate_second_half": 0.9066666666666666
+  },
+  {
+   "move": 9,
+   "hit_rate": 0.8333333333333334,
+   "hit_rate_second_half": 0.8933333333333333
+  },
+  {
+   "move": 10,
+   "hit_rate": 0.7733333333333333,
+   "hit_rate_second_half": 0.86
+  },
+  {
+   "move": 11,
+   "hit_rate": 0.7433333333333333,
+   "hit_rate_second_half": 0.84
+  },
+  {
+   "move": 12,
+   "hit_rate": 0.7133333333333334,
+   "hit_rate_second_half": 0.82
+  },
+  {
+   "move": 13,
+   "hit_rate": 0.66,
+   "hit_rate_second_half": 0.78
+  },
+  {
+   "move": 14,
+   "hit_rate": 0.6133333333333333,
+   "hit_rate_second_half": 0.7466666666666667
+  },
+  {
+   "move": 15,
+   "hit_rate": 0.5866666666666667,
+   "hit_rate_second_half": 0.7133333333333334
+  },
+  {
+   "move": 20,
+   "hit_rate": 0.41333333333333333,
+   "hit_rate_second_half": 0.5133333333333333
+  },
+  {
+   "move": 30,
+   "hit_rate": 0.23333333333333334,
+   "hit_rate_second_half": 0.3
+  },
+  {
+   "move": 50,
+   "hit_rate": 0.04,
+   "hit_rate_second_half": 0.05333333333333334
+  }
+ ],
+ "mean_first_miss": 24.36,
+ "max_first_miss": 108,
+ "share_served": 0.11476860184874463
+}
