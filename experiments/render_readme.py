@@ -25,7 +25,7 @@ def value(key: str, field: str) -> str:
 
 text = re.sub(r"\{\{(\w+)\.(\w+)\}\}", lambda m: value(m.group(1), m.group(2)), text)
 table = Path("results/matches/TABLE.md").read_text()
-table = "\n".join(l for l in table.splitlines() if "pilot" not in l.lower() or "Player" in l)
+table = "\n".join(l for l in table.splitlines() if "pilot" not in l.lower())
 text = text.replace("{{table}}", table.strip())
 demo = Path("results/demo/game.json")
 excerpt = "(demo game pending)"
@@ -33,8 +33,9 @@ if demo.exists():
     out = subprocess.run([sys.executable, "-m", "datago.demo", "--replay", str(demo)],
                          capture_output=True, text=True).stdout.splitlines()
     moves = [l for l in out if l[:4].strip().isdigit()]
-    k = next((i for i, l in enumerate(moves) if "800" in l), len(moves) // 2)
-    excerpt = "\n".join([out[0]] + moves[:6] + ["   ..."] + moves[max(k - 3, 6): k + 5] + ["   ..."] + out[-3:])
+    k = next((i for i, l in enumerate(moves) if "3200" in l),
+             next((i for i, l in enumerate(moves) if "800" in l), len(moves) // 2))
+    excerpt = "\n".join([out[0]] + moves[:6] + ["   ..."] + moves[max(k - 4, 6): k + 5] + ["   ..."] + out[-3:])
 text = text.replace("{{demo_excerpt}}", excerpt)
 train = Path("results/stopper/training.json")
 sentence = "(training curve pending)"
@@ -45,5 +46,10 @@ if train.exists():
                 f"{first['multiplier']:.2f}x, and with {last['positions']:,} it reaches {last['multiplier']:.2f}x. "
                 "The band shows the spread over three random draws of training games.")
 text = text.replace("{{training_sentence}}", sentence)
+pending_runs = [k for k in ("memonly", "full", "long", "bhundred", "bfour", "beight", "bignet", "thirteen", "nine", "lean")
+                if RUNS[k] not in rows]
+note = ("*More runs are still in progress and will be added to this table: memory, other budgets, "
+        "the b28 network, and smaller boards.*\n\n" if pending_runs else "")
+text = text.replace("{{progress_note}}", note)
 Path("README.md").write_text(text)
 print("wrote README.md;", text.count("pending"), "values pending")

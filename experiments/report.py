@@ -28,15 +28,27 @@ def describe(name: str, s: dict) -> str:
         parts.append("stopper")
     if c.get("memory"):
         parts.append("memory" + (" + deepening" if c.get("deepen") else ""))
-    net = f" ({c['net']})" if c.get("net", "b18") != "b18" else ""
-    fmt = ", paired openings, no sampling" if c.get("paired") else ""
-    return "DataGo: " + " + ".join(parts) + net + fmt
+    grant = c.get("grant") or c["budget"]
+    label = f"DataGo ({' + '.join(parts)}), {grant:g}-visit grant"
+    if "long" in name:
+        label += ", six-rung ladder"
+    if c.get("net", "b18") != "b18":
+        label += f", {c['net']} network"
+    if c.get("size", 19) != 19:
+        label += f", {c['size']}x{c['size']} board"
+    if c.get("paired"):
+        label += ", paired openings, no sampling"
+    if name.startswith("pilot"):
+        label += " (pilot, early model)"
+    return label
 
 
 def row(name: str, s: dict) -> dict:
     rows = s.get("nn_rows_per_move") or {}
     return {
-        "run": name, "player": describe(name, s), "baseline": f"KataGo {s['config']['budget']}",
+        "run": name, "player": describe(name, s),
+        "baseline": f"KataGo {s['config']['budget']}" + (
+            f" ({s['config']['net']})" if s["config"].get("net", "b18") != "b18" else ""),
         "games": s["games"], "wld": f"{s['wins']}-{s['losses']}-{s['draws']}",
         "score": s["score"], "score_lo": s["score_lo"], "score_hi": s["score_hi"],
         "elo": s["elo"], "elo_lo": s["elo_lo"], "elo_hi": s["elo_hi"],
@@ -61,7 +73,7 @@ def markdown(rows: list[dict]) -> str:
 
 def fig_elo_compute(rows: list[dict], out: Path, budget: int = 200) -> None:
     rows = [r for r in rows if r["baseline"] == f"KataGo {budget}" and r["rows"]
-            and "b28" not in r["player"] and "paired" not in r["player"]]
+            and "paired" not in r["player"] and "board" not in r["player"]]
     uni = sorted((r for r in rows if r["run"].startswith("uni_")), key=lambda r: r["visits"])
     dg = [r for r in rows if not r["run"].startswith("uni_") and not r["run"].startswith("pilot")]
     measures = [("visits", "base_visits", "Visits per move"),

@@ -21,7 +21,7 @@ With the ladder 50, 200, 800, 3{,}200 and the controller holding its mean at the
 
 Visits understate DataGo's cost in one respect. A fixed-budget engine re-meets much of its previous tree on the next move and finds those evaluations cached. DataGo's searches vary in size, so less carries over, and it runs more network evaluations per visit. We therefore reran the match with DataGo granted fewer visits. At a grant of 160 it averaged \strictVisits{} visits per move, \strictRestart{} with every restarted search counted, and \strictEvals{} network evaluations to KataGo's \strictBaseEvals. It scored \strictScore\% over \strictGames{} games (\strictRecord), a gain of $\strictElo$ Elo ($\strictEloLo$ to $\strictEloHi$). At a grant of 140 it averaged \leanVisits{} visits, \leanRestart{} restart visits, and \leanEvals{} evaluations to KataGo's \leanBaseEvals, and gained $\leanElo$ Elo ($\leanEloLo$ to $\leanEloHi$) over \leanGames{} games.
 
-Figure~\ref{fig:elo} places these results against the uniform curve under all three measures of compute.
+Figure~\ref{fig:elo} places these results against the uniform curve under all three measures of compute. Both DataGo runs lie above the curve under each. The comparison at equal evaluations is direct: DataGo in the main match and KataGo at 283 visits run \mainEvals{} and \unirootEvals{} evaluations per move and gain $\mainElo$ and $\unirootElo$ Elo.
 
 \begin{figure}[t]
 \centering
@@ -36,12 +36,12 @@ KataGo's default play samples among well-visited moves early in the game. A sear
 
 \subsection{Where the visits go}
 
-Figure~\ref{fig:profile} shows DataGo's spending in the main match. It uses well under the budget in the opening, where Section~\ref{sec:offline} found almost no regret to recover, and more than the budget through the middle game. It also spends by stakes: least when it believes the game is decided and most when the game is in the balance. Neither behaviour was programmed. Both follow from predicting regret in winrate units.
+Figure~\ref{fig:profile} shows DataGo's spending in the main match. It uses about a third of the budget over the first 20 moves, where Section~\ref{sec:offline} found almost no regret to recover, and about 270 visits per move around move 140. After move 60 it also spends by stakes: about 130 visits per move when it rates its own winrate above 90\%, about 160 when below 10\%, and 190 to 330 in between, with the peak when it is behind but not lost. Neither behaviour was programmed. Both follow from predicting regret in winrate units. Of all its moves, 47\% stopped at 50 visits, 42\% at 200, 11\% at 800, and 0.2\% at 3{,}200.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{profile_main}
-\caption{Mean visits per DataGo move in the main match, by move number and by DataGo's own winrate estimate.}
+\caption{Mean visits per DataGo move in the main match, by move number and, for moves 60 and later, by DataGo's own winrate estimate.}
 \label{fig:profile}
 \end{figure}
 

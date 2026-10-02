@@ -76,8 +76,27 @@
   "hit_rate": 0.0
  },
  {
+  "run": "main_200",
+  "player": "DataGo (stopper), 200-visit grant",
+  "baseline": "KataGo 200",
+  "games": 1000,
+  "wld": "728-196-76",
+  "score": 0.766,
+  "score_lo": 0.7395,
+  "score_hi": 0.7915,
+  "elo": 206.00516488898438,
+  "elo_lo": 181.2521802789472,
+  "elo_hi": 231.73794395543936,
+  "visits": 200.39262090131376,
+  "restart": 250.523494535085,
+  "base_visits": 200.0,
+  "rows": 98.63081091477743,
+  "base_rows": 74.1642579396205,
+  "hit_rate": 0.0
+ },
+ {
   "run": "main_stopper_160",
-  "player": "DataGo: stopper",
+  "player": "DataGo (stopper), 160-visit grant",
   "baseline": "KataGo 200",
   "games": 1000,
   "wld": "586-325-89",
@@ -96,7 +115,7 @@
  },
  {
   "run": "paired_greedy_200",
-  "player": "DataGo: stopper, paired openings, no sampling",
+  "player": "DataGo (stopper), 200-visit grant, paired openings, no sampling",
   "baseline": "KataGo 200",
   "games": 800,
   "wld": "561-183-56",
@@ -115,7 +134,7 @@
  },
  {
   "run": "pilot2_stopper_200",
-  "player": "DataGo: stopper",
+  "player": "DataGo (stopper), 200-visit grant (pilot, early model)",
   "baseline": "KataGo 200",
   "games": 240,
   "wld": "169-60-11",

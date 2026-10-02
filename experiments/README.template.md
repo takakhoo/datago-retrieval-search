@@ -6,7 +6,7 @@
 
 ![A DataGo game against KataGo, with the visits each move cost](results/demo/game.gif)
 
-*One real game from the main match. Blue bars are DataGo's visits per move. KataGo spends a fixed 200 on every move.*
+*One real game from the main match. Blue bars are DataGo's visits per move. KataGo spends a fixed 200 on every move. At move 137 DataGo climbs the whole ladder to 3,200 visits and sees its winrate estimate fall from 65% to 19%. It keeps thinking hard for the next few moves and goes on to win. Over the whole game both sides averaged about 200 visits per move.*
 
 ## Headline
 
@@ -113,13 +113,15 @@ Compute is reported three ways because the answer depends on how you count. **Vi
 
 {{table}}
 
+{{progress_note}}The paired-openings row is a control. Both players always play their engine's top move from 400 balanced openings, each played twice with colors swapped, so the gain cannot come from how moves are sampled.
+
 ![Elo against compute, counted three ways](results/figures/elo_vs_compute.png)
 
-The orange line is KataGo at uniform budgets. DataGo's points sit above it under all three ways of counting.
+The orange line is KataGo at uniform budgets. Both DataGo runs sit above it under all three ways of counting. At about the same network evaluations per move (99 against 98), DataGo gains +206 Elo where KataGo at 283 visits gains +108.
 
 ![Where DataGo spends its visits](results/figures/profile_main.png)
 
-Nobody told DataGo to save in the opening or to think when the game is close. Both fall out of predicting regret in winrate units.
+Nobody told DataGo to save visits in the opening or to ease off once a game is decided. Both fall out of predicting regret in winrate units: it averages about 65 visits over the first 20 moves, peaks near 270 around move 140, and drops to about 130 when it rates its own winrate above 90%.
 
 ## Try it
 

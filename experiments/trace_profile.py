@@ -33,7 +33,8 @@ for line in open(args.games):
             continue
         total += 1
         by_move[t["n"] // 10].append(t["v"])
-        by_wr[min(int(t["wr"] * 10), 9)].append(t["v"])
+        if t["n"] >= 60:
+            by_wr[min(int(t["wr"] * 10), 9)].append(t["v"])
         rungs[t["v"]] += 1
         hits[t["n"] // 10].append(1.0 if t.get("hit") else 0.0)
 
@@ -46,7 +47,7 @@ report = {
                                    for k, v in sorted(by_move.items()) if len(v) >= 30},
     "hit_rate_by_move_number": {f"{10 * k}-{10 * k + 9}": float(np.mean(v))
                                 for k, v in sorted(hits.items()) if len(v) >= 30},
-    "mean_visits_by_own_winrate": {f"{10 * k}-{10 * k + 10}%": float(np.mean(v))
+    "mean_visits_by_own_winrate_after_move_60": {f"{10 * k}-{10 * k + 10}%": float(np.mean(v))
                                    for k, v in sorted(by_wr.items())},
 }
 out = Path(args.out)
@@ -59,13 +60,13 @@ axes[0].plot([10 * k + 5 for k in ks], [np.mean(by_move[k]) for k in ks], color=
 axes[0].axhline(args.budget, color=ORANGE, label="KataGo (fixed)")
 axes[0].set_xlabel("Move number")
 axes[0].set_ylabel("Mean visits per move")
-axes[0].set_title("DataGo saves in the opening and spends in the middle game")
+axes[0].set_title("DataGo saves in the opening, spends in the middle game")
 axes[0].legend(loc="upper right")
 ws = sorted(by_wr)
 axes[1].plot([10 * k + 5 for k in ws], [np.mean(by_wr[k]) for k in ws], color=BLUE, marker="o", markersize=5)
 axes[1].axhline(args.budget, color=ORANGE)
-axes[1].set_xlabel("DataGo's winrate estimate (%)")
-axes[1].set_title("and when the game is in the balance")
+axes[1].set_xlabel("DataGo's winrate estimate (%), moves 60 and later")
+axes[1].set_title("and eases off once the game is decided")
 for ax in axes:
     ax.set_ylim(0, None)
 save(fig, out / "figures", f"profile_{args.name}")
