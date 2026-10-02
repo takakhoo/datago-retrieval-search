@@ -7,6 +7,7 @@
 | Mikiri (stopper), 100-visit grant | KataGo 100 | 400 | 262-119-19 | 0.679 | +130 (+95 to +167) | 100 | 117 | 50 : 40 |
 | DS-MCTS-style rule (Lan et al. 2021) in the same player, 200-visit grant | KataGo 200 | 600 | 395-157-48 | 0.698 | +146 (+117 to +176) | 200 | 351 | 105 : 77 |
 | Mikiri (stopper + memory), 200-visit grant | KataGo 200 | 1200 | 908-219-73 | 0.787 | +227 (+204 to +250) | 201 | 255 | 109 : 76 |
+| Mikiri (stopper), 200-visit grant, six-rung ladder | KataGo 400 | 600 | 268-271-61 | 0.497 | -2 (-27 to +24) | 200 | 303 | 102 : 143 |
 | Mikiri (stopper), 200-visit grant, six-rung ladder | KataGo 200 | 1000 | 750-175-75 | 0.787 | +228 (+203 to +254) | 201 | 304 | 102 : 78 |
 | Mikiri (stopper), 200-visit grant | KataGo 200 | 1000 | 728-196-76 | 0.766 | +206 (+181 to +232) | 200 | 251 | 99 : 74 |
 | Mikiri (stopper), 160-visit grant | KataGo 200 | 1000 | 586-325-89 | 0.630 | +93 (+72 to +114) | 160 | 197 | 80 : 74 |

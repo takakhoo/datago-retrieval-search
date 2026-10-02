@@ -27,6 +27,7 @@ Mikiri (見切り) is Japanese for the judgment that you have seen enough.
 | KataGo against itself, as a check on the harness | {{unisame.games}} | {{unisame.wld}} | {{unisame.elo}} ({{unisame.elo_lo}} to {{unisame.elo_hi}}) |
 
 - **At equal visits, Mikiri wins {{long.score}}% of the points** with its six-rung ladder (50, 200, 400, 800, 1,600, 3,200) and {{main.score}}% with the four-rung ladder (50, 200, 800, 3,200). The stopping rule is worth nearly a doubling of KataGo's search: {{long.elo}} and {{main.elo}} Elo, against {{unidouble.elo}} for twice the visits.
+- **Against KataGo with twice the visits, it holds even.** Mikiri at 200 visits per move against KataGo at 400: {{half.wld}} over {{half.games}} games ({{half.elo}} Elo, {{half.elo_lo}} to {{half.elo_hi}}), running {{half.evals}} network evaluations per move to KataGo's {{half.base_evals}}.
 - **With 20% fewer visits it still wins {{strict.score}}%.**
 - **It holds up under the strictest accounting.** Counting actual network evaluations, Mikiri at {{long.evals}} per move gains {{long.elo}} Elo. KataGo at {{uniroot.evals}} per move (283 visits) gains {{uniroot.elo}}, and at {{unidouble.evals}} per move (400 visits) gains {{unidouble.elo}}.
 - **It is not an artifact of move sampling.** With both sides always playing their top move from 400 balanced openings, the gain is {{paired.elo}}.

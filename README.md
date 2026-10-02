@@ -14,7 +14,7 @@ Mikiri (見切り) is Japanese for the judgment that you have seen enough.
 
 ## The result
 
-8,800 recorded games against KataGo on 19x19, both sides running the same network:
+9,400 recorded games against KataGo on 19x19, both sides running the same network:
 
 | Against KataGo at 200 visits per move | Games | Record (W-L-D) | Elo gain (95% interval) |
 |---|---|---|---|
@@ -27,6 +27,7 @@ Mikiri (見切り) is Japanese for the judgment that you have seen enough.
 | KataGo against itself, as a check on the harness | 400 | 185-183-32 | +2 (-30 to +35) |
 
 - **At equal visits, Mikiri wins 78.8% of the points** with its six-rung ladder (50, 200, 400, 800, 1,600, 3,200) and 76.6% with the four-rung ladder (50, 200, 800, 3,200). The stopping rule is worth nearly a doubling of KataGo's search: +228 and +206 Elo, against +237 for twice the visits.
+- **Against KataGo with twice the visits, it holds even.** Mikiri at 200 visits per move against KataGo at 400: 268-271-61 over 600 games (-2 Elo, -27 to +24), running 102 network evaluations per move to KataGo's 143.
 - **With 20% fewer visits it still wins 63.0%.**
 - **It holds up under the strictest accounting.** Counting actual network evaluations, Mikiri at 102 per move gains +228 Elo. KataGo at 98 per move (283 visits) gains +108, and at 132 per move (400 visits) gains +237.
 - **It is not an artifact of move sampling.** With both sides always playing their top move from 400 balanced openings, the gain is +178.
@@ -181,6 +182,7 @@ Compute is reported three ways because the answer depends on how you count. **Vi
 | Mikiri (stopper), 100-visit grant | KataGo 100 | 400 | 262-119-19 | 0.679 | +130 (+95 to +167) | 100 | 117 | 50 : 40 |
 | DS-MCTS-style rule (Lan et al. 2021) in the same player, 200-visit grant | KataGo 200 | 600 | 395-157-48 | 0.698 | +146 (+117 to +176) | 200 | 351 | 105 : 77 |
 | Mikiri (stopper + memory), 200-visit grant | KataGo 200 | 1200 | 908-219-73 | 0.787 | +227 (+204 to +250) | 201 | 255 | 109 : 76 |
+| Mikiri (stopper), 200-visit grant, six-rung ladder | KataGo 400 | 600 | 268-271-61 | 0.497 | -2 (-27 to +24) | 200 | 303 | 102 : 143 |
 | Mikiri (stopper), 200-visit grant, six-rung ladder | KataGo 200 | 1000 | 750-175-75 | 0.787 | +228 (+203 to +254) | 201 | 304 | 102 : 78 |
 | Mikiri (stopper), 200-visit grant | KataGo 200 | 1000 | 728-196-76 | 0.766 | +206 (+181 to +232) | 200 | 251 | 99 : 74 |
 | Mikiri (stopper), 160-visit grant | KataGo 200 | 1000 | 586-325-89 | 0.630 | +93 (+72 to +114) | 160 | 197 | 80 : 74 |
