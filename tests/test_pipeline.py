@@ -141,3 +141,15 @@ def test_elo_helpers():
     games = [("a", "b", 1.0)] * 30 + [("a", "b", 0.0)] * 10 + [("b", "c", 1.0)] * 30 + [("b", "c", 0.0)] * 10
     elo = bradley_terry(games, anchor="b")
     assert elo["a"] > 150 and elo["c"] < -150 and elo["b"] == 0
+
+
+def test_many_large_concurrent_responses_do_not_deadlock(engine):
+    """Regression: 64 threads requesting policy-sized responses once stalled the pipe."""
+    from concurrent.futures import ThreadPoolExecutor
+    board = Board(19)
+    for p in (72, 288, 60, 300, 110):
+        board.play(p)
+    with ThreadPoolExecutor(64) as pool:
+        futs = [pool.submit(engine.search, board, 8, 7.0, include_policy=True) for _ in range(128)]
+        results = [f.result(timeout=120) for f in futs]
+    assert all(len(r.policy) == 362 for r in results)

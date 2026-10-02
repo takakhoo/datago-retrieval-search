@@ -122,7 +122,10 @@ class AnalysisEngine:
         )
         self._ids = itertools.count()
         self._pending: dict[str, tuple[Future, int, int]] = {}
+        # Separate locks: the reader must never wait on a writer that is blocked
+        # on a full stdin pipe, or the engine's stdout fills and both sides stall.
         self._lock = threading.Lock()
+        self._write_lock = threading.Lock()
         self.visits_served = 0
         self.queries_served = 0
         self._reader = threading.Thread(target=self._read_loop, daemon=True)
@@ -133,21 +136,24 @@ class AnalysisEngine:
             line = line.strip()
             if not line.startswith("{"):
                 continue
-            resp = json.loads(line)
-            if resp.get("isDuringSearch"):
+            try:
+                resp = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if resp.get("isDuringSearch") or "warning" in resp:
                 continue
             with self._lock:
                 entry = self._pending.pop(resp.get("id"), None)
             if entry is None:
                 continue
             fut, size, to_move = entry
-            if "error" in resp:
-                fut.set_exception(RuntimeError(f"engine error: {resp['error']}"))
+            try:
+                if "error" in resp:
+                    raise RuntimeError(f"engine error: {resp['error']}")
+                result = parse_response(resp, size, to_move)
+            except Exception as exc:
+                fut.set_exception(RuntimeError(f"{exc!r} for response {line[:300]}"))
                 continue
-            if "moveInfos" not in resp:
-                fut.set_exception(RuntimeError(f"unexpected response: {line[:200]}"))
-                continue
-            result = parse_response(resp, size, to_move)
             self.visits_served += result.visits
             self.queries_served += 1
             fut.set_result(result)
@@ -200,9 +206,11 @@ class AnalysisEngine:
                 "untilDepth": 1,
             }]
         fut: Future = Future()
+        payload = json.dumps(query) + "\n"
         with self._lock:
             self._pending[qid] = (fut, size, board.to_move)
-            self.proc.stdin.write(json.dumps(query) + "\n")
+        with self._write_lock:
+            self.proc.stdin.write(payload)
             self.proc.stdin.flush()
         return fut
 
