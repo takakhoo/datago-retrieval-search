@@ -71,6 +71,39 @@ class Deepener:
                 self._busy.discard(entry.key)
 
 
+class BudgetController:
+    """Steers the stopper threshold so cumulative spending tracks the grant.
+
+    The stopper's offline calibration maps thresholds to an expected cost per
+    searched move. After every game the controller nudges that target cost
+    toward whatever makes played visits equal `share` of the granted visits,
+    then sets the threshold from the calibration table. Memory hits therefore
+    turn into deeper searches elsewhere without ever exceeding the grant.
+    """
+
+    def __init__(self, stopper, ledger: Ledger, share: float = 1.0, gain: float = 0.08):
+        calib = sorted(stopper.meta["calibration"], key=lambda r: r["cost_continue"])
+        self.costs = np.array([r["cost_continue"] for r in calib])
+        self.thresholds = np.array([r["threshold"] for r in calib])
+        self.stopper, self.ledger, self.share, self.gain = stopper, ledger, share, gain
+        self.target = float(np.clip(ledger.budget_per_move, self.costs[0], self.costs[-1]))
+        self._lock = threading.Lock()
+        self._apply()
+
+    def _apply(self) -> None:
+        self.stopper.threshold = float(np.interp(self.target, self.costs, self.thresholds))
+
+    def __call__(self, rec: GameRecord | None = None) -> None:
+        with self._lock:
+            spent = self.ledger.played + self.ledger.deepening
+            if spent <= 0:
+                return
+            ratio = self.share * self.ledger.granted / spent
+            self.target = float(np.clip(self.target * ratio ** self.gain,
+                                        self.costs[0], self.costs[-1]))
+            self._apply()
+
+
 def run_series(a: Player, b: Player, cfg: GameConfig, games: int, seed: int = 0,
                workers: int = 32, out_path: str | Path | None = None,
                after_game: Callable[[GameRecord], None] | None = None,

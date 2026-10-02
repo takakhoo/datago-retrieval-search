@@ -209,3 +209,24 @@ def test_many_large_concurrent_responses_do_not_deadlock(engine):
         futs = [pool.submit(engine.search, board, 8, 7.0, include_policy=True) for _ in range(128)]
         results = [f.result(timeout=120) for f in futs]
     assert all(len(r.policy) == 362 for r in results)
+
+
+def test_budget_controller_tracks_the_grant():
+    from datago.series import BudgetController, Ledger
+    from datago.stopper import Stopper, TreeEnsemble
+    leaf = {"left": [-1], "right": [-1], "feature": [0], "threshold": [0.0], "value": [0.0]}
+    calib = [{"threshold": t, "cost_continue": c} for t, c in ((0.9, 50), (0.5, 100), (0.2, 200), (0.1, 400))]
+    st = Stopper(TreeEnsemble(0.0, 1.0, [leaf]), 0.5, [50, 200, 800], meta={"calibration": calib})
+    ledger = Ledger(budget_per_move=200)
+    ctl = BudgetController(st, ledger, gain=0.5)
+    assert st.threshold == pytest.approx(0.2)
+    for _ in range(40):
+        ledger.granted += 200 * 100
+        ledger.played += 100 * 100
+        ctl()
+    assert ctl.target > 300 and st.threshold < 0.2
+    for _ in range(200):
+        ledger.granted += 200 * 100
+        ledger.played += 600 * 100
+        ctl()
+    assert ctl.target < 150 and st.threshold > 0.2
