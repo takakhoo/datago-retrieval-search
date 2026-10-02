@@ -52,13 +52,14 @@ def main() -> None:
                     help="adapt the stopper threshold so total spending tracks the baseline budget")
     ap.add_argument("--play-share", type=float, default=1.0,
                     help="share of the grant the controller aims to spend during play")
+    ap.add_argument("--trace", action="store_true", help="record every move's cost and winrate")
     ap.add_argument("--workers", type=int, default=48)
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
     out = Path(args.out) / args.name
     out.mkdir(parents=True, exist_ok=True)
-    cfg = GameConfig(size=args.size, komi=args.komi)
+    cfg = GameConfig(size=args.size, komi=args.komi, keep_trace=args.trace)
     path = [int(x) for x in args.path.split(",")]
     temp = Temperature()
 

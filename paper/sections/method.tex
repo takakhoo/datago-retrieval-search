@@ -1,0 +1,57 @@
+\section{Measuring what more search buys}
+\label{sec:ladder}
+
+Before building a gate we need to know what it could gain, position by position. We collect that in a \emph{ladder dataset}.
+
+\paragraph{Positions.}
+We played 300 self-play games with the test network, each at a per-game visit budget drawn log-uniformly from 30 to 200, and sampled 20 positions from each game uniformly over move numbers after the fourth. This gives 6{,}000 positions from the distribution a low-budget player actually meets, from first corner moves to late endgame.
+
+\paragraph{Ladder.}
+Each position is searched at 50, 100, 200, 400, 800, 1{,}600 and 3{,}200 visits. We record the engine's chosen move and summary statistics at every rung.
+
+\paragraph{An independent yardstick.}
+A search cannot grade itself: the value it reports for its own choice is the very estimate that might be wrong. For every distinct move that any rung chose, and for the top two moves of the deepest rung, we run a separate search restricted to that move at the root (1{,}600 visits). Its winrate, $q(s,a)$, is our value for playing $a$ in $s$. All moves are scored the same way, by a search that did not choose them, so a comparison between two stopping policies is not biased toward either. The \emph{regret} of stopping at rung $k$ is
+\begin{equation}
+  r_k(s) \;=\; \max_{a \in C(s)} q(s,a) \;-\; q\bigl(s, a_k(s)\bigr),
+\end{equation}
+where $a_k(s)$ is the move chosen at rung $k$ and $C(s)$ is the set of scored moves. Regret is in winrate units, so it is automatically small in positions that are already decided and large where the game can still turn.
+
+\paragraph{Equivalent visits.}
+The mean regret of always stopping at rung $k$ traces a curve $R(v)$ against visits. For any other policy with mean regret $\bar r$ we report the uniform budget $v^\ast$ with $R(v^\ast)=\bar r$, interpolating $R$ linearly in $\log v$. The ratio of $v^\ast$ to the policy's own mean cost is its \emph{compute multiplier}: how many times more visits uniform search needs to give up as little.
+
+\section{DataGo}
+\label{sec:method}
+
+DataGo wraps a fixed engine and changes only how many visits each move receives. It has three parts.
+
+\subsection{A visit ladder with a learned stop}
+
+DataGo searches a position at the first rung of a short ladder, for example 50 visits, and asks a model whether the decision is settled. If it is, DataGo plays. If not, it searches at the next rung (200, then 800, then 3{,}200) and asks again.
+
+The model is a gradient-boosted regression tree ensemble that predicts the regret remaining at the current rung, $\hat r_j(x)$. Its inputs come from the search that just finished, at no extra engine cost:
+\begin{itemize}
+  \item how contested the root is: visit share of the top two moves, visit entropy, number of moves above 5\% of visits, the margin between the best move's lower confidence bound and the best rival's winrate, and whether the most-visited move is also the highest-valued one;
+  \item how the search disagrees with the network: prior of the chosen move, whether it is the top-prior move, the KL divergence from prior to visit distribution, and the gap between the raw network winrate and the searched winrate;
+  \item what is at stake: root winrate, its distance from 50\%, score lead, and the spread of score among the leading moves;
+  \item KataGo's own raw-network predictions of its short-term winrate and score error;
+  \item game phase and the logarithm of visits;
+  \item from the second rung on, what changed since the previous rung: whether the best move changed, how many times it has changed so far, and the change in winrate, top-move share, and confidence margin.
+\end{itemize}
+
+DataGo stops at rung $j$ when
+\begin{equation}
+  \frac{\hat r_j(x)}{v_{j+1}-v_j} \;<\; \lambda .
+\end{equation}
+The left side is the regret still on the table per visit needed to reach the next rung, an upper bound on the return from continuing. A single $\lambda$ then trades winrate against visits at the same rate everywhere on the ladder: going from 800 to 3{,}200 visits requires four times the stake that going from 200 to 800 does. Without this scaling a long ladder spends most of its budget on a handful of positions that no amount of search resolves (Section~\ref{sec:offline}).
+
+The model is trained on the ladder dataset with all non-final rungs pooled. Every offline number we report is cross-fitted: games are split into five folds, and each position is scored by a model that never saw any position from its game. The deployed model is trained on all games and stored as JSON trees evaluated in NumPy.
+
+\subsection{Exact search memory}
+
+Every search DataGo finishes within the first 80 moves of a game is stored under the position's symmetry-canonical key. When a later game reaches the same position, in any of its eight orientations and by any move order, DataGo plays from the stored search and spends nothing. The stored result is a search of exactly this position, at the budget DataGo's own stopping rule chose for it, so a hit gives up nothing in quality.
+
+Entries that keep being hit are worth more than their first search. After each game, if the ledger (below) shows a surplus, DataGo re-searches the most frequently hit entries at a larger budget and replaces them.
+
+\subsection{A ledger}
+
+To compare fairly with an engine that spends $b$ visits on every move, DataGo is granted $b$ visits for each move it makes and may never spend more than it has been granted. Memory hits and early stops leave part of the grant unspent. A controller adjusts $\lambda$ after every game so that cumulative spending tracks the cumulative grant, which turns visits saved on known or easy positions into deeper searches on hard ones. Post-game deepening draws on the same ledger. Over a series, DataGo's total compute, online and offline, is at most the baseline's.
