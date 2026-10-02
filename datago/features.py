@@ -17,6 +17,8 @@ FEATURE_NAMES = [
     "best_prior", "max_prior", "best_is_not_max_prior", "policy_surprise",
     "q_gap", "lcb_margin", "visit_value_disagree", "root_winrate", "undecided",
     "value_surprise", "abs_score_lead", "score_spread", "phase", "log_visits",
+    "best_score_stdev", "raw_wr_error", "raw_score_error", "raw_var_time_left",
+    "wr_x_lcb_margin",
 ]
 
 
@@ -56,4 +58,7 @@ def extract(result: SearchResult, board: Board) -> np.ndarray:
         abs(result.winrate - raw), abs(result.score_lead),
         float(np.std(scores)) if len(scores) > 1 else 0.0,
         board.num_stones() / (board.size * board.size), math.log(max(result.visits, 1)),
+        best.score_stdev, result.raw.get("rawStWrError", 0.0),
+        result.raw.get("rawStScoreError", 0.0), result.raw.get("rawVarTimeLeft", 0.0),
+        (1.0 - 2.0 * abs(result.winrate - 0.5)) * float(np.clip(-lcb_margin, 0, 1)),
     ])
