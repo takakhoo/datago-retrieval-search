@@ -1,0 +1,32 @@
+{
+ "50": {
+  "positions_with_regret_over_0.5pct": 1592,
+  "share_of_regret_by_attention_to_best_move": {
+   "not listed or under 1% of visits": 0.18552260271038054,
+   "1-10% of visits": 0.3381956817917454,
+   "10-40% of visits": 0.3827978769712403,
+   "over 40% of visits": 0.09348383852663354
+  },
+  "share_of_regret_where_best_move_prior_under_5pct": 0.2336736186876911
+ },
+ "200": {
+  "positions_with_regret_over_0.5pct": 1275,
+  "share_of_regret_by_attention_to_best_move": {
+   "not listed or under 1% of visits": 0.12398251861099231,
+   "1-10% of visits": 0.4507518847025402,
+   "10-40% of visits": 0.3328225464641549,
+   "over 40% of visits": 0.09244305022231297
+  },
+  "share_of_regret_where_best_move_prior_under_5pct": 0.22118194149256876
+ },
+ "800": {
+  "positions_with_regret_over_0.5pct": 840,
+  "share_of_regret_by_attention_to_best_move": {
+   "not listed or under 1% of visits": 0.12681817481870383,
+   "1-10% of visits": 0.41155578373887114,
+   "10-40% of visits": 0.35443906558001237,
+   "over 40% of visits": 0.10718697586241416
+  },
+  "share_of_regret_where_best_move_prior_under_5pct": 0.20714867763396108
+ }
+}
