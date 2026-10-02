@@ -146,7 +146,7 @@ def prediction_table() -> None:
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("prediction", "\n".join(lines) + "\n")
     lines = [r"\begin{tabular}{lrrrr}", r"\toprule",
-             r"Rule & Visits & Equiv. & Forecast & Measured (95\% interval) \\", r"\midrule"]
+             r"Rule & Visits & Equiv. & Forecast & Measured (95\%) \\", r"\midrule"]
     for r in rows:
         lines.append(f"{r.get('ladder', 'four-rung')} & {r['visits']:.0f} & {r['equivalent_uniform_visits']:.0f} & "
                      f"${r['predicted_elo']:+.0f}$ & ${r['measured_elo']:+.0f}$ "
