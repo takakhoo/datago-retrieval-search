@@ -11,7 +11,7 @@ import sys
 
 import numpy as np
 
-from datago.board import BLACK, EMPTY, WHITE, Board
+from mikiri.board import BLACK, EMPTY, WHITE, Board
 
 katago, model, config, games_path = sys.argv[1:5]
 n_games = int(sys.argv[5]) if len(sys.argv) > 5 else 20

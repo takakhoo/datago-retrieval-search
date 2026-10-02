@@ -242,8 +242,8 @@ NETS = {
 
 def open_katago(net: str = "b18", gpu: int | None = None, config: str | None = None,
                 threads: int | None = None, stderr=subprocess.DEVNULL) -> AnalysisEngine:
-    """Start `katago analysis`. Paths come from $KATAGO and $DG (see README)."""
-    root = Path(os.environ.get("DG", "."))
+    """Start `katago analysis`. Paths come from $KATAGO and $MIKIRI_HOME (see README)."""
+    root = Path(os.environ.get("MIKIRI_HOME", "."))
     binary = os.environ.get("KATAGO", "katago")
     model = NETS.get(net, net)
     if not os.path.isabs(model):

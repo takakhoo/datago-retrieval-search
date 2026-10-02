@@ -18,7 +18,7 @@ These games used a higher early move temperature (0.8) than KataGo's default (0.
 \subsection{Near matches do not transfer}
 \label{sec:approx}
 
-The first version of DataGo was designed around approximate retrieval: find stored positions that resemble the current one and reuse their analysis. We tested the idea directly. Each position in the ladder dataset is embedded with KataGo's raw policy and ownership maps, compared against every position from other games in all eight orientations, and matched to its nearest neighbours by cosine similarity. A neighbour's 3{,}200-visit move is mapped through the aligning symmetry and offered as a proposal.
+The first version of this project, DataGo, was designed around approximate retrieval: find stored positions that resemble the current one and reuse their analysis. We tested the idea directly. Each position in the ladder dataset is embedded with KataGo's raw policy and ownership maps, compared against every position from other games in all eight orientations, and matched to its nearest neighbours by cosine similarity. A neighbour's 3{,}200-visit move is mapped through the aligning symmetry and offered as a proposal.
 
 Proposals matter in the 1{,}605 positions (27\%) where the 200-visit move differs from the 3{,}200-visit move. There the nearest neighbour's move is the 3{,}200-visit move 5.5\% of the time, and one of five neighbours has it 7.8\% of the time. The policy network's highest-prior alternative to the 200-visit move is right 43\% of the time, and one of its top five 85\%. An index of stored searches is a much worse source of candidate moves than the network the engine already carries.
 

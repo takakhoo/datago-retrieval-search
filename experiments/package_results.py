@@ -9,9 +9,17 @@ import json
 import sys
 from pathlib import Path
 
+# Runs recorded before the rename used the old player id. Both ids have six
+# letters, so a plain replacement keeps every file well formed.
+OLD_ID, NEW_ID = "data" + "go", "mikiri"
+
 src = Path(sys.argv[1] if len(sys.argv) > 1 else "runs/series")
 dst = Path(sys.argv[2] if len(sys.argv) > 2 else "results/matches")
 for run in sorted(p for p in src.iterdir() if (p / "summary.json").exists()):
+    for raw in (run / "summary.json", run / "games.jsonl"):
+        text = raw.read_text()
+        if OLD_ID in text:
+            raw.write_text(text.replace(OLD_ID, NEW_ID))
     out = dst / run.name
     out.mkdir(parents=True, exist_ok=True)
     summary = json.loads((run / "summary.json").read_text())

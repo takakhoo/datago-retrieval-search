@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from datago.board import (BLACK, EMPTY, PASS, WHITE, Board, IllegalMove, gtp_to_point,
+from mikiri.board import (BLACK, EMPTY, PASS, WHITE, Board, IllegalMove, gtp_to_point,
                           point_to_gtp, symmetry_tables)
 
 

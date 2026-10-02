@@ -16,5 +16,5 @@ for run in main_200 pilot2_stopper_200; do
   fi
 done
 python3 experiments/paper_tables.py | tail -1
-(cd paper && tectonic -X compile datago.tex 2>&1 | grep -E "^error|Writing" || true)
+(cd paper && tectonic -X compile mikiri.tex 2>&1 | grep -E "^error|Writing" || true)
 grep -c "??" paper/numbers.tex | xargs echo "numbers still pending:"

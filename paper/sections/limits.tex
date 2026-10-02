@@ -14,7 +14,7 @@ The oracle multiplier at 200 visits is 12; the learned stopper reaches 1.8. Amon
 Exact reuse is confined to the first few dozen moves, where search error at these budgets is already small. It saves visits, and in a long-running engine process it saves almost no network evaluations, since the engine's own cache covers the same positions. Against opponents with a wider opening repertoire than KataGo's, hit rates will be lower than ours.
 
 \paragraph{The opponent is cooperative.}
-Adversarial policies defeat KataGo at any budget we could afford \citep{wang2023adversarial,tseng2025can}. DataGo reads the same network and the same search, and would stop early with full confidence in exactly the positions those attacks construct.
+Adversarial policies defeat KataGo at any budget we could afford \citep{wang2023adversarial,tseng2025can}. Mikiri reads the same network and the same search, and would stop early with full confidence in exactly the positions those attacks construct.
 
 \paragraph{No direct comparison with AlphaGo.}
 AlphaGo and AlphaGo Zero \citep{silver2016mastering,silver2017mastering} are not available to play. KataGo's public networks are among the strongest Go engines anyone can run, so they are the baseline here. What we show is an improvement over that baseline at equal compute.

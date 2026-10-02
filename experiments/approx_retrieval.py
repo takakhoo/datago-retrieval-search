@@ -18,8 +18,8 @@ import json
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
-from datago.board import symmetry_tables
-from datago.ladder import load
+from mikiri.board import symmetry_tables
+from mikiri.ladder import load
 
 ap = argparse.ArgumentParser()
 ap.add_argument("data")

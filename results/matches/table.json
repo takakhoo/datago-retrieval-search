@@ -77,7 +77,7 @@
  },
  {
   "run": "main_200",
-  "player": "DataGo (stopper), 200-visit grant",
+  "player": "Mikiri (stopper), 200-visit grant",
   "baseline": "KataGo 200",
   "games": 1000,
   "wld": "728-196-76",
@@ -96,7 +96,7 @@
  },
  {
   "run": "main_stopper_160",
-  "player": "DataGo (stopper), 160-visit grant",
+  "player": "Mikiri (stopper), 160-visit grant",
   "baseline": "KataGo 200",
   "games": 1000,
   "wld": "586-325-89",
@@ -115,7 +115,7 @@
  },
  {
   "run": "mem_only_200",
-  "player": "DataGo (memory), 200-visit grant",
+  "player": "Mikiri (memory), 200-visit grant",
   "baseline": "KataGo 200",
   "games": 600,
   "wld": "276-292-32",
@@ -134,7 +134,7 @@
  },
  {
   "run": "paired_greedy_200",
-  "player": "DataGo (stopper), 200-visit grant, paired openings, no sampling",
+  "player": "Mikiri (stopper), 200-visit grant, paired openings, no sampling",
   "baseline": "KataGo 200",
   "games": 800,
   "wld": "561-183-56",
@@ -153,7 +153,7 @@
  },
  {
   "run": "pilot2_stopper_200",
-  "player": "DataGo (stopper), 200-visit grant (pilot, early model)",
+  "player": "Mikiri (stopper), 200-visit grant (pilot, early model)",
   "baseline": "KataGo 200",
   "games": 240,
   "wld": "169-60-11",

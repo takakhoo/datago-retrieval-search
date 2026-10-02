@@ -1,6 +1,6 @@
 """Explanatory diagrams for the README and paper.
 
-pipeline         how DataGo decides one move
+pipeline         how Mikiri decides one move
 symmetry         eight orientations of a position share one memory key
 case_study       a real position where thinking longer changed the move
 regret_anatomy   how concentrated search error is, and when in the game it occurs
@@ -21,10 +21,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch
 
-from datago.board import BLACK, WHITE, Board, gtp_to_point, point_to_gtp, symmetry_tables
-from datago.ladder import result_from_summary
-from datago.features import extract
-from datago.stopper import Stopper, trajectory
+from mikiri.board import BLACK, WHITE, Board, gtp_to_point, point_to_gtp, symmetry_tables
+from mikiri.ladder import result_from_summary
+from mikiri.features import extract
+from mikiri.stopper import Stopper, trajectory
 from figures import AQUA, BLUE, GRAY, GRID, INK, MUTED, ORANGE, SURFACE, save
 from render_game import draw_board
 
@@ -51,7 +51,7 @@ def pipeline(out: Path) -> None:
     ax.set_xlim(0, 12.6)
     ax.set_ylim(0, 5.9)
     ax.axis("off")
-    ax.text(0.1, 5.62, "How DataGo decides one move", fontsize=13, fontweight="bold", color=INK)
+    ax.text(0.1, 5.62, "How Mikiri decides one move", fontsize=13, fontweight="bold", color=INK)
 
     box(ax, 0.1, 2.9, 1.3, 0.9, "Position", face="#ffffff", weight="bold", size=10)
     box(ax, 1.9, 2.7, 2.5, 1.3, "Seen before?\nSame position in any\nof 8 orientations,\nby any move order",
@@ -210,7 +210,7 @@ def case_study(recs: list[dict], stopper: Stopper, out: Path) -> None:
     gain = 100 * (r["forced"][deep]["winrate"] - r["forced"][shallow]["winrate"])
     ax2.text(0.1, 1.35, f"A is what a fixed 200-visit search plays. An independent {r['forced'][shallow]['visits']:,}-visit search of each\n"
              f"move puts B {gain:.1f} points of winrate ahead of A. The stopper's stake estimate stayed above\n"
-             f"its threshold λ at 50 and at 200 visits, so DataGo went on to 800 and found B.",
+             f"its threshold λ at 50 and at 200 visits, so Mikiri went on to 800 and found B.",
              fontsize=9, color=MUTED, va="center", linespacing=1.5)
     fig.text(0.03, 0.94, "A real position where thinking longer changed the move",
              fontsize=13, fontweight="bold", color=INK)

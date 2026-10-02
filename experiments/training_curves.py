@@ -18,8 +18,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
 
-from datago.ladder import load
-from datago.stopper import STOPPER_FEATURES, Stopper
+from mikiri.ladder import load
+from mikiri.stopper import STOPPER_FEATURES, Stopper
 from figures import BLUE, GRAY, INK, MUTED, ORANGE, save
 from train_stopper import at_cost, folds_by_game, frontier, path_features
 

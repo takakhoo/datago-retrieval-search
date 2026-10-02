@@ -29,7 +29,7 @@ def describe(name: str, s: dict) -> str:
     if c.get("memory"):
         parts.append("memory" + (" + deepening" if c.get("deepen") else ""))
     grant = c.get("grant") or c["budget"]
-    label = f"DataGo ({' + '.join(parts)}), {grant:g}-visit grant"
+    label = f"Mikiri ({' + '.join(parts)}), {grant:g}-visit grant"
     if "long" in name:
         label += ", six-rung ladder"
     if c.get("net", "b18") != "b18":
@@ -54,7 +54,7 @@ def row(name: str, s: dict) -> dict:
         "elo": s["elo"], "elo_lo": s["elo_lo"], "elo_hi": s["elo_hi"],
         "visits": s["visits_per_move"], "restart": s["restart_visits_per_move"],
         "base_visits": s["baseline_visits_per_move"],
-        "rows": rows.get("datago"), "base_rows": rows.get("katago"),
+        "rows": rows.get("mikiri"), "base_rows": rows.get("katago"),
         "hit_rate": (s.get("per_move") or {}).get("hit", 0.0),
     }
 
@@ -90,7 +90,7 @@ def fig_elo_compute(rows: list[dict], out: Path, budget: int = 200) -> None:
             x = r[key] / r[base]
             ax.plot([x, x], [r["elo_lo"], r["elo_hi"]], color=BLUE, linewidth=1.2)
             ax.plot([x], [r["elo"]], color=BLUE, marker="D", markersize=6, linestyle="none",
-                    label="DataGo" if i == 0 else None)
+                    label="Mikiri" if i == 0 else None)
         ax.axhline(0, color=MUTED, linewidth=0.8)
         ax.set_xscale("log")
         ticks = [0.5, 0.7, 1.0, 1.4, 2.0]

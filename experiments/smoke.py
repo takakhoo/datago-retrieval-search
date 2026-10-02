@@ -6,8 +6,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 
-from datago.board import Board, point_to_gtp
-from datago.engine import open_katago
+from mikiri.board import Board, point_to_gtp
+from mikiri.engine import open_katago
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--net", default="b18")

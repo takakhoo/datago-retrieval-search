@@ -20,6 +20,9 @@ def value(key: str, field: str) -> str:
         "games": lambda: f"{r['games']:,}", "score": lambda: f"{100 * r['score']:.1f}",
         "elo": lambda: f"{r['elo']:+.0f}", "elo_lo": lambda: f"{r['elo_lo']:+.0f}",
         "elo_hi": lambda: f"{r['elo_hi']:+.0f}", "visits": lambda: f"{r['visits']:.0f}",
+        "elo_abs": lambda: f"{abs(r['elo']):.0f}", "wld": lambda: r["wld"],
+        "evals": lambda: f"{r['rows']:.0f}", "base_evals": lambda: f"{r['base_rows']:.0f}",
+        "hit": lambda: f"{100 * r['hit_rate']:.0f}",
     }[field]()
 
 
@@ -30,7 +33,7 @@ text = text.replace("{{table}}", table.strip())
 demo = Path("results/demo/game.json")
 excerpt = "(demo game pending)"
 if demo.exists():
-    out = subprocess.run([sys.executable, "-m", "datago.demo", "--replay", str(demo)],
+    out = subprocess.run([sys.executable, "-m", "mikiri.demo", "--replay", str(demo)],
                          capture_output=True, text=True).stdout.splitlines()
     moves = [l for l in out if l[:4].strip().isdigit()]
     k = next((i for i, l in enumerate(moves) if "3200" in l),
@@ -48,8 +51,10 @@ if train.exists():
 text = text.replace("{{training_sentence}}", sentence)
 pending_runs = [k for k in ("memonly", "full", "long", "bhundred", "bfour", "beight", "bignet", "thirteen", "nine", "lean")
                 if RUNS[k] not in rows]
-note = ("*More runs are still in progress and will be added to this table: memory, other budgets, "
+note = ("*More runs are still in progress and will be added to this table: the full system with memory, other budgets, "
         "the b28 network, and smaller boards.*\n\n" if pending_runs else "")
 text = text.replace("{{progress_note}}", note)
+total = sum(r["games"] for name, r in rows.items() if not name.startswith("pilot"))
+text = text.replace("{{total_games}}", f"{total:,}")
 Path("README.md").write_text(text)
 print("wrote README.md;", text.count("pending"), "values pending")

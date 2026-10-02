@@ -10,8 +10,8 @@ import re
 import sys
 import tempfile
 
-from datago.board import Board
-from datago.engine import open_katago
+from mikiri.board import Board
+from mikiri.engine import open_katago
 
 gpu = int(sys.argv[1])
 games = [json.loads(l) for l in open(sys.argv[2])][:6]

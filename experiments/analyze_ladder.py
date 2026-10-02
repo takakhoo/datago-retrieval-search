@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
-from datago.ladder import FEATURE_NAMES, evaluate_stops, load, sequential_stops, uniform_curve
+from mikiri.ladder import FEATURE_NAMES, evaluate_stops, load, sequential_stops, uniform_curve
 
 
 def frontier(lad, path, scores, points=160):

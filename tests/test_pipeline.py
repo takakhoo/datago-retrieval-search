@@ -5,18 +5,18 @@ import sys
 import numpy as np
 import pytest
 
-from datago.board import BLACK, PASS, Board, symmetry_tables
-from datago.engine import AnalysisEngine
-from datago.features import FEATURE_NAMES, extract
-from datago.match import GameConfig, play_game, run_match, sample_openings, summarize
-from datago.memory import Memory
-from datago.players import DataGoPlayer, KataGoPlayer, Temperature, pick_move
-from datago.stats import bradley_terry, elo_from_score, paired_summary
+from mikiri.board import BLACK, PASS, Board, symmetry_tables
+from mikiri.engine import AnalysisEngine
+from mikiri.features import FEATURE_NAMES, extract
+from mikiri.match import GameConfig, play_game, run_match, sample_openings, summarize
+from mikiri.memory import Memory
+from mikiri.players import MikiriPlayer, KataGoPlayer, Temperature, pick_move
+from mikiri.stats import bradley_terry, elo_from_score, paired_summary
 
 
 @pytest.fixture(scope="module")
 def engine():
-    with AnalysisEngine([sys.executable, "-m", "datago.fake_engine"]) as e:
+    with AnalysisEngine([sys.executable, "-m", "mikiri.fake_engine"]) as e:
         yield e
 
 
@@ -46,7 +46,7 @@ def test_features_are_finite_and_named(engine):
 
 def test_memory_hit_is_free_and_symmetry_aware(engine, tmp_path):
     mem = Memory(tmp_path / "mem.jsonl")
-    player = DataGoPlayer(engine, [128], None, mem, temp=None)
+    player = MikiriPlayer(engine, [128], None, mem, temp=None)
     rng = np.random.default_rng(0)
     board = Board(7)
     board.play(9)
@@ -71,27 +71,27 @@ def test_ladder_player_matches_baseline_without_a_stopper(engine):
     board = Board(7)
     rng = np.random.default_rng(0)
     base = KataGoPlayer(engine, 64, temp=None).decide(board, 7.5, rng)
-    same = DataGoPlayer(engine, [64, 256], None, None, temp=None).decide(board, 7.5, rng)
+    same = MikiriPlayer(engine, [64, 256], None, None, temp=None).decide(board, 7.5, rng)
     assert (same.point, same.visits) == (base.point, base.visits)
 
 
 def test_stopper_controls_ladder_depth_and_costs(engine):
-    from datago.stopper import STOPPER_FEATURES, Stopper, TreeEnsemble
+    from mikiri.stopper import STOPPER_FEATURES, Stopper, TreeEnsemble
     leaf = {"left": [-1], "right": [-1], "feature": [0], "threshold": [0.0], "value": [0.0]}
     board = Board(7)
     rng = np.random.default_rng(0)
     never = Stopper(TreeEnsemble(1.0, 1.0, [leaf]), 0.5, [16, 64, 256])
     always = Stopper(TreeEnsemble(0.0, 1.0, [leaf]), 0.5, [16, 64, 256])
-    deep = DataGoPlayer(engine, [16, 64, 256], never, None, temp=None).decide(board, 7.5, rng)
+    deep = MikiriPlayer(engine, [16, 64, 256], never, None, temp=None).decide(board, 7.5, rng)
     assert deep.visits == 256 and deep.counts["restart_visits"] == 16 + 64 + 256 and deep.counts["rung"] == 2
-    quick = DataGoPlayer(engine, [16, 64, 256], always, None, temp=None).decide(board, 7.5, rng)
+    quick = MikiriPlayer(engine, [16, 64, 256], always, None, temp=None).decide(board, 7.5, rng)
     assert quick.visits == 16 and quick.counts["restart_visits"] == 16 and quick.counts["rung"] == 0
     assert len(STOPPER_FEATURES) == len(extract(engine.search(board, 16, 7.5), board)) + 6
 
 
 def test_tree_ensemble_matches_sklearn(tmp_path):
     sklearn = pytest.importorskip("sklearn.ensemble")
-    from datago.stopper import STOPPER_FEATURES, Stopper, TreeEnsemble
+    from mikiri.stopper import STOPPER_FEATURES, Stopper, TreeEnsemble
     rng = np.random.default_rng(0)
     X = rng.normal(size=(400, len(STOPPER_FEATURES)))
     y = np.maximum(0, X[:, 0] * X[:, 3] + 0.3 * X[:, 5]) + 0.05 * rng.normal(size=400)
@@ -112,10 +112,10 @@ def test_tree_ensemble_matches_sklearn(tmp_path):
 
 
 def test_series_ledger_never_overspends_and_memory_gets_hits(engine):
-    from datago.series import Deepener, Ledger, run_series
+    from mikiri.series import Deepener, Ledger, run_series
     cfg = GameConfig(size=5, komi=0.5, max_moves=40)
     mem = Memory()
-    dg = DataGoPlayer(engine, [24], None, mem, name="dg")
+    dg = MikiriPlayer(engine, [24], None, mem, name="dg")
     kg = KataGoPlayer(engine, 24, name="kg")
     ledger = Ledger(budget_per_move=24)
     hook = Deepener("dg", mem, engine, ledger, deep_visits=96, komi=0.5)
@@ -168,7 +168,7 @@ def test_match_is_color_balanced_and_accounts_compute(engine, tmp_path):
 
 
 def test_fake_engine_picks_better_moves_with_more_visits(engine):
-    from datago.fake_engine import true_values
+    from mikiri.fake_engine import true_values
     rng = np.random.default_rng(0)
     gain = []
     for _ in range(40):
@@ -217,8 +217,8 @@ def test_many_large_concurrent_responses_do_not_deadlock(engine):
 
 
 def test_budget_controller_holds_spending_at_the_budget():
-    from datago.series import BudgetController
-    from datago.stopper import Stopper, TreeEnsemble
+    from mikiri.series import BudgetController
+    from mikiri.stopper import Stopper, TreeEnsemble
     leaf = {"left": [-1], "right": [-1], "feature": [0], "threshold": [0.0], "value": [0.0]}
     calib = [{"threshold": 1.0 / c, "cost_continue": c} for c in (50, 100, 200, 400, 800, 1600)]
     st = Stopper(TreeEnsemble(0.0, 1.0, [leaf]), 0.5, [50, 200, 800], meta={"calibration": calib})

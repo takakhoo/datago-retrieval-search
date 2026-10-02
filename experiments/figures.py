@@ -42,7 +42,7 @@ def fig_frontier(report: dict, key: str, out: Path) -> None:
     ax.plot(rungs, uniform, color=ORANGE, marker="o", markersize=5, label="Uniform visits (KataGo)")
     front = [r for r in pol["frontier"] if rungs[0] <= r["cost_continue"] <= rungs[-1]]
     ax.plot([r["cost_continue"] for r in front], [100 * r["regret"] for r in front],
-            color=BLUE, label="Learned stopping (DataGo)")
+            color=BLUE, label="Learned stopping (Mikiri)")
     orc = [r for r in pol["oracle"] if rungs[0] <= r["cost_continue"] <= rungs[-1]]
     # Past its cheapest best point the oracle has nothing left to gain.
     best = min(range(len(orc)), key=lambda i: (orc[i]["regret"], orc[i]["cost_continue"]))

@@ -17,11 +17,11 @@ To read the other results we first need the exchange rate between compute and st
 
 \subsection{The stopping rule at equal visits and below}
 
-With the ladder 50, 200, 800, 3{,}200 and the controller holding its mean at the opponent's budget, DataGo scores \mainScore\% over \mainGames{} games (\mainRecord), a gain of $\mainElo$ Elo (95\% interval $\mainEloLo$ to $\mainEloHi$), at \mainVisits{} visits per move. Counting every restarted search it requested \mainRestart{} visits per move, and it ran \mainEvals{} network evaluations per move to KataGo's \mainBaseEvals.
+With the ladder 50, 200, 800, 3{,}200 and the controller holding its mean at the opponent's budget, Mikiri scores \mainScore\% over \mainGames{} games (\mainRecord), a gain of $\mainElo$ Elo (95\% interval $\mainEloLo$ to $\mainEloHi$), at \mainVisits{} visits per move. Counting every restarted search it requested \mainRestart{} visits per move, and it ran \mainEvals{} network evaluations per move to KataGo's \mainBaseEvals.
 
-Visits understate DataGo's cost in one respect. A fixed-budget engine re-meets much of its previous tree on the next move and finds those evaluations cached. DataGo's searches vary in size, so less carries over, and it runs more network evaluations per visit. We therefore reran the match with DataGo granted fewer visits. At a grant of 160 it averaged \strictVisits{} visits per move, \strictRestart{} with every restarted search counted, and \strictEvals{} network evaluations to KataGo's \strictBaseEvals. It scored \strictScore\% over \strictGames{} games (\strictRecord), a gain of $\strictElo$ Elo ($\strictEloLo$ to $\strictEloHi$). At a grant of 140 it averaged \leanVisits{} visits, \leanRestart{} restart visits, and \leanEvals{} evaluations to KataGo's \leanBaseEvals, and gained $\leanElo$ Elo ($\leanEloLo$ to $\leanEloHi$) over \leanGames{} games.
+Visits understate Mikiri's cost in one respect. A fixed-budget engine re-meets much of its previous tree on the next move and finds those evaluations cached. Mikiri's searches vary in size, so less carries over, and it runs more network evaluations per visit. We therefore reran the match with Mikiri granted fewer visits. At a grant of 160 it averaged \strictVisits{} visits per move, \strictRestart{} with every restarted search counted, and \strictEvals{} network evaluations to KataGo's \strictBaseEvals. It scored \strictScore\% over \strictGames{} games (\strictRecord), a gain of $\strictElo$ Elo ($\strictEloLo$ to $\strictEloHi$). At a grant of 140 it averaged \leanVisits{} visits, \leanRestart{} restart visits, and \leanEvals{} evaluations to KataGo's \leanBaseEvals, and gained $\leanElo$ Elo ($\leanEloLo$ to $\leanEloHi$) over \leanGames{} games.
 
-Figure~\ref{fig:elo} places these results against the uniform curve under all three measures of compute. Both DataGo runs lie above the curve under each. The comparison at equal evaluations is direct: DataGo in the main match and KataGo at 283 visits run \mainEvals{} and \unirootEvals{} evaluations per move and gain $\mainElo$ and $\unirootElo$ Elo.
+Figure~\ref{fig:elo} places these results against the uniform curve under all three measures of compute. Both Mikiri runs lie above the curve under each. The comparison at equal evaluations is direct: Mikiri in the main match and KataGo at 283 visits run \mainEvals{} and \unirootEvals{} evaluations per move and gain $\mainElo$ and $\unirootElo$ Elo.
 
 \begin{figure}[t]
 \centering
@@ -32,24 +32,24 @@ Figure~\ref{fig:elo} places these results against the uniform curve under all th
 
 \subsection{Without move sampling}
 
-KataGo's default play samples among well-visited moves early in the game. A search that stops when one move dominates has sharper visit counts than a fixed-budget search, so sampling could favour DataGo for reasons unrelated to search quality. To rule this out we sampled 400 balanced openings of 12 moves, played each twice with colours swapped, and had both players always play their engine's top move. DataGo scores \pairedScore\% over \pairedGames{} games (\pairedRecord), $\pairedElo$ Elo ($\pairedEloLo$ to $\pairedEloHi$), at \pairedVisits{} visits per move.
+KataGo's default play samples among well-visited moves early in the game. A search that stops when one move dominates has sharper visit counts than a fixed-budget search, so sampling could favour Mikiri for reasons unrelated to search quality. To rule this out we sampled 400 balanced openings of 12 moves, played each twice with colours swapped, and had both players always play their engine's top move. Mikiri scores \pairedScore\% over \pairedGames{} games (\pairedRecord), $\pairedElo$ Elo ($\pairedEloLo$ to $\pairedEloHi$), at \pairedVisits{} visits per move.
 
 \subsection{Where the visits go}
 
-Figure~\ref{fig:profile} shows DataGo's spending in the main match. It uses about a third of the budget over the first 20 moves, where Section~\ref{sec:offline} found almost no regret to recover, and about 270 visits per move around move 140. After move 60 it also spends by stakes: about 130 visits per move when it rates its own winrate above 90\%, about 160 when below 10\%, and 190 to 330 in between, with the peak when it is behind but not lost. Neither behaviour was programmed. Both follow from predicting regret in winrate units. Of all its moves, 47\% stopped at 50 visits, 42\% at 200, 11\% at 800, and 0.2\% at 3{,}200.
+Figure~\ref{fig:profile} shows Mikiri's spending in the main match. It uses about a third of the budget over the first 20 moves, where Section~\ref{sec:offline} found almost no regret to recover, and about 270 visits per move around move 140. After move 60 it also spends by stakes: about 130 visits per move when it rates its own winrate above 90\%, about 160 when below 10\%, and 190 to 330 in between, with the peak when it is behind but not lost. Neither behaviour was programmed. Both follow from predicting regret in winrate units. Of all its moves, 47\% stopped at 50 visits, 42\% at 200, 11\% at 800, and 0.2\% at 3{,}200.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{profile_main}
-\caption{Mean visits per DataGo move in the main match, by move number and, for moves 60 and later, by DataGo's own winrate estimate.}
+\caption{Mean visits per Mikiri move in the main match, by move number and, for moves 60 and later, by Mikiri's own winrate estimate.}
 \label{fig:profile}
 \end{figure}
 
 \subsection{Memory}
 
-With memory alone and no stopper, DataGo is KataGo with an opening book that fills itself. Over \memonlyGames{} games it served \memonlyHitRate\% of its moves from memory (\memonlyHitLate\% in the second half of the series, from \memonlyMemory{} stored positions), averaged \memonlyVisits{} visits per move, and scored \memonlyScore\% ($\memonlyElo$ Elo, $\memonlyEloLo$ to $\memonlyEloHi$). Strength is unchanged, as it should be when a hit returns the search that would have been run, and a fifth of the visits are saved.
+With memory alone and no stopper, Mikiri is KataGo with an opening book that fills itself. Over \memonlyGames{} games it served \memonlyHitRate\% of its moves from memory (\memonlyHitLate\% in the second half of the series, from \memonlyMemory{} stored positions), averaged \memonlyVisits{} visits per move, and scored \memonlyScore\% ($\memonlyElo$ Elo, $\memonlyEloLo$ to $\memonlyEloHi$). Strength is unchanged, as it should be when a hit returns the search that would have been run, and a fifth of the visits are saved.
 
-The saving does not carry over to network evaluations. DataGo ran \memonlyEvals{} evaluations per move and KataGo \memonlyBaseEvals. KataGo keeps a cache of network evaluations for as long as its process lives, so a baseline that plays hundreds of games in one process has already paid for the positions that recur: its opening searches cost visits but few new evaluations. Exact memory removes search work that the evaluation cache had already made cheap. It would save evaluations for an engine that restarts between games, and it saves the tree-search overhead in any case, but in this harness its effect on the dominant cost is nil.
+The saving does not carry over to network evaluations. Mikiri ran \memonlyEvals{} evaluations per move and KataGo \memonlyBaseEvals. KataGo keeps a cache of network evaluations for as long as its process lives, so a baseline that plays hundreds of games in one process has already paid for the positions that recur: its opening searches cost visits but few new evaluations. Exact memory removes search work that the evaluation cache had already made cheap. It would save evaluations for an engine that restarts between games, and it saves the tree-search overhead in any case, but in this harness its effect on the dominant cost is nil.
 
 The full system combines memory with the stopper and lets the controller reinvest what memory saves. Over \fullGames{} games it scores \fullScore\% (\fullRecord), $\fullElo$ Elo ($\fullEloLo$ to $\fullEloHi$), at \fullVisits{} visits and \fullEvals{} evaluations per move against \fullBaseEvals, with \fullHitRate\% of moves served from a memory that grew to \fullMemory{} positions.
 
@@ -57,8 +57,8 @@ The full system combines memory with the stopper and lets the controller reinves
 
 The same model, trained once on 19$\times$19 positions from the b18 network, was run without retraining in six further settings.
 \begin{itemize}
-\item \textbf{Budgets.} Against KataGo at 100, 400, and 800 visits, at matched visits, DataGo gains $\bhundredElo$ ($\bhundredEloLo$ to $\bhundredEloHi$), $\bfourElo$ ($\bfourEloLo$ to $\bfourEloHi$), and $\beightElo$ ($\beightEloLo$ to $\beightEloHi$) Elo.
+\item \textbf{Budgets.} Against KataGo at 100, 400, and 800 visits, at matched visits, Mikiri gains $\bhundredElo$ ($\bhundredEloLo$ to $\bhundredEloHi$), $\bfourElo$ ($\bfourEloLo$ to $\bfourEloHi$), and $\beightElo$ ($\beightEloLo$ to $\beightEloHi$) Elo.
 \item \textbf{Longer ladder.} The six-rung ladder 50, 200, 400, 800, 1{,}600, 3{,}200, the best offline by continuation cost, gains $\longElo$ ($\longEloLo$ to $\longEloHi$) Elo at \longVisits{} visits, \longRestart{} restart visits, and \longEvals{} evaluations per move.
-\item \textbf{A stronger network.} On the 28-block network, with both players using it, DataGo gains $\bignetElo$ ($\bignetEloLo$ to $\bignetEloHi$) Elo.
+\item \textbf{A stronger network.} On the 28-block network, with both players using it, Mikiri gains $\bignetElo$ ($\bignetEloLo$ to $\bignetEloHi$) Elo.
 \item \textbf{Smaller boards.} On 13$\times$13 and 9$\times$9 it gains $\thirteenElo$ ($\thirteenEloLo$ to $\thirteenEloHi$) and $\nineElo$ ($\nineEloLo$ to $\nineEloHi$) Elo.
 \end{itemize}

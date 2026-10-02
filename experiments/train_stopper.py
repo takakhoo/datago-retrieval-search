@@ -15,8 +15,8 @@ from pathlib import Path
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 
-from datago.ladder import Ladder, evaluate_stops, load, sequential_stops, uniform_curve
-from datago.stopper import STOPPER_FEATURES, Stopper, TreeEnsemble, trajectory
+from mikiri.ladder import Ladder, evaluate_stops, load, sequential_stops, uniform_curve
+from mikiri.stopper import STOPPER_FEATURES, Stopper, TreeEnsemble, trajectory
 
 
 def path_features(lad: Ladder, path: list[int]) -> np.ndarray:

@@ -1,4 +1,4 @@
-"""Where does DataGo spend its visits? Profile a traced match by move number and by game state."""
+"""Where does Mikiri spend its visits? Profile a traced match by move number and by game state."""
 from __future__ import annotations
 
 import argparse
@@ -29,7 +29,7 @@ total = 0
 for line in open(args.games):
     rec = json.loads(line)
     for t in rec["trace"]:
-        if t["p"] != "datago":
+        if t["p"] != "mikiri":
             continue
         total += 1
         by_move[t["n"] // 10].append(t["v"])
@@ -56,16 +56,16 @@ print(json.dumps(report, indent=1))
 
 fig, axes = plt.subplots(1, 2, figsize=(10.4, 3.6), sharey=True)
 ks = [k for k, v in sorted(by_move.items()) if len(v) >= 30]
-axes[0].plot([10 * k + 5 for k in ks], [np.mean(by_move[k]) for k in ks], color=BLUE, label="DataGo")
+axes[0].plot([10 * k + 5 for k in ks], [np.mean(by_move[k]) for k in ks], color=BLUE, label="Mikiri")
 axes[0].axhline(args.budget, color=ORANGE, label="KataGo (fixed)")
 axes[0].set_xlabel("Move number")
 axes[0].set_ylabel("Mean visits per move")
-axes[0].set_title("DataGo saves in the opening, spends in the middle game")
+axes[0].set_title("Mikiri saves in the opening, spends in the middle game")
 axes[0].legend(loc="upper right")
 ws = sorted(by_wr)
 axes[1].plot([10 * k + 5 for k in ws], [np.mean(by_wr[k]) for k in ws], color=BLUE, marker="o", markersize=5)
 axes[1].axhline(args.budget, color=ORANGE)
-axes[1].set_xlabel("DataGo's winrate estimate (%), moves 60 and later")
+axes[1].set_xlabel("Mikiri's winrate estimate (%), moves 60 and later")
 axes[1].set_title("and eases off once the game is decided")
 for ax in axes:
     ax.set_ylim(0, None)

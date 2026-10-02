@@ -13,8 +13,8 @@ from pathlib import Path
 import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
 
-from datago.ladder import load
-from datago.stopper import STOPPER_FEATURES, TRAJECTORY_NAMES, Stopper
+from mikiri.ladder import load
+from mikiri.stopper import STOPPER_FEATURES, TRAJECTORY_NAMES, Stopper
 from train_stopper import at_cost, folds_by_game, frontier, path_features
 
 BUDGETS = (100, 200, 400, 800)

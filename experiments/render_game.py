@@ -1,7 +1,7 @@
 """Render one recorded game as an animated GIF and a still.
 
 Left: the board. Right: visits spent on each move by each player, and the
-winrate DataGo reported. Memory hits show as zero-cost moves, early stops as
+winrate Mikiri reported. Memory hits show as zero-cost moves, early stops as
 short bars, and long thinks as tall ones.
 """
 from __future__ import annotations
@@ -18,7 +18,7 @@ import numpy as np
 from matplotlib.animation import FuncAnimation, PillowWriter
 from matplotlib.patches import Circle
 
-from datago.board import BLACK, EMPTY, GTP_COLS, PASS, Board, gtp_to_point
+from mikiri.board import BLACK, EMPTY, GTP_COLS, PASS, Board, gtp_to_point
 
 SURFACE, INK, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
 BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"
@@ -60,14 +60,14 @@ def draw_board(ax, board: Board, last: int | None = None, title: str = "") -> No
 def render(rec: dict, out: Path, name: str, step: int = 1, fps: int = 6, budget: int | None = None,
            gif_dpi: int = 84) -> None:
     size, trace = rec["size"], rec["trace"]
-    datago_black = rec["black"] == "datago"
+    mikiri_black = rec["black"] == "mikiri"
     moves = [gtp_to_point(m, size) for m in rec["moves"]]
     n = len(trace)
     xs = np.arange(n)
     visits = np.array([t["v"] for t in trace], dtype=float)
-    mine = np.array([t["p"] == "datago" for t in trace])
+    mine = np.array([t["p"] == "mikiri" for t in trace])
     hit = np.array([bool(t.get("hit")) for t in trace])
-    wr = np.array([t["wr"] if t["p"] == "datago" else np.nan for t in trace])
+    wr = np.array([t["wr"] if t["p"] == "mikiri" else np.nan for t in trace])
     vmax = max(visits.max(), 1)
     ladder = sorted({int(v) for v, m in zip(visits, mine) if m and v > 0}) or [1]
 
@@ -78,7 +78,7 @@ def render(rec: dict, out: Path, name: str, step: int = 1, fps: int = 6, budget:
     ax_v = fig.add_subplot(gs[0, 1])
     ax_w = fig.add_subplot(gs[1, 1], sharex=ax_v)
     result = "draw" if rec["winner"] == "draw" else (
-        ("DataGo" if (rec["winner"] == "B") == datago_black else "KataGo") + " wins"
+        ("Mikiri" if (rec["winner"] == "B") == mikiri_black else "KataGo") + " wins"
         + (" by resignation" if rec["reason"] == "resign" else f" by {abs(rec['margin']):g}"))
     result = result.replace(" by resignation", ", resign")
 
@@ -87,11 +87,11 @@ def render(rec: dict, out: Path, name: str, step: int = 1, fps: int = 6, budget:
         for p in moves[:k]:
             board.play(p)
         last = moves[k - 1] if k and moves[k - 1] != PASS else None
-        side = "Black" if datago_black else "White"
-        draw_board(ax_b, board, last, f"DataGo ({side}) vs KataGo, move {k}"
+        side = "Black" if mikiri_black else "White"
+        draw_board(ax_b, board, last, f"Mikiri ({side}) vs KataGo, move {k}"
                    + (f" ({result})" if k >= len(moves) else ""))
-        # What DataGo decided on its most recent move, shown under the board and as a ring.
-        mine_idx = [i for i in range(min(k, n)) if trace[i]["p"] == "datago"]
+        # What Mikiri decided on its most recent move, shown under the board and as a ring.
+        mine_idx = [i for i in range(min(k, n)) if trace[i]["p"] == "mikiri"]
         if mine_idx:
             t = trace[mine_idx[-1]]
             if t.get("hit"):
@@ -102,7 +102,7 @@ def render(rec: dict, out: Path, name: str, step: int = 1, fps: int = 6, budget:
                 climbed = [v for v in ladder if v <= t["v"]]
                 note = "kept thinking: " + " \u2192 ".join(f"{v:,}" for v in climbed) + " visits"
                 ring = BLUE if t["v"] >= ladder[min(2, len(ladder) - 1)] else MUTED
-            ax_b.text(0.0, -0.045, f"DataGo's last move ({t['mv']}): {note}", transform=ax_b.transAxes,
+            ax_b.text(0.0, -0.045, f"Mikiri's last move ({t['mv']}): {note}", transform=ax_b.transAxes,
                       fontsize=9, color=ring if ring != MUTED else INK, va="top",
                       fontweight="bold" if ring == BLUE else "normal")
             if t["mv"] != "pass" and ring != MUTED:
@@ -123,10 +123,10 @@ def render(rec: dict, out: Path, name: str, step: int = 1, fps: int = 6, budget:
         shown = xs < min(k, n)
         d, o = shown & mine & ~hit, shown & ~mine
         ax_v.bar(xs[o], visits[o], width=0.9, color=ORANGE, label="KataGo")
-        ax_v.bar(xs[d], visits[d], width=0.9, color=BLUE, label="DataGo")
+        ax_v.bar(xs[d], visits[d], width=0.9, color=BLUE, label="Mikiri")
         h = shown & mine & hit
         ax_v.scatter(xs[h], np.full(h.sum(), vmax * 0.02), marker="v", s=14, color=BLUE,
-                     label="DataGo: from memory (0 visits)")
+                     label="Mikiri: from memory (0 visits)")
         if budget:
             ax_v.axhline(budget, color=MUTED, linewidth=0.8, linestyle=(0, (3, 3)))
         ax_v.set_xlim(-1, n)
@@ -134,7 +134,7 @@ def render(rec: dict, out: Path, name: str, step: int = 1, fps: int = 6, budget:
         ax_v.set_ylabel("Visits spent", fontsize=8, color=MUTED)
         spent_d = visits[shown & mine].sum() / max((shown & mine).sum(), 1)
         spent_o = visits[o].sum() / max(o.sum(), 1)
-        ax_v.set_title(f"Visits per move (mean so far: DataGo {spent_d:.0f}, KataGo {spent_o:.0f})",
+        ax_v.set_title(f"Visits per move (mean so far: Mikiri {spent_d:.0f}, KataGo {spent_o:.0f})",
                        loc="left", fontsize=10, fontweight="bold", color=INK, pad=20)
         ax_v.legend(loc="lower left", bbox_to_anchor=(0, 1.0), fontsize=7, frameon=False, ncol=3,
                     borderaxespad=0.1, handlelength=1.2, columnspacing=1.2)
@@ -143,9 +143,9 @@ def render(rec: dict, out: Path, name: str, step: int = 1, fps: int = 6, budget:
         ax_w.plot(xs[ok], 100 * w[ok], color=BLUE, linewidth=1.8)
         ax_w.axhline(50, color=MUTED, linewidth=0.8)
         ax_w.set_ylim(0, 100)
-        ax_w.set_ylabel("DataGo winrate (%)", fontsize=8, color=MUTED)
+        ax_w.set_ylabel("Mikiri winrate (%)", fontsize=8, color=MUTED)
         ax_w.set_xlabel("Move number", fontsize=8, color=MUTED)
-        ax_w.set_title("DataGo's own estimate of the game", loc="left", fontsize=10,
+        ax_w.set_title("Mikiri's own estimate of the game", loc="left", fontsize=10,
                        fontweight="bold", color=INK)
 
     out.mkdir(parents=True, exist_ok=True)

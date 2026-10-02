@@ -11,7 +11,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from datago.board import Board
+from mikiri.board import Board
 
 ap = argparse.ArgumentParser()
 ap.add_argument("games")

@@ -4,10 +4,10 @@ A series is how an engine is actually used: many games against the same
 opponent pool, each starting from move one. Positions recur, which is what a
 search memory can exploit.
 
-The ledger keeps the comparison honest. Each DataGo move is granted the
+The ledger keeps the comparison honest. Each Mikiri move is granted the
 baseline's per-move budget. Whatever memory hits and early stops leave unspent
 may be used after a game to deepen stored positions that keep recurring.
-Total spending never exceeds the total grant, so over the series DataGo uses
+Total spending never exceeds the total grant, so over the series Mikiri uses
 at most the baseline's compute.
 """
 from __future__ import annotations
@@ -72,9 +72,9 @@ class Deepener:
 
 
 class BudgetController:
-    """Keeps DataGo's spending on the baseline's budget, move by move.
+    """Keeps Mikiri's spending on the baseline's budget, move by move.
 
-    Every DataGo move (memory hits included) is granted `budget` visits. The
+    Every Mikiri move (memory hits included) is granted `budget` visits. The
     controller asks the stopper for a mean cost that pays back any deficit, or
     spends any surplus, over the next `horizon` moves. The stopper's offline
     calibration maps a commanded cost to a threshold, and because real games

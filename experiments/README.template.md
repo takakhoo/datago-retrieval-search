@@ -1,25 +1,35 @@
-# DataGo
+# Mikiri
 
-[![tests](https://github.com/takakhoo/datago-retrieval-search/actions/workflows/tests.yml/badge.svg)](https://github.com/takakhoo/datago-retrieval-search/actions/workflows/tests.yml)
+[![tests](https://github.com/takakhoo/mikiri-beats-katago/actions/workflows/tests.yml/badge.svg)](https://github.com/takakhoo/mikiri-beats-katago/actions/workflows/tests.yml)
 
-**A Go engine that knows when to stop thinking.** DataGo wraps a frozen [KataGo](https://github.com/lightvector/KataGo) and changes one thing: how many search visits each move gets. It plays settled moves quickly, keeps searching when the game is in the balance, and never searches the same position twice. The network and the search algorithm are untouched.
+**Mikiri makes KataGo {{main.elo_abs}} Elo stronger at the same search budget. Same network, same search algorithm, no retraining.**
 
-![A DataGo game against KataGo, with the visits each move cost](results/demo/game.gif)
+KataGo is the strongest open engine in the AlphaGo family: a policy and value network guiding a tree search. Like every engine in that family, it gives each move the same number of search visits. Mikiri wraps it and decides, move by move, when the search has seen enough. It plays settled moves at a quarter of the budget, keeps searching when the game is on the line, and never searches the same position twice.
 
-*One real game from the main match. Blue bars are DataGo's visits per move. KataGo spends a fixed 200 on every move. At move 137 DataGo climbs the whole ladder to 3,200 visits and sees its winrate estimate fall from 65% to 19%. It keeps thinking hard for the next few moves and goes on to win. Over the whole game both sides averaged about 200 visits per move.*
+Mikiri (見切り) is Japanese for the judgment that you have seen enough.
 
-## Headline
+![A Mikiri game against KataGo, with the visits each move cost](results/demo/game.gif)
 
-Against KataGo at 200 visits per move, 19x19, same network:
+*One real game from the main match. Blue bars are Mikiri's visits per move. KataGo spends a fixed 200 on every move. At move 137 Mikiri climbs the whole ladder to 3,200 visits and sees its winrate estimate fall from 65% to 19%. It keeps thinking hard for the next few moves and goes on to win. Over the whole game both sides averaged about 200 visits per move.*
 
-| | Games | Score | Elo (95% interval) |
+## The result
+
+{{total_games}} recorded games against KataGo on 19x19, both sides running the same network:
+
+| Against KataGo at 200 visits per move | Games | Record (W-L-D) | Elo gain (95% interval) |
 |---|---|---|---|
-| **DataGo, same visits per move** | {{main.games}} | {{main.score}}% | **{{main.elo}}** ({{main.elo_lo}} to {{main.elo_hi}}) |
-| **DataGo, 20% fewer visits** ({{strict.visits}} per move, fewer than KataGo even counting every restart) | {{strict.games}} | {{strict.score}}% | **{{strict.elo}}** ({{strict.elo_lo}} to {{strict.elo_hi}}) |
-| KataGo with twice the visits, for scale | {{unidouble.games}} | {{unidouble.score}}% | {{unidouble.elo}} ({{unidouble.elo_lo}} to {{unidouble.elo_hi}}) |
-| KataGo against itself, as a check | {{unisame.games}} | {{unisame.score}}% | {{unisame.elo}} ({{unisame.elo_lo}} to {{unisame.elo_hi}}) |
+| **Mikiri at the same 200 visits** | {{main.games}} | {{main.wld}} | **{{main.elo}}** ({{main.elo_lo}} to {{main.elo_hi}}) |
+| **Mikiri at {{strict.visits}} visits, 20% fewer** | {{strict.games}} | {{strict.wld}} | **{{strict.elo}}** ({{strict.elo_lo}} to {{strict.elo_hi}}) |
+| **Mikiri with move sampling switched off** (paired openings) | {{paired.games}} | {{paired.wld}} | **{{paired.elo}}** ({{paired.elo_lo}} to {{paired.elo_hi}}) |
+| KataGo given twice the visits, for scale | {{unidouble.games}} | {{unidouble.wld}} | {{unidouble.elo}} ({{unidouble.elo_lo}} to {{unidouble.elo_hi}}) |
+| KataGo against itself, as a check on the harness | {{unisame.games}} | {{unisame.wld}} | {{unisame.elo}} ({{unisame.elo_lo}} to {{unisame.elo_hi}}) |
 
-Paper: [`paper/datago.pdf`](paper/datago.pdf). Every game behind every number is in [`results/matches/`](results/matches/).
+- **At equal visits, Mikiri wins {{main.score}}% of the points.** Its stopping rule is worth most of a doubling of KataGo's search.
+- **With 20% fewer visits it still wins {{strict.score}}%.**
+- **It holds up under the strictest accounting.** Counting actual network evaluations, Mikiri at {{main.evals}} per move gains {{main.elo}} Elo, while KataGo at {{uniroot.evals}} per move (283 visits) gains {{uniroot.elo}}.
+- **It is not an artifact of move sampling.** With both sides always playing their top move from 400 balanced openings, the gain is {{paired.elo}}.
+
+Paper: [`paper/mikiri.pdf`](paper/mikiri.pdf). Every game behind every number is in [`results/matches/`](results/matches/).
 
 ## Contents
 
@@ -32,12 +42,12 @@ Paper: [`paper/datago.pdf`](paper/datago.pdf). Every game behind every number is
 
 ## How it works
 
-![How DataGo decides one move](results/figures/pipeline.png)
+![How Mikiri decides one move](results/figures/pipeline.png)
 
-1. **Memory first.** If this exact position has been searched before, in any rotation or reflection and by any move order, DataGo plays from the stored search and spends nothing.
+1. **Memory first.** If this exact position has been searched before, in any rotation or reflection and by any move order, Mikiri plays from the stored search and spends nothing.
 2. **A ladder of budgets.** Otherwise it searches at 50 visits and asks a small model whether the decision is settled. If not, it searches at 200, then 800, then 3,200.
-3. **A stopping rule with a price in it.** The model predicts how much winrate the current choice might still be giving up. DataGo stops when that stake, divided by the visits needed to reach the next rung, falls below a threshold.
-4. **A ledger.** DataGo is granted the baseline's budget for every move, and a controller keeps its total spending at that grant. Visits saved on easy or remembered positions are spent on hard ones.
+3. **A stopping rule with a price in it.** The model predicts how much winrate the current choice might still be giving up. Mikiri stops when that stake, divided by the visits needed to reach the next rung, falls below a threshold.
+4. **A ledger.** Mikiri is granted the baseline's budget for every move, and a controller keeps its total spending at that grant. Visits saved on easy or remembered positions are spent on hard ones.
 
 ## The science, step by step
 
@@ -53,11 +63,11 @@ At 200 visits, 71% of positions have no regret at all, and the worst 10% hold 84
 
 ![A position where thinking longer changed the move](results/figures/case_study.png)
 
-This is a real position from the dataset. At 50 and at 200 visits the engine plays A. The stopper's estimate of what is at stake stays far above its threshold, so DataGo keeps going, and at 800 visits the engine finds B. An independent search rates B about 50 points of winrate better than A. A fixed 200-visit player gives all of that away.
+This is a real position from the dataset. At 50 and at 200 visits the engine plays A. The stopper's estimate of what is at stake stays far above its threshold, so Mikiri keeps going, and at 800 visits the engine finds B. An independent search rates B about 50 points of winrate better than A. A fixed 200-visit player gives all of that away.
 
 ### 3. The stopping rule
 
-DataGo stops at rung $j$ when
+Mikiri stops at rung $j$ when
 
 $$\frac{\hat r_j(x)}{v_{j+1}-v_j} < \lambda$$
 
@@ -105,11 +115,13 @@ The original idea behind this project was *approximate* retrieval: find similar 
 
 When the shallow and deep search disagree, the most similar stored position has the right move 5.5% of the time. The policy network's own second choice has it 43% of the time. Transfer is reliable only when the stored position is the same position, which the exact key already finds.
 
+In play, memory alone (no stopper) served {{memonly.hit}}% of Mikiri's moves over {{memonly.games}} games with no change in strength ({{memonly.elo}} Elo, {{memonly.elo_lo}} to {{memonly.elo_hi}}). It saves search visits. It does not save network evaluations ({{memonly.evals}} per move against {{memonly.base_evals}}), because KataGo already caches evaluations of positions it has seen. The strength comes from the stopping rule.
+
 ## Match results
 
-Offline regret is a proxy. These are played games, from the empty board, alternating colors, each player on its own KataGo process.
+The offline analysis predicted a gain. These are the played games that confirm it: from the empty board, alternating colors, each player on its own KataGo process.
 
-Compute is reported three ways because the answer depends on how you count. **Visits** is the size of the deepest search per move. **Restart visits** charges every search DataGo requested, including smaller ones it later extended. **NN evals** is the number of network evaluations each player's KataGo process actually ran.
+Compute is reported three ways because the answer depends on how you count. **Visits** is the size of the deepest search per move. **Restart visits** charges every search Mikiri requested, including smaller ones it later extended. **NN evals** is the number of network evaluations each player's KataGo process actually ran.
 
 {{table}}
 
@@ -117,11 +129,11 @@ Compute is reported three ways because the answer depends on how you count. **Vi
 
 ![Elo against compute, counted three ways](results/figures/elo_vs_compute.png)
 
-The orange line is KataGo at uniform budgets. Both DataGo runs sit above it under all three ways of counting. At about the same network evaluations per move (99 against 98), DataGo gains +206 Elo where KataGo at 283 visits gains +108.
+The orange line is KataGo at uniform budgets. Both Mikiri runs sit above it under all three ways of counting. At about the same network evaluations per move (99 against 98), Mikiri gains +206 Elo where KataGo at 283 visits gains +108.
 
-![Where DataGo spends its visits](results/figures/profile_main.png)
+![Where Mikiri spends its visits](results/figures/profile_main.png)
 
-Nobody told DataGo to save visits in the opening or to ease off once a game is decided. Both fall out of predicting regret in winrate units: it averages about 65 visits over the first 20 moves, peaks near 270 around move 140, and drops to about 130 when it rates its own winrate above 90%.
+Nobody told Mikiri to save visits in the opening or to ease off once a game is decided. Both fall out of predicting regret in winrate units: it averages about 65 visits over the first 20 moves, peaks near 270 around move 140, and drops to about 130 when it rates its own winrate above 90%.
 
 ## Try it
 
@@ -129,7 +141,7 @@ Replay the demo game move by move in a terminal. No GPU, no KataGo:
 
 ```bash
 pip install -e .
-python -m datago.demo --replay results/demo/game.json
+python -m mikiri.demo --replay results/demo/game.json
 ```
 
 ```
@@ -139,15 +151,15 @@ python -m datago.demo --replay results/demo/game.json
 Watch the mechanics against a toy engine, or play live against a real KataGo:
 
 ```bash
-python -m datago.demo --fake --games 2
-python -m datago.demo --net b18 --stopper models/stopper_b18.json --games 2
+python -m mikiri.demo --fake --games 2
+python -m mikiri.demo --net b18 --stopper models/stopper_b18.json --games 2
 ```
 
 ## What happened to v1
 
 <img src="results/figures/v1_bug.png" width="330" align="right" alt="The v1 bug: three black stones in one turn">
 
-The first version of this project reported 9-0-1 and 8-0-2 records against KataGo. Those came from a bug. Its match runner analysed positions with a GTP command that also plays a move, so the standard search, the deep search, and each recursive search all placed a stone before White replied. Retrieved moves were never sent to the engine at all.
+The first version of this project, called DataGo, reported 9-0-1 and 8-0-2 records against KataGo. Those came from a bug. Its match runner analysed positions with a GTP command that also plays a move, so the standard search, the deep search, and each recursive search all placed a stone before White replied. Retrieved moves were never sent to the engine at all.
 
 [`legacy/AUDIT.md`](legacy/AUDIT.md) walks through it, and [`legacy/audit/reproduce_double_move.py`](legacy/audit/reproduce_double_move.py) reproduces it with v1's own code: three black stones after one Black turn. v1 is preserved unchanged in [`legacy/v1/`](legacy/v1/). None of its numbers are used here.
 
@@ -160,7 +172,7 @@ pip install -e ".[dev,experiments]"
 python -m pytest -q        # 26 tests against a toy engine, no GPU
 ```
 
-For real runs set `KATAGO` (path to a KataGo 1.18 binary) and `DG` (a directory with `nets/` holding the networks named in [`datago/engine.py`](datago/engine.py)).
+For real runs set `KATAGO` (path to a KataGo 1.18 binary) and `MIKIRI_HOME` (a directory with `nets/` holding the networks named in [`mikiri/engine.py`](mikiri/engine.py)).
 
 | Step | Command | GPU time (one RTX 6000 Ada) |
 |---|---|---|
@@ -173,7 +185,7 @@ For real runs set `KATAGO` (path to a KataGo 1.18 binary) and `DG` (a directory 
 The dataset and trained model ship in [`data/`](data/) and [`models/`](models/), so the first three steps are optional.
 
 ```
-datago/        the engine wrapper: board, KataGo client, stopper, memory, players, matches
+mikiri/        the engine wrapper: board, KataGo client, stopper, memory, players, matches
 experiments/   scripts behind every number, table, and figure
 data/          the ladder dataset and the games it was drawn from
 models/        trained stopping models (JSON)
@@ -183,12 +195,11 @@ legacy/        v1, unchanged, and the audit of its results
 tests/         26 tests that run the whole pipeline against a toy engine
 ```
 
-## Limits
+## Scope
 
-- Results are for KataGo networks at 100 to 800 visits per move, against KataGo itself. Elo per doubling of visits is steep in that range, which is what makes moving visits around valuable. Tournament-scale budgets are untested.
-- Regret is measured by a search, so it inherits the engine's blind spots. The match results do not depend on it.
-- Memory hit rates depend on how varied the opponent's openings are.
-- AlphaGo is not available to play, so there is no direct comparison with it. KataGo is among the strongest engines anyone can run.
+- Measured on KataGo networks at 100 to 800 visits per move, against KataGo itself. That is fast-play territory, where each doubling of search is worth about 230 Elo. Tournament-scale budgets are the next thing to test.
+- AlphaGo itself is not available to play, so the comparison is with KataGo, the strongest open engine built on its design.
+- Regret in the offline analysis is measured by a search. The match results do not depend on it.
 
 ## Credits
 

@@ -19,14 +19,14 @@ where $a_k(s)$ is the move chosen at rung $k$ and $C(s)$ is the set of scored mo
 \paragraph{Equivalent visits.}
 The mean regret of always stopping at rung $k$ traces a curve $R(v)$ against visits. For any other policy with mean regret $\bar r$ we report the uniform budget $v^\ast$ with $R(v^\ast)=\bar r$, interpolating $R$ linearly in $\log v$. The ratio of $v^\ast$ to the policy's own mean cost is its \emph{compute multiplier}: how many times more visits uniform search needs to give up as little.
 
-\section{DataGo}
+\section{Mikiri}
 \label{sec:method}
 
-DataGo wraps a fixed engine and changes only how many visits each move receives. It has three parts.
+Mikiri wraps a fixed engine and changes only how many visits each move receives. It has three parts.
 
 \subsection{A visit ladder with a learned stop}
 
-DataGo searches a position at the first rung of a short ladder, for example 50 visits, and asks a model whether the decision is settled. If it is, DataGo plays. If not, it searches at the next rung (200, then 800, then 3{,}200) and asks again.
+Mikiri searches a position at the first rung of a short ladder, for example 50 visits, and asks a model whether the decision is settled. If it is, Mikiri plays. If not, it searches at the next rung (200, then 800, then 3{,}200) and asks again.
 
 The model is a gradient-boosted regression tree ensemble that predicts the regret remaining at the current rung, $\hat r_j(x)$. Its inputs come from the search that just finished, at no extra engine cost:
 \begin{itemize}
@@ -38,7 +38,7 @@ The model is a gradient-boosted regression tree ensemble that predicts the regre
   \item from the second rung on, what changed since the previous rung: whether the best move changed, how many times it has changed so far, and the change in winrate, top-move share, and confidence margin.
 \end{itemize}
 
-DataGo stops at rung $j$ when
+Mikiri stops at rung $j$ when
 \begin{equation}
   \frac{\hat r_j(x)}{v_{j+1}-v_j} \;<\; \lambda .
 \end{equation}
@@ -48,10 +48,10 @@ The model is trained on the ladder dataset with all non-final rungs pooled. Ever
 
 \subsection{Exact search memory}
 
-Every search DataGo finishes within the first 80 moves of a game is stored under the position's symmetry-canonical key. When a later game reaches the same position, in any of its eight orientations and by any move order, DataGo plays from the stored search and spends nothing. The stored result is a search of exactly this position, at the budget DataGo's own stopping rule chose for it, so a hit gives up nothing in quality.
+Every search Mikiri finishes within the first 80 moves of a game is stored under the position's symmetry-canonical key. When a later game reaches the same position, in any of its eight orientations and by any move order, Mikiri plays from the stored search and spends nothing. The stored result is a search of exactly this position, at the budget Mikiri's own stopping rule chose for it, so a hit gives up nothing in quality.
 
-Entries that keep being hit are worth more than their first search. After each game, if the ledger (below) shows a surplus, DataGo re-searches the most frequently hit entries at a larger budget and replaces them.
+Entries that keep being hit are worth more than their first search. After each game, if the ledger (below) shows a surplus, Mikiri re-searches the most frequently hit entries at a larger budget and replaces them.
 
 \subsection{A ledger}
 
-To compare fairly with an engine that spends $b$ visits on every move, DataGo is granted $b$ visits for each move it makes and may never spend more than it has been granted. Memory hits and early stops leave part of the grant unspent. A controller adjusts $\lambda$ after every game so that cumulative spending tracks the cumulative grant, which turns visits saved on known or easy positions into deeper searches on hard ones. Post-game deepening draws on the same ledger. Over a series, DataGo's total compute, online and offline, is at most the baseline's.
+To compare fairly with an engine that spends $b$ visits on every move, Mikiri is granted $b$ visits for each move it makes and may never spend more than it has been granted. Memory hits and early stops leave part of the grant unspent. A controller adjusts $\lambda$ after every game so that cumulative spending tracks the cumulative grant, which turns visits saved on known or easy positions into deeper searches on hard ones. Post-game deepening draws on the same ledger. Over a series, Mikiri's total compute, online and offline, is at most the baseline's.

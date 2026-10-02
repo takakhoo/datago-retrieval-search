@@ -1,5 +1,5 @@
 {
- "player": "datago",
+ "player": "mikiri",
  "games": 400,
  "wins": 77,
  "losses": 301,
@@ -51,9 +51,9 @@
  },
  "minutes": 29.032561961809794,
  "baseline_visits_per_move": 200.0,
- "datago_total_visits_per_move_incl_deepening": 100.0,
+ "mikiri_total_visits_per_move_incl_deepening": 100.0,
  "nn_rows_per_move": {
-  "datago": 39.570344827586204,
+  "mikiri": 39.570344827586204,
   "katago": 70.85116223626177
  },
  "ledger": {

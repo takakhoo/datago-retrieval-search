@@ -1,10 +1,10 @@
-"""Watch DataGo play KataGo move by move.
+"""Watch Mikiri play KataGo move by move.
 
-    python -m datago.demo --replay results/demo/game.json   # a recorded real game, no GPU
-    python -m datago.demo --net b18 --stopper models/stopper_b18.json   # live, needs KataGo
-    python -m datago.demo --fake                             # toy engine, mechanics only
+    python -m mikiri.demo --replay results/demo/game.json   # a recorded real game, no GPU
+    python -m mikiri.demo --net b18 --stopper models/stopper_b18.json   # live, needs KataGo
+    python -m mikiri.demo --fake                             # toy engine, mechanics only
 
---replay prints a real recorded game against KataGo with what every DataGo
+--replay prints a real recorded game against KataGo with what every Mikiri
 move cost. With --fake the engine is a stand-in that only mimics the protocol,
 so the game shows the mechanics and says nothing about Go strength.
 """
@@ -21,7 +21,7 @@ from .engine import AnalysisEngine, open_katago
 from .features import FEATURE_NAMES
 from .match import GameConfig
 from .memory import Memory
-from .players import DataGoPlayer, KataGoPlayer, Temperature
+from .players import MikiriPlayer, KataGoPlayer, Temperature
 from .stopper import Stopper
 
 _LCB = FEATURE_NAMES.index("lcb_margin")
@@ -49,11 +49,11 @@ def describe(counts: dict, visits: int, path: list[int]) -> str:
 def replay(path: str, quiet: bool) -> None:
     rec = json.loads(open(path).readline())
     size, ladder = rec["size"], rec.get("path") or sorted({t["v"] for t in rec["trace"] if t["v"]})
-    names = {"datago": "DataGo", "katago": "KataGo"}
+    names = {"mikiri": "Mikiri", "katago": "KataGo"}
     print(f"=== Recorded game: {names[rec['black']]} (Black) vs {names[rec['white']]} (White), "
           f"komi {rec['komi']} ===")
     board = Board(size, superko=False)
-    spent = {"datago": [0, 0], "katago": [0, 0]}
+    spent = {"mikiri": [0, 0], "katago": [0, 0]}
     for t in rec["trace"]:
         spent[t["p"]][0] += t["v"]
         spent[t["p"]][1] += 1
@@ -96,7 +96,7 @@ def main() -> None:
         return
     if args.fake:
         size, budget, path = args.size or 9, args.budget or 64, [16, 64, 256]
-        engine = AnalysisEngine([sys.executable, "-m", "datago.fake_engine"])
+        engine = AnalysisEngine([sys.executable, "-m", "mikiri.fake_engine"])
         stopper = MarginStopper()
     else:
         if not args.stopper:
@@ -108,14 +108,14 @@ def main() -> None:
 
     memory = Memory()
     temp = Temperature()
-    datago = DataGoPlayer(engine, path, stopper, memory, temp=temp, name="DataGo")
+    mikiri = MikiriPlayer(engine, path, stopper, memory, temp=temp, name="Mikiri")
     katago = KataGoPlayer(engine, budget, temp, name="KataGo")
     cfg = GameConfig(size=size, komi=args.komi)
     rng = np.random.default_rng(args.seed)
-    totals = {"DataGo": [0, 0], "KataGo": [0, 0]}
+    totals = {"Mikiri": [0, 0], "KataGo": [0, 0]}
 
     for g in range(args.games):
-        players = {BLACK: datago, 3 - BLACK: katago} if g % 2 == 0 else {BLACK: katago, 3 - BLACK: datago}
+        players = {BLACK: mikiri, 3 - BLACK: katago} if g % 2 == 0 else {BLACK: katago, 3 - BLACK: mikiri}
         board = Board(size)
         low = {1: 0, 2: 0}
         print(f"\n=== Game {g + 1}: {players[BLACK].name} is Black. Memory holds {len(memory)} positions. ===")
@@ -127,7 +127,7 @@ def main() -> None:
             totals[player.name][0] += d.visits
             totals[player.name][1] += 1
             if not args.quiet:
-                note = describe(d.counts, d.visits, path) if player is datago else f"{d.visits} visits"
+                note = describe(d.counts, d.visits, path) if player is mikiri else f"{d.visits} visits"
                 print(f"{len(board.moves) + 1:4d} {player.name:7s} {'B' if color == BLACK else 'W'} "
                       f"{point_to_gtp(d.point, size):5s} winrate {100 * d.winrate:5.1f}%  {note}")
             low[color] = low[color] + 1 if d.winrate < cfg.resign_threshold else 0

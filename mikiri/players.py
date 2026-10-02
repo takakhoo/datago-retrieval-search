@@ -1,7 +1,7 @@
-"""Players: the uniform-budget KataGo baseline and DataGo.
+"""Players: the uniform-budget KataGo baseline and Mikiri.
 
 Both go through the same kind of engine, the same move-selection rule, and the
-same visit accounting. The only difference is how DataGo spends and saves
+same visit accounting. The only difference is how Mikiri spends and saves
 visits.
 """
 from __future__ import annotations
@@ -76,7 +76,7 @@ class KataGoPlayer:
         return Decision(point, result.visits, result.winrate, {"restart_visits": result.visits})
 
 
-class DataGoPlayer:
+class MikiriPlayer:
     """Visit ladder with a learned stopping rule, backed by a search memory.
 
     1. If the position (up to symmetry) is in memory, play from the stored
@@ -86,12 +86,12 @@ class DataGoPlayer:
     3. Store the final search for positions early enough to recur.
 
     With stopper=None the player always stops at path[0], which makes
-    DataGoPlayer([v], None, None) identical to KataGoPlayer(v).
+    MikiriPlayer([v], None, None) identical to KataGoPlayer(v).
     """
 
     def __init__(self, engine: AnalysisEngine, path: list[int], stopper: Stopper | None = None,
                  memory: Memory | None = None, store_max_move: int = 80,
-                 temp: Temperature | None = Temperature(), name: str = "datago",
+                 temp: Temperature | None = Temperature(), name: str = "mikiri",
                  on_decision: Callable[[int], None] | None = None):
         self.engine, self.path, self.stopper = engine, list(path), stopper
         self.memory, self.store_max_move, self.temp, self.name = memory, store_max_move, temp, name

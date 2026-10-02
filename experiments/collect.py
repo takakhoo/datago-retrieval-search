@@ -20,10 +20,10 @@ from pathlib import Path
 
 import numpy as np
 
-from datago.board import Board, point_to_gtp
-from datago.engine import SearchResult, open_katago
-from datago.match import GameConfig, play_game
-from datago.players import KataGoPlayer, Temperature
+from mikiri.board import Board, point_to_gtp
+from mikiri.engine import SearchResult, open_katago
+from mikiri.match import GameConfig, play_game
+from mikiri.players import KataGoPlayer, Temperature
 
 
 def summarize_search(res: SearchResult, size: int, top: int = 12) -> dict:
