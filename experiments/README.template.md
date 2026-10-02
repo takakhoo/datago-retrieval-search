@@ -132,6 +132,11 @@ Two things stand out. Mikiri is ahead of the strongest prior rule, V-MCTS at its
 
 One caveat on accounting: the table charges every rule the size of its deepest search. Mikiri restarts its search at each rung, and if every restart is charged in full its four-rung ladder comes to 1.44x, below V-MCTS, which stops inside one search and has nothing to restart. On fresh engines a restarted search cost about the same network evaluations as one continuous search, and the head-to-head matches below report evaluations for both players.
 
+Two follow-up experiments explain where the gap comes from.
+
+- **The prior rules do not see anything Mikiri misses.** Feeding their statistics (KLD gain, VOI bound, BAI gap, V-MCTS distance) to Mikiri's model as extra inputs, one at a time or all together, moves the multiplier from 2.14x to between 2.07x and 2.17x, with no gain distinguishable from zero ([`results/stopper/hybrid.json`](results/stopper/hybrid.json)). The rules differ in what they do with the search statistics.
+- **Predicting the regret that remains, and dividing by the cost of the next rung, beats every alternative we tried.** In theory the right score is the best recovery per visit over any continuation, and an oracle that reads it matches the hindsight optimum (14.1x against 14.2x). Learned from search statistics it reaches 1.63x to 1.87x. Remaining regret under the rate rule reaches 1.83x to 2.14x, and with no price only 1.41x to 1.56x ([`results/stopper/targets.json`](results/stopper/targets.json)).
+
 These are re-implementations from root search statistics on KataGo, with the adaptations listed in the paper. The two strongest are also being played against KataGo directly, and those match results are added to the table below as they finish.
 
 ## Match results

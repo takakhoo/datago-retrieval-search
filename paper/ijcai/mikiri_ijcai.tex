@@ -5,7 +5,15 @@
 \pdfpageheight=11in
 
 \usepackage{ijcai26}
-\usepackage{times}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage{times}
+\else
+  % XeTeX and LuaTeX have no Type 1 Times; TeX Gyre Termes is the metric-compatible OpenType face.
+  \usepackage{fontspec}
+  \setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold,
+    ItalicFont=*-italic, BoldItalicFont=*-bolditalic, Ligatures=TeX]
+\fi
 \usepackage{url}
 \usepackage[hidelinks]{hyperref}
 \usepackage[utf8]{inputenc}
@@ -81,6 +89,15 @@ We played 300 self-play games at budgets drawn log-uniformly from 30 to 200 visi
 \label{fig:anatomy}
 \end{figure}
 
+Figure~\ref{fig:case} shows one of the costly positions. At 50 and at 200 visits the engine chooses a move that an independent search rates at 11\%, and at 800 visits it finds one rated at 62\%.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{case_study}
+\caption{A position where the stopper keeps searching and the move changes. The threshold $\lambda$ shown gives a mean cost of 200 visits.}
+\label{fig:case}
+\end{figure}
+
 \textbf{No single signal finds it.} Table~\ref{tab:auc} asks how well individual search statistics rank positions by whether more than 0.5\% of winrate remains on the table. Measures of how contested the root is reach an AUC of about 0.74. KataGo's own prediction of its short-term winrate error, which it uses inside the tree to weight playouts, reaches 0.58 to 0.60. The classical cue that the most-visited move is not the highest-valued one \cite{huang2010time} reaches 0.59 to 0.61. Contested positions are common, and most are contested between moves of nearly equal value, where being wrong costs nothing.
 
 \begin{table}[t]
@@ -127,7 +144,14 @@ One $\lambda$ prices every decision on the ladder alike. On a geometric ladder t
 
 \textbf{Multiplier.} On the four-rung ladder (50, 200, 800, 3{,}200) the stopper at a mean cost of 200 visits loses as little as uniform search at 358, a multiplier of 1.80, and stays between 1.69 and 1.88 from 100 to 800 visits (Figure~\ref{fig:frontier}). With every restart charged it is 1.29 to 1.51. On the full doubling ladder it reaches 2.13.
 
-\textbf{What matters.} Removing the trajectory features, KataGo's raw error predictions, or all but seven features changes the multiplier at 200 visits by at most 0.09, and 300 labeled positions already give 1.50. Fitting the square root of regret instead of regret raises it from 1.74 to 1.82. Replacing the rate rule by a flat threshold lowers it to 1.41.
+\textbf{What matters.} Removing the trajectory features, KataGo's raw error predictions, or all but seven features changes the multiplier at 200 visits by at most 0.09, and 300 labeled positions already give 1.50. Fitting the square root of regret instead of regret raises it from 1.74 to 1.82. Replacing the rate rule by a flat threshold lowers it to 1.41. Figure~\ref{fig:rate} shows the same contrast for hand-written signals: with a flat threshold the entropy gate of an earlier prototype is worse than no gate (0.63), and with the rate rule it is a gain (1.16).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\linewidth]{rate_rule}
+\caption{Four stopping signals on the four-rung ladder at 200 visits, with a flat threshold and with the rate rule.}
+\label{fig:rate}
+\end{figure}
 
 \subsection{Comparison with Prior Rules}
 \label{sec:baselines}
@@ -142,6 +166,18 @@ One $\lambda$ prices every decision on the ladder alike. On a geometric ladder t
 We re-implemented ten published rules from their papers and source code (Table~\ref{tab:baselines}). All see the same root statistics and are scored by the same forced values. \emph{BEHIND} and \emph{UNST} search longer when the player is losing or when the most-visited move is not the highest-valued one \cite{huang2010time}. \emph{STOP} ends a search once the runner-up cannot overtake the leader in the visits that remain, or in a fraction $p$ of them, and \emph{CLOSE} extends it when the top two moves are close in visits \cite{baier2016time}. \emph{Smart pruning} is Leela Chess Zero's form of STOP, shipped with a stop on the per-visit KL gain of the visit distribution \cite{lc0_options}. The \emph{VOI} rule stops when a bound on the value of further samples falls below their cost \cite{hay2012selecting}, and the \emph{BAI} rule when the leader's confidence interval separates from every rival's \cite{kaufmann2017monte}. The \emph{state-only} rule predicts regret from features available before any search, in the spirit of Muppidi \textit{et al.}~\shortcite{muppidi2026finding}. Two learned rules are adaptations: for DS-MCTS we train a classifier on root statistics to the authors' label $U(s,n)$, in place of their board-input networks, and for V-MCTS we run the authors' virtual expansion on KataGo's root priors, visits and winrates with their published $r=0.2$ and $\epsilon=0.1$. Every rule is charged continuation cost, which is what a rule inside the engine pays. Charged for every restart, Mikiri's four-rung ladder reaches 1.44 at 200 visits, below the 1.60 of V-MCTS, which has no restarts to charge; the matches settle that question in network evaluations.
 
 Three findings. First, the rules with a statistical stopping guarantee are far worse than uniform search here, because they stop on confidence in the leading move and ignore whether the game is still in doubt. Second, V-MCTS is the strongest prior rule (1.60 at 200 visits), and Mikiri exceeds it by \pairedVmctsTwo{} at 200 visits and \pairedVmctsFour{} at 400, paired over the same resampled games. Third, the rate rule improves every signal it can be applied to, including the DS-MCTS classifier (1.48 to 1.75), which with it ties Mikiri at 400 visits (\pairedDsRateFour).
+
+\textbf{What to predict, and how to price it.} Remaining regret is an upper bound on what continuing can recover. Table~\ref{tab:targets} compares it with the quantities the derivation names: the gain from the next rung, the gain from the whole ladder, and the best recovery per visit over any continuation, $\max_{k>j}(r_j-r_k)/(v_k-v_j)$. Read by an oracle, that last index reproduces the hindsight optimum (14.11 against 14.16). Learned from search statistics it trails remaining regret under the rate rule (1.63 to 1.87 against 1.83 to 2.14). The next-rung gain is weakest: myopic as an oracle, noisy as a target. Pricing remaining regret by the visits to the top rung is worse than no price. The rate rule pairs a target that search statistics can predict with the one cost that is known exactly.
+
+\begin{table}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\input{../tables/targets}
+\caption{Multipliers for different quantities to score at rung $j$ and prices to divide them by ($m$ is the top rung). Oracle: true quantity, four-rung ladder, 100 visits. Learned: same model fitted to each quantity, 200 visits, three ladders.}
+\label{tab:targets}
+\end{table}
+
+\textbf{Do prior rules see more?} We fed the KLD gain, the VOI bound, the BAI gap and the V-MCTS distance to Mikiri's regressor as extra inputs, singly and together. The multiplier at 200 visits moved from 2.14 to between 2.07 and 2.17, with no paired gain distinguishable from zero. The rules differ in how they use the root statistics; the statistics themselves are exhausted.
 
 \section{Matches}
 \label{sec:matches}
@@ -166,7 +202,15 @@ Three findings. First, the rules with a statistical stopping guarantee are far w
 
 \textbf{No move sampling.} A search that stops when one move dominates has sharper visit counts, which could interact with sampling. With 400 balanced openings each played twice with colours swapped, and both players always playing the top move, Mikiri gains $\pairedElo$ Elo ($\pairedEloLo$ to $\pairedEloHi$).
 
-\textbf{The forecast.} Reading the cross-fitted regret at the cost Mikiri actually used, converting to equivalent uniform visits, and reading that budget's Elo off the measured uniform curve predicts $+197$ for the four-rung match against the measured $\mainElo$, $+126$ at 160 visits against $\strictElo$, and $+225$ for the six-rung ladder against $\longElo$. The forecast orders the three configurations correctly and is within 40 Elo of each, so the ladder dataset can stand in for matches when choosing among rules.
+\textbf{The forecast.} Reading the cross-fitted regret at the cost Mikiri actually used, converting to equivalent uniform visits, and reading that budget's Elo off the measured uniform curve predicts $+197$ for the four-rung match against the measured $\mainElo$, $+126$ at 160 visits against $\strictElo$, and $+225$ for the six-rung ladder against $\longElo$. The forecast orders the three configurations correctly and is within 40 Elo of each, so the ladder dataset can stand in for matches when choosing among rules (Table~\ref{tab:forecast}).
+
+\begin{table}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{../tables/prediction_compact}
+\caption{Elo forecast from the ladder dataset against Elo measured in play, versus KataGo at 200 visits.}
+\label{tab:forecast}
+\end{table}
 
 \textbf{Prior rules in play.} The V-MCTS rule gains $\vmctsElo$ Elo ($\vmctsEloLo$ to $\vmctsEloHi$) and the DS-MCTS-style classifier $\dsmctsElo$ ($\dsmctsEloLo$ to $\dsmctsEloHi$), each held to 200 visits by the same controller. The LCB margin with the rate rule and no learning gains $\rulelcbElo$ ($\rulelcbEloLo$ to $\rulelcbEloHi$), and the entropy gate with a flat threshold $\vonegateElo$ ($\vonegateEloLo$ to $\vonegateEloHi$).
 
@@ -182,9 +226,10 @@ Three findings. First, the rules with a statistical stopping guarantee are far w
 \textbf{Other settings.} The same model, without retraining, was played in further settings (Table~\ref{tab:other}).
 
 \begin{table}[t]
-\centering
-\resizebox{\linewidth}{!}{\input{../tables/matches_other}}
-\caption{The four-rung stopper, trained once on 19$\times$19 b18 positions, at matched visits in other settings.}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{../tables/matches_other}
+\caption{The four-rung stopper, trained once on 19$\times$19 b18 positions, against KataGo at matched visits in other settings.}
 \label{tab:other}
 \end{table}
 

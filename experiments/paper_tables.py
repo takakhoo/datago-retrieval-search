@@ -145,11 +145,50 @@ def prediction_table() -> None:
                      f"(${r['measured_lo']:+.0f}$ to ${r['measured_hi']:+.0f}$) \\\\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("prediction", "\n".join(lines) + "\n")
+    lines = [r"\begin{tabular}{lrrrr}", r"\toprule",
+             r"Ladder & Visits & Equiv. & Forecast & Measured (95\% interval) \\", r"\midrule"]
+    for r in rows:
+        lines.append(f"{r.get('ladder', 'four-rung')} & {r['visits']:.0f} & {r['equivalent_uniform_visits']:.0f} & "
+                     f"${r['predicted_elo']:+.0f}$ & ${r['measured_elo']:+.0f}$ "
+                     f"(${r['measured_lo']:+.0f}$, ${r['measured_hi']:+.0f}$) \\\\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("prediction_compact", "\n".join(lines) + "\n")
+
+
+def targets_table() -> None:
+    p = RES / "stopper/targets.json"
+    if not p.exists():
+        return
+    lad = json.loads(p.read_text())["ladders"]
+    four, six, seven = (lad[k] for k in ("50,200,800,3200", "50,200,400,800,1600,3200",
+                                         "50,100,200,400,800,1600,3200"))
+    rows = [("$r_j$", "1 (flat)", "regret / flat"),
+            ("$r_j$ (rate rule)", "$v_{j+1}-v_j$", "regret / rate"),
+            ("$r_j$", "$v_m-v_j$", "regret / to_top"),
+            ("$r_j-r_{j+1}$", "$v_{j+1}-v_j$", "step / rate"),
+            ("$r_j-r_m$", "$v_{j+1}-v_j$", "top / rate"),
+            ("$\\max_{k>j}\\frac{r_j-r_k}{v_k-v_j}$", "built in", "index / flat")]
+
+    def cell(table, key, budget):
+        v = table.get(key, {}).get(budget)
+        return f"{v['gain']:.2f}" if v else "--"
+
+    lines = [r"\begin{tabular}{llrrrr}", r"\toprule",
+             r" & & Oracle, & \multicolumn{3}{c}{Learned, 200 visits} \\",
+             r"Scored & Divided by & 100 visits & 4 & 6 & 7 rungs \\", r"\midrule"]
+    for name, price, key in rows:
+        lines.append(f"{name} & {price} & {cell(four, 'oracle ' + key, '100')} & {cell(four, 'learned ' + key, '200')} & "
+                     f"{cell(six, 'learned ' + key, '200')} & {cell(seven, 'learned ' + key, '200')} \\\\")
+    lines += [r"\midrule",
+              f"\\multicolumn{{2}}{{l}}{{Hindsight optimum}} & {cell(four, 'hindsight optimum', '100')} & -- & -- & -- \\\\",
+              r"\bottomrule", r"\end{tabular}"]
+    write("targets", "\n".join(lines) + "\n")
 
 
 COMPACT = [
     ("uni_100_vs_200", "KataGo, 100 visits"), ("uni_283_vs_200", "KataGo, 283 visits"),
     ("uni_400_vs_200", "KataGo, 400 visits"), None,
+    ("double_200", "Mikiri, seven-rung ladder"),
     ("long_200", "Mikiri, six-rung ladder"), ("main_200", "Mikiri, four-rung ladder"),
     ("main_stopper_160", "Mikiri, four-rung, 160-visit grant"), ("main_140", "Mikiri, four-rung, 140-visit grant"),
     ("paired_greedy_200", "Mikiri, four-rung, no move sampling"), None,
@@ -158,9 +197,9 @@ COMPACT = [
     ("mem_only_200", "Memory only"), ("full_200", "Mikiri four-rung + memory"),
 ]
 OTHER = [
-    ("budget_100", "KataGo 100 visits, 19x19, b18"), ("budget_400", "KataGo 400 visits, 19x19, b18"),
-    ("budget_800", "KataGo 800 visits, 19x19, b18"), ("b28_200", "KataGo 200 visits, 19x19, b28 network"),
-    ("size13_200", "KataGo 200 visits, 13x13, b18"), ("size9_200", "KataGo 200 visits, 9x9, b18"),
+    ("budget_100", "100"), ("budget_400", "400"), ("budget_800", "800"),
+    ("b28_200", "200, b28 network"),
+    ("size13_200", "200, 13$\\times$13"), ("size9_200", "200, 9$\\times$9"),
 ]
 
 
@@ -183,14 +222,14 @@ def compact_tables() -> None:
             r"\midrule"]
     body = [r"\midrule" if item is None else line(item[1], rows.get(item[0])) for item in COMPACT]
     write("matches_compact", "\n".join(head + body + [r"\bottomrule", r"\end{tabular}"]) + "\n")
-    head2 = [r"\begin{tabular}{lrrrr}", r"\toprule",
-             r"Opponent and setting & Games & W--L--D & Elo (95\% interval) & Visits \\", r"\midrule"]
+    head2 = [r"\begin{tabular}{lrrr}", r"\toprule",
+             r"Opponent visits & Games & W--L--D & Elo (95\% interval) \\", r"\midrule"]
     body2 = []
     for run, label in OTHER:
         r = rows.get(run)
-        body2.append(f"{label} & \\multicolumn{{4}}{{c}}{{(running)}} \\\\" if r is None else
+        body2.append(f"{label} & \\multicolumn{{3}}{{c}}{{(running)}} \\\\" if r is None else
                      f"{label} & {r['games']} & {r['wld'].replace('-', '--')} & "
-                     f"${r['elo']:+.0f}$ (${r['elo_lo']:+.0f}$, ${r['elo_hi']:+.0f}$) & {r['visits']:.0f} \\\\")
+                     f"${r['elo']:+.0f}$ (${r['elo_lo']:+.0f}$, ${r['elo_hi']:+.0f}$) \\\\")
     write("matches_other", "\n".join(head2 + body2 + [r"\bottomrule", r"\end{tabular}"]) + "\n")
 
 
@@ -250,6 +289,7 @@ RUNS = {
     "unihalf": "uni_100_vs_200", "unisame": "uni_200_vs_200", "uniroot": "uni_283_vs_200",
     "unidouble": "uni_400_vs_200", "pilot": "pilot2_stopper_200",
     "rulelcb": "rule_lcb_200", "vonegate": "v1gate_200", "vmcts": "vmcts_200", "dsmcts": "dsmcts_200",
+    "seven": "double_200",
 }
 
 
@@ -301,5 +341,6 @@ if __name__ == "__main__":
     auc_table()
     matches_table()
     prediction_table()
+    targets_table()
     compact_tables()
     baselines_table()

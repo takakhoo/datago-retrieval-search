@@ -1,0 +1,15 @@
+\begin{tabular}{llrrrr}
+\toprule
+ & & Oracle, & \multicolumn{3}{c}{Learned, 200 visits} \\
+Scored & Divided by & 100 visits & 4 & 6 & 7 rungs \\
+\midrule
+$r_j$ & 1 (flat) & 5.99 & 1.41 & 1.56 & 1.51 \\
+$r_j$ (rate rule) & $v_{j+1}-v_j$ & 8.69 & 1.83 & 1.98 & 2.14 \\
+$r_j$ & $v_m-v_j$ & 5.86 & 1.35 & 1.50 & 1.39 \\
+$r_j-r_{j+1}$ & $v_{j+1}-v_j$ & 4.96 & 1.50 & 1.54 & 1.44 \\
+$r_j-r_m$ & $v_{j+1}-v_j$ & 9.07 & 1.79 & 1.98 & 2.04 \\
+$\max_{k>j}\frac{r_j-r_k}{v_k-v_j}$ & built in & 14.11 & 1.63 & 1.87 & 1.77 \\
+\midrule
+\multicolumn{2}{l}{Hindsight optimum} & 14.16 & -- & -- & -- \\
+\bottomrule
+\end{tabular}

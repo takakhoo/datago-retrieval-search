@@ -34,8 +34,14 @@ def describe(name: str, s: dict) -> str:
     elif "rule_v1" in str(c.get("stopper")):
         parts = ["v1 entropy gate, flat threshold"]
     label = f"Mikiri ({' + '.join(parts)}), {grant:g}-visit grant"
+    if "baseline_vmcts" in str(c.get("stopper")):
+        label = f"V-MCTS rule (Ye et al. 2022) in the same player, {grant:g}-visit grant"
+    elif "baseline_dsmcts" in str(c.get("stopper")):
+        label = f"DS-MCTS-style rule (Lan et al. 2021) in the same player, {grant:g}-visit grant"
     if "long" in name:
         label += ", six-rung ladder"
+    if "double" in name:
+        label += ", seven-rung ladder"
     if c.get("net", "b18") != "b18":
         label += f", {c['net']} network"
     if c.get("size", 19) != 19:

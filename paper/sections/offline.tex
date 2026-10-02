@@ -88,6 +88,27 @@ Every rule in the table is charged continuation cost, the size of the deepest se
 
 Three things stand out. First, the rules with a stopping guarantee are far worse than uniform search here (0.34 and 0.77 at 200 visits). They stop on confidence in the leading move, and that confidence says little about whether the game is still in doubt. Second, V-MCTS is the strongest published rule, at 1.60, and Mikiri at 2.13 exceeds it by \pairedVmctsTwo{} at 200 visits and by \pairedVmctsFour{} at 400, as paired differences over the same resampled games. Third, the rate rule improves every signal it can be applied to. It lifts the DS-MCTS classifier from 1.48 to 1.75, and at 400 visits that combination ties Mikiri (difference \pairedDsRateFour). Mikiri's own model with a flat threshold reaches only 1.40. The price on the next rung matters more than which learned signal it is applied to.
 
+\subsection{What the model should predict}
+\label{sec:targets}
+
+The rate rule scores a position by its remaining regret, an upper bound on what continuing can recover. The derivation in Section~\ref{sec:method} names other quantities more directly: the gain from the next rung, $r_j-r_{j+1}$; the gain from the whole ladder, $r_j-r_m$; and the best recovery per visit over any continuation, $\max_{k>j}(r_j-r_k)/(v_k-v_j)$. Table~\ref{tab:targets} tries each one twice: as an oracle that reads the true value, and as the target of the same model, cross-fitted in the same way. As a ceiling it also gives the hindsight optimum, which picks for each position the rung minimising $r_k+\lambda v_k$ with every rung known.
+
+\begin{table}[t]
+\centering\small
+\input{tables/targets}
+\caption{Compute multipliers for different quantities to score at rung $j$ and prices to divide them by ($m$ is the top rung). The oracle column reads the true quantity on the four-rung ladder at a mean cost of 100 visits (at 200 the oracles reach the top of the measurable range). The learned columns fit each quantity with the same model and report a mean cost of 200 visits on three ladders, averaged over three fold assignments.}
+\label{tab:targets}
+\end{table}
+
+With perfect information the best-gain-per-visit index reproduces the hindsight optimum (14.11 against 14.16), so it is the right quantity in principle. It is also the hardest of the four to learn: fitted from search statistics it reaches 1.63 to 1.87, behind remaining regret under the rate rule at 1.83 to 2.14. The gain from the next rung is the weakest choice on both counts. As an oracle it is myopic, because it stops whenever one more rung does not help even if two more would, and as a target it is noisy, because a difference of two regrets has more variance than either. The gain from the whole ladder matches remaining regret on short ladders and falls slightly behind on the longest.
+
+The three rows for remaining regret isolate the price. With no price the multiplier is 1.41 to 1.56. Dividing by the visits to the next rung gives 1.83 to 2.14. Dividing by the visits to the top of the ladder, which charges for a commitment the rule never makes, is worse than no price at all. The rate rule works because it pairs a target that search statistics can predict with the one cost that is known exactly.
+
+\subsection{Prior rules' statistics add nothing as inputs}
+\label{sec:hybrid}
+
+The published rules each reduce the root statistics to one number. If those numbers carried information that Mikiri's 30 features miss, feeding them to the regressor should help. On the doubling ladder we added, one at a time and then together, the KLD gain, the VOI bound, the BAI gap, and the virtual-expansion distance of V-MCTS. The multiplier at 200 visits moved from 2.14 to between 2.07 and 2.17, and no paired difference at any budget was distinguishable from zero in the direction of a gain (the largest was $+0.11$, interval $-0.00$ to $+0.26$, for the BAI gap at 400 visits; all four together gave $-0.10$ at 200). The rules differ in what they do with the root statistics, and the statistics themselves are exhausted. This agrees with Section~\ref{sec:limits}: most of the regret that survives sits on moves the search barely visited, where no root statistic can see it.
+
 \subsection{The model needs little}
 
 Appendix~\ref{app:training} reports ablations and training diagnostics. Removing the trajectory features, removing KataGo's raw error predictions, or keeping only seven features changes the multiplier at 200 visits by at most 0.09. A model of 80 depth-2 trees does nearly as well as one of 400 depth-3 trees. Trained on 300 labeled positions the stopper already reaches 1.50, against 1.82 with 4{,}800. Two choices matter. Fitting the square root of regret instead of regret raises the multiplier from 1.74 to 1.82, because a few very large blunders otherwise dominate the fit. Replacing the rate rule with a flat threshold lowers it to 1.41.

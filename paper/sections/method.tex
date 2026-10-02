@@ -49,7 +49,13 @@ Mikiri stops at rung $j$ when
 \begin{equation}
   \frac{\hat r_j(x)}{v_{j+1}-v_j} \;<\; \lambda .
 \end{equation}
-The left side is the regret still on the table per visit needed to reach the next rung, an upper bound on the return from continuing. A single $\lambda$ then trades winrate against visits at the same rate everywhere on the ladder: going from 800 to 3{,}200 visits requires four times the stake that going from 200 to 800 does. Without this scaling a long ladder spends most of its budget on a handful of positions that no amount of search resolves (Section~\ref{sec:offline}).
+The rule comes from a constrained problem. Let a stopping policy $\pi$ stop position $s$ at rung $\pi(s)$. We want
+\begin{equation}
+  \min_\pi \; \mathbb{E}\bigl[r_{\pi(s)}(s)\bigr] \quad \text{subject to} \quad \mathbb{E}\bigl[v_{\pi(s)}\bigr] \le B .
+\end{equation}
+With a multiplier $\lambda$ on the constraint the problem separates over positions, each minimising $r_k(s)+\lambda v_k$. At rung $j$ the visits already spent cannot be recovered, and continuing by one rung is worthwhile exactly when $\mathbb{E}[r_j-r_{j+1}\mid x] > \lambda\,(v_{j+1}-v_j)$. The reduction $r_j-r_{j+1}$ is at most $r_j$, and replacing it with a prediction of the regret remaining gives the rule above. Section~\ref{sec:targets} tests the alternatives this derivation suggests, including predicting the reduction itself, and finds that remaining regret is the best target in practice.
+
+The left side is the regret still on the table per visit needed to reach the next rung. A single $\lambda$ then trades winrate against visits at the same rate everywhere on the ladder: going from 800 to 3{,}200 visits requires four times the stake that going from 200 to 800 does. Without this scaling a long ladder spends most of its budget on a handful of positions that no amount of search resolves (Section~\ref{sec:offline}).
 
 The model is trained on the ladder dataset with all non-final rungs pooled. Every offline number we report is cross-fitted: games are split into five folds, and each position is scored by a model that never saw any position from its game. The deployed model is trained on all games and stored as JSON trees evaluated in NumPy.
 
