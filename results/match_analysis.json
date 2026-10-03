@@ -12,6 +12,17 @@
    "measured_hi": 113.67991502312822
   },
   {
+   "run": "main_175",
+   "ladder": "Mikiri, 4 rungs",
+   "visits": 175.12286530119158,
+   "offline_regret": 0.007860821989038504,
+   "equivalent_uniform_visits": 325.0433846570854,
+   "predicted_elo": 159.84715787318365,
+   "measured_elo": 193.17252039851735,
+   "measured_lo": 163.3523579375483,
+   "measured_hi": 224.97247873185896
+  },
+  {
    "run": "main_200",
    "ladder": "Mikiri, 4 rungs",
    "visits": 200.39262090131376,

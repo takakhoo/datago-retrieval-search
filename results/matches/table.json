@@ -171,6 +171,25 @@
   "hit_rate": 0.0
  },
  {
+  "run": "main_175",
+  "player": "Mikiri (stopper), 175-visit grant",
+  "baseline": "KataGo 200",
+  "games": 600,
+  "wld": "432-129-39",
+  "score": 0.7525,
+  "score_lo": 0.7191666666666666,
+  "score_hi": 0.785,
+  "elo": 193.17252039851735,
+  "elo_lo": 163.3523579375483,
+  "elo_hi": 224.97247873185896,
+  "visits": 175.12286530119158,
+  "restart": 216.83048706825545,
+  "base_visits": 200.0,
+  "rows": 89.01824446762946,
+  "base_rows": 76.02794941703544,
+  "hit_rate": 0.0
+ },
+ {
   "run": "main_200",
   "player": "Mikiri (stopper), 200-visit grant",
   "baseline": "KataGo 200",

@@ -9,6 +9,7 @@
 | Mikiri (stopper + memory), 200-visit grant | KataGo 200 | 1200 | 908-219-73 | 0.787 | +227 (+204 to +250) | 201 | 255 | 109 : 76 |
 | Mikiri (stopper), 200-visit grant, six-rung ladder | KataGo 400 | 600 | 268-271-61 | 0.497 | -2 (-27 to +24) | 200 | 303 | 102 : 143 |
 | Mikiri (stopper), 200-visit grant, six-rung ladder | KataGo 200 | 1000 | 750-175-75 | 0.787 | +228 (+203 to +254) | 201 | 304 | 102 : 78 |
+| Mikiri (stopper), 175-visit grant | KataGo 200 | 600 | 432-129-39 | 0.752 | +193 (+163 to +225) | 175 | 217 | 89 : 76 |
 | Mikiri (stopper), 200-visit grant | KataGo 200 | 1000 | 728-196-76 | 0.766 | +206 (+181 to +232) | 200 | 251 | 99 : 74 |
 | Mikiri (stopper), 160-visit grant | KataGo 200 | 1000 | 586-325-89 | 0.630 | +93 (+72 to +114) | 160 | 197 | 80 : 74 |
 | Mikiri (memory), 200-visit grant | KataGo 200 | 600 | 276-292-32 | 0.487 | -9 (-37 to +19) | 158 | 158 | 69 : 69 |

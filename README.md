@@ -14,7 +14,7 @@ Mikiri (見切り) is Japanese for the judgment that you have seen enough.
 
 ## The result
 
-10,600 recorded games against KataGo on 19x19, both sides running the same network:
+11,200 recorded games against KataGo on 19x19, both sides running the same network:
 
 | Against KataGo at 200 visits per move | Games | Record (W-L-D) | Elo gain (95% interval) |
 |---|---|---|---|
@@ -163,9 +163,10 @@ The two strongest prior rules were packaged into the same player and held to the
 | DS-MCTS-style rule | 600 | +146 (+117 to +176) | 105 : 77 |
 | Mikiri, four-rung ladder | 1,000 | +206 (+181 to +232) | 99 : 74 |
 | Mikiri, six-rung ladder | 1,000 | +228 (+203 to +254) | 102 : 78 |
+| Mikiri, four-rung ladder at a 175-visit grant (matched evaluations) | 600 | +193 (+163 to +225) | 89 : 76 |
 | Mikiri's rule on V-MCTS's own ladder (50, 100, 200, 400) | 600 | +150 (+121 to +180) | 92 : 74 |
 
-At equal visits Mikiri is clearly ahead of both: the intervals do not overlap. The DS-MCTS-style rule also runs more network evaluations than Mikiri, so Mikiri leads it on every measure. Against V-MCTS, counting network evaluations, it is closer. V-MCTS never searches past 400 visits, so more of its work is already in KataGo's cache, and it ran 87 evaluations per move to Mikiri's 99. Interpolating between Mikiri's 160-visit and 200-visit matches puts it at about +135 Elo at 87 evaluations, level with V-MCTS. The last row is the controlled test, with both rules on the same ladder so that they differ in nothing else. There Mikiri's rule gains +150 to V-MCTS's +135, with intervals that overlap almost entirely: on that ladder the two cannot be told apart. So Mikiri's lead at equal visits comes from ladders that reach 3,200 visits, which its rate rule makes affordable and which cost more evaluations per visit. Per network evaluation, Mikiri and V-MCTS are level.
+At equal visits Mikiri is clearly ahead of both: the intervals do not overlap. The DS-MCTS-style rule also runs more network evaluations than Mikiri, so Mikiri leads it on every measure. Against V-MCTS, counting network evaluations, it is closer. V-MCTS never searches past 400 visits, so more of its work is already in KataGo's cache, and it ran 87 evaluations per move to Mikiri's 99. Granted 175 visits so that its evaluations match, Mikiri's four-rung ladder gains +193 (+163 to +225) at 89 evaluations to V-MCTS's +135 at 87: a lead of about 60 Elo, with intervals that touch. The last row is the controlled test, with both rules on the same ladder so that they differ in nothing else. There Mikiri's rule gains +150 to V-MCTS's +135, with intervals that overlap almost entirely: on that ladder the two cannot be told apart. So Mikiri's lead at equal visits comes from ladders that reach 3,200 visits, which its rate rule makes affordable and which cost more evaluations per visit. Per network evaluation Mikiri keeps a smaller lead.
 
 ## Match results
 
@@ -184,6 +185,7 @@ Compute is reported three ways because the answer depends on how you count. **Vi
 | Mikiri (stopper + memory), 200-visit grant | KataGo 200 | 1200 | 908-219-73 | 0.787 | +227 (+204 to +250) | 201 | 255 | 109 : 76 |
 | Mikiri (stopper), 200-visit grant, six-rung ladder | KataGo 400 | 600 | 268-271-61 | 0.497 | -2 (-27 to +24) | 200 | 303 | 102 : 143 |
 | Mikiri (stopper), 200-visit grant, six-rung ladder | KataGo 200 | 1000 | 750-175-75 | 0.787 | +228 (+203 to +254) | 201 | 304 | 102 : 78 |
+| Mikiri (stopper), 175-visit grant | KataGo 200 | 600 | 432-129-39 | 0.752 | +193 (+163 to +225) | 175 | 217 | 89 : 76 |
 | Mikiri (stopper), 200-visit grant | KataGo 200 | 1000 | 728-196-76 | 0.766 | +206 (+181 to +232) | 200 | 251 | 99 : 74 |
 | Mikiri (stopper), 160-visit grant | KataGo 200 | 1000 | 586-325-89 | 0.630 | +93 (+72 to +114) | 160 | 197 | 80 : 74 |
 | Mikiri (memory), 200-visit grant | KataGo 200 | 600 | 276-292-32 | 0.487 | -9 (-37 to +19) | 158 | 158 | 69 : 69 |

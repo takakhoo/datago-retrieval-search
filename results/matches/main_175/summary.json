@@ -1,0 +1,71 @@
+{
+ "player": "mikiri",
+ "games": 600,
+ "wins": 432,
+ "losses": 129,
+ "draws": 39,
+ "visits_per_move": 175.12286530119158,
+ "opponent_visits_per_move": {
+  "katago": 200.0
+ },
+ "restart_visits_per_move": 216.83048706825545,
+ "per_move": {
+  "rung": 0.5665806380758882,
+  "searched": 1.0
+ },
+ "reasons": {
+  "score": 128,
+  "resign": 472,
+  "move-cap": 0
+ },
+ "pairs": 300,
+ "score": 0.7525,
+ "score_lo": 0.7191666666666666,
+ "score_hi": 0.785,
+ "elo": 193.17252039851735,
+ "elo_lo": 163.3523579375483,
+ "elo_hi": 224.97247873185896,
+ "z": 14.957942849292818,
+ "p_superior": 1.0,
+ "config": {
+  "name": "main_175",
+  "net": "b18",
+  "baseline_net": null,
+  "size": 19,
+  "komi": 7.0,
+  "games": 600,
+  "budget": 200,
+  "grant": 175.0,
+  "path": "50,200,800,3200",
+  "stopper": "models/stopper_b18.json",
+  "threshold": null,
+  "memory": false,
+  "store_max_move": 80,
+  "deepen": 0,
+  "control": true,
+  "play_share": 1.0,
+  "trace": false,
+  "paired": 0,
+  "opening_plies": 12,
+  "greedy": false,
+  "resume": true,
+  "seed": 25
+ },
+ "minutes": 130.49234774112702,
+ "resumed_from_games": 0,
+ "baseline_visits_per_move": 200.0,
+ "mikiri_total_visits_per_move_incl_deepening": 175.12286530119158,
+ "nn_rows_per_move": {
+  "mikiri": 89.01824446762946,
+  "katago": 76.02794941703544
+ },
+ "ledger": {
+  "granted": 12747700.0,
+  "played": 12756650.0,
+  "deepening": 0.0,
+  "deepened_entries": 0
+ },
+ "memory_entries": 0,
+ "final_threshold": 0.0029333276550335716,
+ "mean_game_length": 242.26833333333335
+}

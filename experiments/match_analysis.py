@@ -61,7 +61,7 @@ def main() -> None:
     logv, elo = uniform_elo_curve()
     report: dict = {"prediction": [], "colour": {}, "advantage": {}}
     four, six = "50,200,800,3200:sqrt", "50,200,400,800,1600,3200:sqrt"
-    for run, policy in (("main_140", four), ("main_stopper_160", four), ("main_200", four), ("long_200", six)):
+    for run, policy in (("main_140", four), ("main_stopper_160", four), ("main_175", four), ("main_200", four), ("long_200", six)):
         p = RES / "matches" / run / "summary.json"
         if not p.exists():
             continue
