@@ -1,0 +1,5 @@
+\section{Conclusion}
+
+A frozen Go engine leaves most of a doubling of search on the table by spending visits uniformly. A small learned rule recovers it, and the part of the rule that matters most is the price it puts on continuing: divide the stake by the cost of the next rung, and signals that were worse than no gate become gains. The same engine cannot be helped by analyses of similar positions, and an exact memory of its own past searches saves visits that its evaluation cache had already made cheap.
+
+We think the more general lesson is about measurement. A search cannot grade itself. Once a yardstick independent of the search exists, questions that looked settled, such as whether a modern engine has anything left to gain from time management, turn out to have numbers attached, and the numbers can be checked against games before the games are played. The testbed, the dataset, every model and every game record are released so that others can check ours.
